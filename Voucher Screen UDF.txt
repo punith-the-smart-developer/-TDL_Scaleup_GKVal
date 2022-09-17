@@ -1,0 +1,259 @@
+[#Part	:	VTYP Behaviour Main]
+
+Add	:	Option	:	EnableeGKModu1le	:	@@GKIsTDLEnable
+	
+[!Part	:	EnableeGKModu1le]
+
+		Add	:	Lines	: After	:	 VTYP PrintSave	:	GK_EnablePaymentAlloc,GK_EnablePartyInfo,GK_EnableCSOAnnexture,GK_EnablePrintFormat,GK_EnableOrderNoSeries
+		
+[Line	:	GK_EnablePartyInfo]
+	
+		Fields	: Long Prompt, GK_EnablePartyInfo
+		Local   : Field : Long Prompt : Info        : $$LocaleString:"Enable Party Info:"
+		Local   : Field : Long Prompt : Color		: Blue
+		Local	: Field	: Long Prompt :	Inactive	: NOT $$IsSales:$Parent and NOT $$IsSalesOrder:$Parent
+		
+[Field	:	GK_EnablePartyInfo]
+	
+		Use			:	Logical Field
+		Storage		:	GKEnablePartyInfo
+		Width		:	10
+		Table		:	YesNoTable
+		Show Table	:	Always
+		Style		:	Normal
+		Color		:	Blue
+		Inactive	:   NOT $$IsSales:$Parent and NOT $$IsSalesOrder:$Parent
+		
+[Line	:	GK_EnableOrderNoSeries]
+	
+		
+		Fields	: Long Prompt, GK_EnableOrderNoSeries
+		Local   : Field : Long Prompt : Info        : $$LocaleString:"Order No Series:"
+		Local   : Field : Long Prompt : Color		: Blue
+		Local	: Field	: Long Prompt :	Inactive	: NOT $$IsSalesOrder:$Parent
+		
+[Field	:	GK_EnableOrderNoSeries]
+	
+		Use			:	Name Field
+		Storage		:	GKOrderNoSeries
+		Width		:	10
+		Max			:	4
+		Style		:	Normal
+		Color		:	Blue
+		Inactive	:   NOT $$IsSalesOrder:$Parent
+		Validate	:	NOT $$IsEmpty:$$Value
+		Control		:   GKFindDuplicateSeries	:	($$FilterCount:GKSOVchTypes:GKSOSeriesNoFilter > 0) and $$InCreateMode
+		
+[Collection : GKSOVchTypes]
+
+Type 	 : Voucher Type
+Fetch	 : MasterId,Name,Parent
+Filter   : GKSO_VchFilter
+
+;;;Select $Name,$Parent from HKJ_SLS_Vch
+
+
+
+
+		
+[Line	:	GK_EnablePaymentAlloc]
+	
+		Fields	: Long Prompt, GK_EnablePaymentAlloc
+		Local   : Field : Long Prompt : Info        : $$LocaleString:"Enable Payment allocations:"
+		Local   : Field : Long Prompt : Color		: Blue
+		Local	: Field	: Long Prompt :	Inactive	: NOT $$IsSales:$Parent and NOT $$IsSalesOrder:$Parent
+		
+[Field	:	GK_EnablePaymentAlloc]
+	
+		Use			:	Logical Field
+		Storage		:	GKEnablePMAlloc
+		Width		:	10
+		Table		:	YesNoTable
+		Show Table	:	Always
+		Style		:	Normal
+		Color		:	Blue
+		Inactive	:   NOT $$IsSales:$Parent and NOT $$IsSalesOrder:$Parent
+		
+[Line	:	GK_EnableCSOAnnexture]
+	
+		Fields	: Long Prompt, GK_EnableCSOAnnexture
+		Local   : Field : Long Prompt : Info        : $$LocaleString:"Enable SO Annexture:"
+		Local   : Field : Long Prompt : Color		: Blue
+		Local	: Field	: Long Prompt :	Inactive	: NOT $$IsSalesOrder:$Parent
+		
+[Field	:	GK_EnableCSOAnnexture]
+	
+		Use			:	Logical Field
+		Storage		:	GKEnableCSOAnnex
+		Width		:	10
+		Table		:	YesNoTable
+		Show Table	:	Always
+		Style		:	Normal
+		Color		:	Blue
+		Inactive	:   NOT $$IsSalesOrder:$Parent
+		
+		
+;[#Line	:	EI Consignee]
+;	
+;		Add	:	Option	:	EnableInVcrs	:	@@GKEnablePartyInfo
+;		
+;[!Line	:	EnableInVcrs]
+;	
+;		Add	:	Field	:	After	:	EI Consignee	:	Short Prompt,GK_PartyDetails
+;		Local	:	Field	:	Short Prompt	:	Set as	:	"Party Info:"
+;		Local	:	Field	:	Short Prompt	:	Color	:	Blue
+
+[Field	:	GK_PartyDetails]
+	
+			Use			:	Logical Field
+			Storage		:	GK_PartyDetails
+			Width		:	10
+			Table		:	YesNoTable
+			Show Table	:	Always
+			Align		:	Left
+			Color		:	Blue
+			Sub Form	:	GK_PartyInfo	:	$$Value
+			Control		:	PartyNmError	:	$GK_PartyDetails=No
+			
+[Report	:	GK_PartyInfo]
+	
+		Form	:	GK_PartyInfo
+		
+[Form	:	GK_PartyInfo]
+	
+		Part		:	GK_PartyHead,GK_PartyInfo
+		Height		:	30 % Page
+		Width		:	40 % Page
+		
+[Part	:	GK_PartyHead]
+	
+		Line	:	GK_PartyHead
+		Space Bottom:0.3 cm
+		
+[Line	:	GK_PartyHead]
+	
+		Field	:	GK_PartyHead
+		
+[Field	:	GK_PartyHead]
+	
+		Use			:	Name Field
+		Set as		:	"PARTY's CONTACT INFO"
+		Full Width	:	Yes
+		Align		:	Center
+		Skip		:	Yes
+		
+[#Part: Party Additional Details]
+	
+	Add	:	Option	:	EnableInVcrs	:	@@GKEnablePartyInfo
+		
+[!Part	:	EnableInVcrs]
+	
+	Add	:	Line		: Before	:	PartyStateName	:GK_VchPartyName,GK_VchPartyPh,GK_VchPartyEmail
+
+ [Line	:	GK_VchPartyName]
+				
+		Space Top	: 0.2 cm
+		Field		: Medium Prompt,GK_VchPartyName
+		Local		: Field	: Medium  Prompt	:	Set as		:	"Party Name:"
+		Local 		: Field : Medium Prompt		:   Width		: 	18
+		Local 		: Field : Medium Prompt		:   Color		:	Blue
+		Local 		: Field : Medium Prompt		:   Style		:	Small
+		Local		: Field : Medium Prompt		:   Invisible	:	@@IndivdlCustFltr
+
+[Field	:	GK_VchPartyName]
+	
+		Use			:	Name Field
+		Storage		:	GKVchPartyNm
+		Align		:	Left
+		Style		:	Small Bold
+		Set Always	: Yes
+		Width		:	40
+		Border		:	Thin Box
+		Validate	:	NOT $$IsEmpty:$$Value
+		Invisible	:	@@IndivdlCustFltr
+		
+[Line	:	GK_VchPartyPh]
+	
+		Space Bottom:0.1 cm
+		Space Top:0.1 cm
+		Field		: Medium Prompt,GK_VchPartyPh
+		Local		: Field	: Medium  Prompt	:	Set as		:	"Party Phone:"
+		Local 		: Field : Medium Prompt		:   Width		: 	18
+		Local 		: Field : Medium Prompt		:   Color		:	Blue
+		Local 		: Field : Medium Prompt		:   Style		:	Small
+		Local		: Field : Medium Prompt		:   Invisible	:	@@IndivdlCustFltr
+		
+[Field	:	GK_VchPartyPh]
+		
+		Use		:	Number Field
+		Storage	:	GKVchPartyPh
+		Align	:	Left
+		Style	:	Small Bold
+		Width	:	20
+		Max		:	10
+		Border	:	Thin Box
+		Format	:	"No Comma,No Zero"
+		Validate:	NOT $$IsEmpty:$$Value
+		Invisible	:	@@IndivdlCustFltr
+		
+
+[Line	:	GK_VchPartyEmail]
+	
+		Space Bottom:0.2 cm
+		Field		: Medium Prompt,GK_VchPartyEmail
+		Local		: Field	:	Medium  Prompt	:	Set as		:	"Party Email:"
+		Local 		: Field : Medium Prompt		:   Width		: 	18
+		Local 		: Field : Medium Prompt		:   Color		:	Blue
+		Local 		: Field : Medium Prompt		:   Style		:	Small
+		Local		: Field : Medium Prompt		:   Invisible	:	@@IndivdlCustFltr
+		
+[Field	:	GK_VchPartyEmail]
+		
+		Use		:	Name Field
+		Storage	:	GKVchPartyEmail
+		Align	:	Left
+		Style	:	Small Bold
+		Width	:	40
+		Border	:	Thin Box
+		Case	:	Lower Case
+		Invisible	:	@@IndivdlCustFltr
+		Set Always: Yes
+	
+[Field: GK Short Prompt]
+
+    Align       : Prompt
+    Width       : @@ShortWidth
+    Skip        : Yes
+    Fixed       : Yes
+	
+[Field	:GK Short Prompt1]
+	
+	 Align       : Prompt
+    Width       : @@ShortWidth
+    Skip        : Yes
+    Fixed       : Yes
+
+
+
+[#Part	:	VCH Narration]
+	
+		Add	:	Line	:	At End	:	GK_CS_Triggered
+		
+[Line	:	GK_CS_Triggered]
+	
+		Field	:	Medium Prompt,GK_CS_Triggered
+		Local	:	Field	:	Medium Prompt	:	Set as		:	"CS Triggered(Y/N):"
+		Local	:	Field	:	Medium Prompt	:	Invisible	:	NOT $$InDeveloperMode
+		
+[Field	:	GK_CS_Triggered]
+	
+			Use			:	Logical Field
+			Storage		:	GKCSTriggered
+			Width		:	10
+			Table		:	YesNoTable
+			Style		:	Normal
+			Align		:	Left
+			Invisible	:	NOT $$InDeveloperMode
+			
+[#Field:DSP VchType]
+	Width:20

@@ -1,0 +1,372 @@
+;[#Part: CMP TallyShop F11]
+;
+;Add	:	Option	:	EnableGKModulee	:	@@GKIsTDLEnable
+;	
+[Part	:	EnableGKModulee]
+	
+    Parts           : CMP TallyShopFeaturesTitle, CMP TallyShopFeatures Left
+    Vertical        : Yes
+	Delete			: Invisible       : NOT ##SVTallyShop
+
+[#Part: CMP TallyShopFeatures Left]
+	
+	Add	:	Option	:	EnableGKModule	:	@@GKIsTDLEnable
+	
+[!Part	:	EnableGKModule]
+	
+	Add : Line  : GK_BillingCustomer,GK_ListOfTransTypes,GK_CompanyBankName,GK Accounts Documents,GKSynctimerSetUp;,GK_ControlNegStk;,GKEnableHOOptional,GK LedVch Mapping;,GKTimerSetup
+	
+[Line	:	GKEnableHOOptional]
+	
+		Field	:	Medium Prompt,GKEnableHOOptional
+		Local	:	Field	:	Medium Prompt	:	Set as	:	"Optional Into Regular:"
+		Local   : 	Field 	: 	Medium Prompt 	: 	Width	: 	25
+		
+[Field	:	GKEnableHOOptional]
+	
+		Use		:	Logical Field
+		Storage	:	GKOptnToReglar
+		Table	:	YesNoTable
+		Show Table: Always
+		Width	:	30
+		Align	:	Left
+		Style	:	Normal
+		
+		
+[Line	:	GK_BillingCustomer]
+	
+		Field	:	Medium Prompt,GK_BillingCustomer
+		Local	:	Field	:	Medium Prompt	:	Set as	:	"Billing Customer Name:"
+		Local   : 	Field 	: 	Medium Prompt 	: 	Width	: 	25
+		
+[Field	:	GK_BillingCustomer]
+	
+		Use		:	Name Field
+		Storage	:	GKBillCustName
+		Table	:	List Of Ledgers
+		Show Table: Always
+		Key		: 	Create Ledger
+		Modifies:	LedgerName
+		Variable:	LedgerName
+		Width	:	30
+		Align	:	Left
+		Style	:	Normal
+		Validate:	NOT $$Isempty:$$Value
+		
+		
+[Line	:	GK_BranchName]
+	
+		Field	:	Medium Prompt,GK_BranchName
+		Local	:	Field	:	Medium Prompt	:	Set as	:	"Branch Name:"
+		Local   : 	Field 	: 	Medium Prompt 	: 	Width	: 	25
+		Local   : 	Field 	: 	Medium Prompt 	: 	Color	:	Blue
+		;Local	:	Field	:	Medium Prompt	:	Invisible: #GKIsTDLEnable=No
+		
+[Field	:	GK_BranchName]
+	
+		Use		:	Name Field
+		Storage	:	GKBranchName
+		Set Always: Yes
+		Width	:	30
+		Align	:	Left
+		Style	:	Normal
+		Validate:	NOT $$Isempty:$$Value
+		Color	:	Blue
+		;Invisible: #GKIsTDLEnable=No
+		
+[Line	:	GK_BranchCode]
+	
+		Field	:	Medium Prompt,GK_BranchCode
+		Local	:	Field	:	Medium Prompt	:	Set as	:	"Branch Code:"
+		Local   : 	Field 	: 	Medium Prompt 	: 	Width	: 	25
+		Local   : 	Field 	: 	Medium Prompt 	: 	Color	:	Blue
+		;Local	:	Field	:	Medium Prompt	:	Invisible: #GKIsTDLEnable=No
+		
+[Field	:	GK_BranchCode]
+	
+		Use		:	Name Field
+		Storage	:	GKBranchCode
+		Width	:	20
+		Align	:	Left
+		Style	:	Normal
+		Validate:	NOT $$Isempty:$$Value
+		Color	:	Blue
+		;Invisible: #GKIsTDLEnable=No
+		
+
+[Line	:	GK_CompanyBankName]
+	
+			Space Top 	: .20
+			Fields      : Medium Prompt, GK_CompanyBankName1
+			Local       : Field : Medium Prompt : Info  : $$LocaleString:"Set Company Bank Name:"
+			Local       : Field : Medium Prompt : Width	: 25
+			
+[Field:	GK_CompanyBankName1]
+		
+		Use 		: Logical Field
+		Storage 	: GKCMPBankYN
+		Width		: 20
+		Table		: YesNoTable
+		Show Table	:Always
+		Align		: Left
+		Style		: Normal Bold
+		Sub Form	: GK_CMPBankDetails:$$Value
+		
+[Report	:	GK_CMPBankDetails]
+	
+		Form	:	GK_CMPBankDetails
+		
+[Form	:	GK_CMPBankDetails]
+	
+		Height	:	25 % Page
+		Width	:	25 % Page
+		Part	:	GK_CMPBankDetails
+		
+[Part	:	GK_CMPBankDetails]
+	
+		
+		Line	:	GK_CMPBankForCard,GK_CMPBankForCheque,GK_CMPBankForOnline,GK_CMPBankForFinance
+		
+[Line	:	GK_CMPBankForCard]
+	
+		Space Top:0.5 cm	
+		Field	:	Medium Prompt,GK_CMPBankForCard
+		Local	:	Field	:	Medium Prompt	:	Set as	:	"Card Bank:"
+		
+[Field: GK_CMPBankForCard]
+	
+		Use 		: Name Field
+		Storage 	: GKCMPCardBank
+		Width		: 20
+		Table		: ListofBankss
+		Show Table	:Always
+		Align		: Left
+		Key		: 	Create Ledger
+		Modifies:	LedgerName
+		Variable:	LedgerName
+		Style		: Normal Bold
+		
+[Line	:	GK_CMPBankForCheque]
+	
+		Field	:	Medium Prompt,GK_CMPBankForCheque
+		Local	:	Field	:	Medium Prompt	:	Set as	:	"Cheque Bank:"
+		
+[Field:	GK_CMPBankForCheque]
+	
+		Use 		: Name Field
+		Storage 	: GKCMPChequeBank
+		Width		: 20
+		Table		: ListofBankss
+		Show Table	:Always
+		Align		: Left
+		Style		: Normal Bold
+		Key		: 	Create Ledger
+		Modifies:	LedgerName
+		Variable:	LedgerName
+		
+[Line	:	GK_CMPBankForOnline]
+	
+		Field	:	Medium Prompt,GK_CMPBankForOnline
+		Local	:	Field	:	Medium Prompt	:	Set as	:	"Online Bank:"
+		
+[Field:	GK_CMPBankForOnline]
+	
+		Use 		: Name Field
+		Storage 	: GKCMPOnlineBank
+		Width		: 20
+		Table		: ListofBankss
+		Show Table	:Always
+		Align		: Left
+		Key		: 	Create Ledger
+		Modifies:	LedgerName
+		Variable:	LedgerName
+		Style		: Normal Bold
+		
+[Line	:	GK_CMPBankForFinance]
+	
+		Field	:	Medium Prompt,GK_CMPBankForFinance
+		Local	:	Field	:	Medium Prompt	:	Set as	:	"Finance Bank:"
+		
+[Field:	GK_CMPBankForFinance]
+	
+		Use 		: Name Field
+		Storage 	: GKCMPFinanceBank
+		Width		: 20
+		Table		: ListofBankss
+		Show Table	: Always
+		Align		: Left
+		Key			: 	Create Ledger
+		Modifies	:	LedgerName
+		Variable	:	LedgerName
+		Style		: Normal Bold
+		
+	
+
+[Line	:	GK_ListOfTransTypes]
+	
+			Space Top 	: .20
+			Fields      : Medium Prompt, GK_ListOfTransTypes
+			Local       : Field : Medium Prompt : Info  : $$LocaleString:"Set Transaction Types:"
+			Local       : Field : Medium Prompt : Width	: 25
+			
+[Field: GK_ListOfTransTypes]
+	
+	Use 		: Name Field
+	Storage 	: CMPTransTypes
+	Width		: 10
+	Table		: YesNoTable
+	Show Table	: Always
+	Align		: Left
+	Style		: Normal Bold
+	Sub Form	: GK_TransTypesRep	:	$$Value
+	
+[Report	:	GK_TransTypesRep]
+	
+		Form	:	GK_TransTypesRep
+		
+[Form	:	GK_TransTypesRep]
+				
+		Height	:	70 % Page
+		Width	:	20 % Page
+		Part	:	GK_TransTypesRep
+				
+[Part	:	GK_TransTypesRep]
+							
+		Line	:	GK_TransTypesRepTit,GK_TransTypesRep
+		Repeat	:	GK_TransTypesRep:GKTransTypes
+		Scroll	:	Vertical
+		Break On:	$$IsEmpty:$GKTransTypesUDF
+						
+[Line	:	GK_TransTypesRepTit]
+								
+		Field	:	GK_TransTypesRepTit
+								
+[Field	:	GK_TransTypesRepTit]
+										
+		Use		:	Name Field
+		Set as	:	"Online Payment Modes"
+		Width	:	30
+		Align	:	Center
+		Style	:	Normal Bold
+	
+[Line	:	GK_TransTypesRep]
+	
+		Field	:	GK_TransTypesRep
+		
+[Field	:	GK_TransTypesRep]
+	
+		Use		:	Name Field
+		Storage	:	GKTransTypesUDF
+		Width	:	30
+		Align	:	Center
+		Style	:	Normal
+		
+[Collection	:	GK_ListOfTransactions]
+	
+		Title		:	"List Of Transactions"
+		Type		:	GKTransTypes	:	Company
+		Child Of	:	##SVCurrentCompany
+		Belongs To	:	Yes
+		Fetch		:	GKTransTypesUDF
+		Format		:	$GKTransTypesUDF,30
+		
+[Line	:	GK LedVch Mapping]
+	
+			Space Top 	: .20
+			Fields      : Medium Prompt, GK LedVch Mapping
+			Local       : Field : Medium Prompt : Info  : $$LocaleString:"Mapping:"
+			Local       : Field : Medium Prompt : Width	: 25
+			
+[Field: GK LedVch Mapping]
+	
+	Use 		: Logical Field
+	Storage 	: CMPLedVchMapping
+	Width		: 10
+	Table		: YesNoTable
+	Show Table	: Always
+	Align		: Left
+	Style		: Normal Bold
+	Sub Form	: GK_LedVchMappingRep	:	$$Value
+	
+[Report	:	GK_LedVchMappingRep]
+	
+		Form	:	GK_LedVchMappingRep
+		
+[Form	:	GK_LedVchMappingRep]
+				
+		Height	:	25 % Page
+		Width	:	60 % Page
+		Part	:	GK_LedVchMappingRep
+
+[Part	:	GK_LedVchMappingRep]
+	
+		Line	:	GK_LedVchMappingTit,GK_LedVchMappingCSO,GK_LedVchMappingCS,GK_LedVchMappingCR
+		
+[Line	:	GK_LedVchMappingTit]
+	
+		Space Bottom:0.3 cm
+		Field	:	GK_LedVchMappingTit
+		
+[Field	:	GK_LedVchMappingTit]
+	
+		Use			:	Name Field
+		Set as		:	"Vouchertypes Mappings"
+		Full Width	:	Yes
+		Align		:	Center
+		Style		:	Normal Bold
+		Skip		:	Yes
+		
+
+[Line	:	GK_LedVchMappingCSO]
+		
+	Space Top:0.2 cm
+	Field	:	Long Prompt,GK_LedVchMappingCSO
+	Local	:	Field	:	Long Prompt	:	Set as	:	"Consolidated SO VchType:"
+	
+[Field	:	GK_LedVchMappingCSO]
+		
+		Use			:	Name Field
+		Storage		:	GKLedVchMpngCSO
+		Table		:	ListOfvouchertypes
+		Show Table	: 	Always
+		Width		:	35
+		Align		:	Left
+		Style		:	Normal Bold
+		Border		:	Thin Box
+		
+[Line	:	GK_LedVchMappingCS]
+	
+	Space Bottom:0.2 cm
+	Space Top:0.2 cm
+	Field	:	Long Prompt,GK_LedVchMappingCS
+	Local	:	Field	:	Long Prompt	:	Set as	:	"Consolidated SI VchType:"
+	
+[Field	:	GK_LedVchMappingCS]
+		
+		Use			:	Name Field
+		Storage		:	GKLedVchMpngCSI
+		Table		:	ListOfvouchertypes
+		Show Table	: 	Always
+		Width		:	35
+		Align		:	Left
+		Style		:	Normal Bold
+		Border		:	Thin Box
+		
+[Line	:	GK_LedVchMappingCR]
+	
+	Field	:	Long Prompt,GK_LedVchMappingCR
+	Local	:	Field	:	Long Prompt	:	Set as	:	"Consolidated Rcpt VchType:"
+	
+[Field	:	GK_LedVchMappingCR]
+		
+		Use			:	Name Field
+		Storage		:	GKLedVchMpngCR
+		Table		:	ListOfvouchertypes
+		Show Table	: 	Always
+		Width		:	35
+		Align		:	Left
+		Style		:	Normal Bold
+		Border		:	Thin Box		
+		
+	
+											

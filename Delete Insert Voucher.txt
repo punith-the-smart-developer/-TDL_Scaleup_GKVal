@@ -1,0 +1,1076 @@
+/* to delete entries */
+
+;[Function:DeleteVchrs]
+;	
+;	1:walk:GKVISDeltRcpt
+;	2:set target
+;	3:delete target
+;	4:end walk
+;	
+
+;	
+;[#Form:Receipt Color]
+;	On:Form Accept:Yes:Form Accept
+;	On:Form Accept:Yes:Call:StkOtherFunction1
+	
+[Function:GKToCreateRcptFrmSales]
+
+	Parameter:P1:String
+	Variable	:	GKVMID	:	String	:	$$String:"Id:"+$$LocaleString:##P1
+
+;		sdfasdfasdfasdfasdf:Log:##GKVMID
+	
+	100:New Object:Voucher:##GKVMID
+	110:Set Object
+	140:delete collection object:LedgerEntries:"*":Yes
+	160:Call:insertsalesfun1
+	150:Accept Alter
+	
+[Function:GKToCreateRcptFrmSales1]
+
+	Parameter:P1:String
+	Variable	:	GKVMID	:	String	:	$$String:"Id:"+$$LocaleString:##P1
+	
+	100:New Object:Voucher:##GKVMID
+	110:Set Object
+	140:delete collection object:LedgerEntries:"*":Yes
+	160:Call:insertsalesfun
+	150:Accept Alter
+	
+[Function:GKToCreateRcptFrmSalesOrder]
+	
+	Parameter:P1:String
+	Variable	:	GKVMID	:	String	:	$$String:"Id:"+$$LocaleString:##P1
+;	dd:Log:$$LocaleString:"Mid:"+$$LocaleString:##GKVMID
+
+	
+	100:New Object:Voucher:##GKVMID
+	110:Set Object
+	140:delete collection object:LedgerEntries:"*":Yes
+	160:Call:insertsalesorderfun
+	150:Accept Alter
+	
+[Function	:	GKModifyValues]
+	
+		
+		Variable	:	VarMId			:	String
+		Variable	:	VarCardNo		:	String
+		Variable	:	VarRefNo		:	String
+		Variable	:	VarCardAmt		:	Number
+		Variable	:	VarChqNo		:	String
+        Variable	:	VarChqDt    	:	String
+        Variable	:	VarChqMId   	:	String
+		Variable	:	VarChqAmt   	:	String
+		Variable	:	VarIndexNo		:	String
+		Variable	:	VarOnlineRefNo	:	String	
+        Variable	:	VarOnlineMode	:	String	
+        Variable	:	VarOnlineMId	:	String	
+        Variable	:	VarOnlineAmt	:	String	
+		Variable	:	VarFinRefNo		:	String
+		Variable	:	VarFinType		:	String
+		Variable	:	VarFinMId		:	String
+		Variable	:	VarFinAmt		:	String
+		Variable	:	VarIndexNo		:	String		
+		
+		100	:	Walk Collection	:	GKCardDetAggrCollIDExists	
+		
+		110	:	Set	:	VarCardNo		:	$GKCarNumudf
+		120	:	Set	:	VarRefNo		:	$GKCarNumBankUdf
+		130	:	Set	:	VarMId			:	$$String:"Id:"+$$LocaleString:$GKCardDetVchMId
+		135	:	Set	:	VarCardAmt		:	$GKCarAggrAmtUdf
+		137	:	Set	:	VarIndexNo		:	$GKCardSlNo
+		
+				
+		140	:	Modify Object:(Voucher,##VarMId).AllLedgerEntries[##VarIndexNo,@@GKIsCardBAnk].BankAllocations[1].InstrumentNumber:##VarCardNo
+		150	:	Modify Object:(Voucher,##VarMId).AllLedgerEntries[##VarIndexNo,@@GKIsCardBAnk].BankAllocations[1].Narration:##VarRefNo
+		
+		160	:	End Walk
+		
+		
+		200	:	Walk Collection	:	GKCheqDetAggrCollIDExists	
+		
+		210	:	Set	:	VarChqNo		:	$GKChqNumudf
+		220	:	Set	:	VarChqDt		:	$GKChqDteudf
+		230	:	Set	:	VarChqMId		:	$$String:"Id:"+$$LocaleString:$GKChqDetVchMId
+		235	:	Set	:	VarChqAmt		:	$GKChqAggrAmtUdf
+		237	:	Set	:	VarIndexNo		:	$GKChqSlNo
+		
+		
+		260	:	Modify Object:(Voucher,##VarChqMId).AllLedgerEntries[##VarIndexNo,@@GKIsChqBAnk].BankAllocations[1].InstrumentNumber:##VarChqNo
+		270	:	Modify Object:(Voucher,##VarChqMId).AllLedgerEntries[##VarIndexNo,@@GKIsChqBAnk].BankAllocations[1].InstrumentDate:##VarChqDt
+	
+		280	:	End Walk
+		
+
+		300	:	Walk Collection	:	GKOnlineDetAggrCollIDExists
+		
+		310	:	Set	:	VarOnlineRefNo		:	$GKOnlineRefNo
+		320	:	Set	:	VarOnlineMode		:	$GKOnlineudf
+		330	:	Set	:	VarOnlineMId		:	$$String:"Id:"+$$LocaleString:$GKOnlineDetVchMId
+		335	:	Set	:	VarOnlineAmt		:	$GKOnlineAggrAmtUdf
+		337	:	Set	:	VarIndexNo			:	$GKOnlineSlNo
+		
+		
+		360	:	Modify Object:(Voucher,##VarOnlineMId).AllLedgerEntries[##VarIndexNo,@@GKIsOnlineBAnk].BankAllocations[1].InstrumentNumber:##VarOnlineRefNo
+		370	:	Modify Object:(Voucher,##VarOnlineMId).AllLedgerEntries[##VarIndexNo,@@GKIsOnlineBAnk].BankAllocations[1].Narration:##VarOnlineMode
+	
+		380	:	End Walk
+		
+		400	:	Walk Collection	:	GKFinanceDetAggrCollIDExists	
+		
+		410	:	Set	:	VarFinRefNo			:	$GKFinanceRefNo
+		420	:	Set	:	VarFinType			:	$GKFinanceType
+		430	:	Set	:	VarFinMId			:	$$String:"Id:"+$$LocaleString:$GKFinanceVchMId
+		435	:	Set	:	VarFinAmt			:	$GKFinanceAggrAmt
+		437	:	Set	:	VarIndexNo			:	$GKFiananceSlNo
+		
+;						a:Log:##VarFinRefNo
+;						b:Log:##VarFinType
+;						c:Log:##VarIndexNo
+;						d:Log:##VarFinMId
+;						e:Log:@@GKIsFinBAnk
+		
+		
+		460	:	Modify Object:(Voucher,##VarFinMId).AllLedgerEntries[##VarIndexNo,@@GKIsFinBAnk].BankAllocations[1].InstrumentNumber:##VarFinRefNo
+		470	:	Modify Object:(Voucher,##VarFinMId).AllLedgerEntries[##VarIndexNo,@@GKIsFinBAnk].BankAllocations[1].Narration:##VarFinType
+	
+		480	:	End Walk
+		
+[System	:	Formulae]
+	
+		GKIsCardBAnk	:	$LedgerName=@@GKCMPCardBankName 
+		GKIsChqBAnk		:	$LedgerName=@@GKCMPChequeBankName 
+		GKIsOnlineBAnk	:	$LedgerName=@@GKCMPOnlineBankName 
+		GKIsFinBAnk		:	$LedgerName=@@GKCMPFinBankName 
+		
+	
+	
+[Function	:	insertsalesfun1]
+	
+		
+	Variable	:	GKVSalesMID						:   String
+	Variable	:	VarRcptLedName					:	String
+	Variable	:	VarRcptVchNo					:	String
+	Variable	:	VarPaymentModeCash				:	String
+	Variable	:	VarPaymentModeCard				:	String
+	Variable	:	VarPaymentModeOnline			:	String
+	Variable	:	VarPaymentModeOnlineAmount		:	Number
+	Variable	:	VarPaymentModeCardAmount		:	Number
+	Variable	:	VarPaymentModeCashAmount		:	Number
+	Variable	:	VarPaymentModeCardNumber		:	String
+	Variable	:	VarPaymentModeCardRefNumber		:	String
+	Variable	:	VarPaymentModeCardBank			:	String
+	Variable	:	VarPaymentModeCheque			:	String
+	Variable	:	VarPaymentModeChequeAmount		:	String
+	Variable	:	VarPaymentModeChequeDate		:	Date
+	Variable	:	VarPaymentModeChequeBank		:	String
+	Variable	:	VarPaymentModeChequeNumber		:	String
+	Variable	:	VarTotalReceptAmount			:	Number
+	Variable	:	Var_InstruMenNo					: 	String
+	Variable	:	VarBranchName					:	String
+	Variable	:   Var_InstrDate					: 	Date
+	Variable	:   Var_PaymentMode					: 	String
+	Variable	:   Var_CmpyBankName				: 	String
+	Variable	:   Var_CusBankName					: 	String
+	Variable	:	VarBranchName					:	String
+	Variable	:	VarBillPatntOnlinecmpnyBank		:	String
+	Variable	:	VarPaymentModeOnlineRefNo		:	String
+	Variable	:	VarPaymentModeGiftCopnAmount	:	Number
+	Variable	:	VarFinanaceNm					:	String			
+    Variable	:	VarFinanceAmt					:	Number
+	Variable	:	VarFinRefNo						:	String
+	Variable	:	VarPaymentModeFinBank			:	String
+	
+	000	  :  Set  : SVSingleEntry 					: No
+	160   :	 Set  : VarRcptLedName 					: $PartyLedgerName
+	170   :	 Set  : VarRcptVchNo 					: $$LocaleString:"SI"+$$LocaleString:@@GKBranchCode+$$LocaleString:#VCHNumber
+	180	  :	 Set  : VarPaymentModeCash				: "CASH"
+	190   :	 Set  : VarPaymentModeCashAmount		: ##VarCashAmt
+	200   :	 Set  : VarPaymentModeCard				: "CARD"
+	210   :	 Set  : VarPaymentModeCardAmount		: ##VarCardAmt
+;	220   :	 Set  : VarPaymentModeCardNumber		: $GKCarNumudf
+	230	  :	 Set  : VarPaymentModeCardBank			: @@GKCMPCardBankName
+	240	  :	 Set  : VarPaymentModeCheque			: "CHEQUE"
+	250	  :	 Set  : VarPaymentModeChequeAmount		: ##VarCheqAmt
+;	260	  :	 Set  : VarPaymentModeChequeNumber		: $GKChqNumudf
+;	270	  :	 Set  : VarPaymentModeChequeDate		: $GKChqDteudf
+	280	  :	 Set  : VarPaymentModeChequeBank		: @@GKCMPChequeBankName
+;	290	  :	 Set  :	VarPaymentModeOnline		    : $GKOnlineudf
+	300	  :	 Set  :	VarPaymentModeOnlineAmount		: ##VarOnlnAmt
+	310	  :	 Set  : VarBillPatntOnlinecmpnyBank		: @@GKCMPOnlineBankName
+;	312	  :  Set  :	VarPaymentModeOnlineRefNo		: $GKOnlineRefNo
+	314	  :  Set  : VarPaymentModeGiftCopnAmount	: ##VarGiftAmt 	
+	314A  :  Set  : VarFinanaceNm					: "FINANCE"
+	315	  :  Set  : VarFinanceAmt					: ##VarFinAmt	
+	315Y  :	 Set	:VarPaymentModeFinBank			: @@GKCMPFinBankName
+	
+	320   :	 Set  : VarTotalReceptAmount		:($$Number:##VarPaymentModeCashAmount+$$Number:##VarPaymentModeCardAmount+$$Number:##VarPaymentModeChequeAmount+$$Number:##VarPaymentModeOnlineAmount+$$Number:##VarPaymentModeGiftCopnAmount+$$Number:##VarFinanceAmt)
+
+;			sadfsad:Log:$$LocaleString:"tota valu"+$$LocaleString:##VarTotalReceptAmount
+			
+	/* Party Loop Starts*/
+
+	400    :     INSERTCOLLECTION OBJECT    	: AllLedgerEntries
+    402    :     SET TARGET        				: AllLedgerEntries
+    404    :     SET VALUE       				: LedgerName        	:$PartyLedgerName
+    406    :     SET VALUE        				: Amount        		:$$TgtObject:$$asAmount:##VarTotalReceptAmount
+	407	   :	 Set Value						: VATEXPAMOUNT			:	$$TgtObject:$$asAmount:##VarTotalReceptAmount
+    408    :     SET VALUE        				: Is Deemed Positive	:	No
+	410    :     SET VALUE        				: ISPARTYLEDGER			:	Yes
+	412    :     SET VALUE        				: ISLASTDEEMEDPOSITIVE	:	No
+	
+/* Party's Bill Allocations Loop */
+
+	416	  : INSERTCOLLECTION OBJECT	: BillAllocations
+	418	  :	SET VALUE		: BILLTYPE		: $$SysName:NewRef  
+	420	  : Set Value		: AMOUNT		: ##VarTotalReceptAmount 
+	422	  :	SET VALUE		: Name			: ##VarRcptVchNo
+	424   : SET TARGET      : ..
+	426   : SET TARGET      : ..
+	
+;		sadfsad:Log:##VarRcptVchNo
+
+
+/* If Payment Mode is Cash */	
+		
+	500		:	If	:	 ##VarPaymentModeCash="Cash" AND $$Number:##VarPaymentModeCashAmount>0
+	500M	:	Walk Collection	:	GKCashDetAggrCollM
+	
+	503M	:	Set	:	VarPaymentModeCashAmount	:	$GKCashDetAggrAmt
+	502    :     INSERTCOLLECTION OBJECT : ALlLedgerEntries
+    504    :     SET TARGET        		 : ALlLedgerEntries
+    506    :     SET VALUE         		 : LedgerName        : "Cash"
+	508	   :	 Set Value				 : Narration		 : "Cash"
+    510    :     SET VALUE         		 : Amount        	 : $$AsAmount:##VarPaymentModeCashAmount
+    512    :     SET VALUE         		 : Is Deemed Positive:	Yes
+	514	   : 	 SET TARGET : ..
+;sdaf:Log:$$LocaleString:"cash"+$$LocaleString:##VarPaymentModeCashAmount
+514M	:	End Walk
+	520	   :     End If
+
+/* If Payment Mode is Gift Vouchers */	
+		
+	570		:	If	:	  $$Number:##VarPaymentModeGiftCopnAmount>0
+	
+	571M	:	Walk Collection		:	GKGiftDetAggrCollM
+	
+	572M	:	Set					:	VarPaymentModeGiftCopnAmount		:	$GKGiftCoupnAmt
+	572    :     INSERTCOLLECTION OBJECT : ALlLedgerEntries
+    574    :     SET TARGET        		 : ALlLedgerEntries
+    576    :     SET VALUE         		 : LedgerName        : "Cash"
+	578	   :	 Set Value				 : Narration		 : "Gift Coupons"
+    580    :     SET VALUE         		 : Amount        	 : $$AsAmount:##VarPaymentModeGiftCopnAmount;*-1
+    582    :     SET VALUE         		 : Is Deemed Positive:	Yes
+	584	   : 	 SET TARGET : ..
+	584B   :	End Walk
+	590	   :     End If
+
+/* If Payment Mode is Card */	
+
+			;asdfAS:Log:##VarPaymentModeCardAmount
+
+	600			:	If	:	 ##VarPaymentModeCard="Card" AND $$Number:##VarPaymentModeCardAmount>0
+
+	600M	:	Walk Collection		:	GKCardDetAggrCollM
+	
+	601M	:	Set					:	VarPaymentModeCardAmount		:	$GKCarAggrAmtUdf
+	602M	:	Set					:	VarPaymentModeCardNumber		:	$GKCarNumudf
+	603M	:	Set					:	VarPaymentModeCardRefNumber		:	$GKCarNumBankUdf
+	
+					;asdfasd:Log:$$LocaleString:"card"+$$LocaleString:##VarPaymentModeCardAmount
+	
+	602    :     INSERTCOLLECTION OBJECT : ALlLedgerEntries
+    604    :     SET TARGET        		 : ALlLedgerEntries
+    606    :     SET VALUE         		 : LedgerName        : ##VarPaymentModeCardBank
+	608	   :	 Set Value				 : Narration		 : "Card"
+    610    :     SET VALUE         		 : Amount        	 : $$AsAmount:##VarPaymentModeCardAmount;*-1
+    612    :     SET VALUE         		 : Is Deemed Positive:	Yes
+;sdafr:Log:$$LocaleString:"cared"+$$LocaleString:##VarPaymentModeCardAmount
+
+	614	:	INSERTCOLLECTION OBJECT : BankAllocations 	
+	616	: 			   SET TARGET: BankAllocations
+	618	:			   SET VALUE  : Date 					:	$$Owner:$$Date:$Date
+ 	620	:			   SET VALUE  : InstrumentDate			:	""
+	622	:			   SET VALUE  : InstrumentNumber		:   ##VarPaymentModeCardRefNumber
+	624	:			   Set Value  : BranchName				:	""
+ 	626	:			   SET VALUE  : TransactionType 		:   "e-Fund Transfer"
+ 	628	:			   SET VALUE  : UniqueReferenceNumber	:   $$MakeTallyUniqueID
+	630 :			   SET VALUE  : Narration				: 	$$LocaleString:##VarPaymentModeCardNumber
+ 	632	:			   SET VALUE  : ChequePrinted 			:   0
+	634	:			   SET VALUE  : BankName				: 	##VarPaymentModeCardBank
+ 	636	:	  		   SET VALUE  : PaymentFavouring		: 	##VarRcptLedName
+	638	:			   Set Value  : BANKPARTYNAME			:	##VarRcptLedName
+ 	640	:			   SET VALUE  : Amount					:  -1*$$AsAmount:$$Number:##VarPaymentModeCardAmount
+	642	:			   SET VALUE  : PaymentMode    			:  $$SysName:Transacted
+	644	:			   SET VALUE  : Name           			:  $$MakeUniqueID	
+	646	:			   SET TARGET : ..
+	648	: 			   SET TARGET : ..
+	648M:	End Walk
+	650 :  End If
+
+;/* If Payment Mode is Online */	
+
+;			ddddd:Log:$$LocaleString:"online"+$$LocaleString:##VarPaymentModeOnlineAmount
+
+	700			:	If	:	  $$Number:##VarPaymentModeOnlineAmount>0
+
+	700M		:	Walk Collection	:	GKOnlineDetAggrCollM
+	
+	701M		:	Set	:	VarPaymentModeOnlineAmount		: $GKOnlineAggrAmtUdf
+	702M		:	Set	:	VarPaymentModeOnlineRefNo		: $GKOnlineRefNo
+	703M	    :	Set :	VarPaymentModeOnline		    : $GKOnlineudf
+	
+				;dddsd:Log:$$LocaleString:"online1"+$$LocaleString:##VarPaymentModeOnlineAmount
+	
+	702    :     INSERTCOLLECTION OBJECT : ALlLedgerEntries
+    704    :     SET TARGET        		 : ALlLedgerEntries
+    706    :     SET VALUE         		 : LedgerName           :  ##VarBillPatntOnlinecmpnyBank
+	708    :	 Set Value				 : Narration			:  ##VarPaymentModeOnline
+    710    :     SET VALUE         		 : Amount        	    :  $$AsAmount:##VarPaymentModeOnlineAmount;*-1
+    712    :     SET VALUE         		 : Is Deemed Positive   :  Yes
+
+
+	714	:			INSERTCOLLECTION OBJECT : BankAllocations 	
+	716	: 			   SET TARGET: BankAllocations
+	718 :			   SET VALUE  : Date 					:	$$Owner:$$Date:$Date
+ 	720	:			   SET VALUE  : InstrumentDate			:	""
+	722	:			   SET VALUE  : InstrumentNumber		:   $$LocaleString:##VarPaymentModeOnlineRefNo
+	724 :			   Set Value  : BranchName				:	""
+ 	726	:			   SET VALUE  : TransactionType 		:   "Others"
+ 	728 :			   SET VALUE  : UniqueReferenceNumber	:   $$MakeTallyUniqueID
+	730 :			   SET VALUE  : Narration				: 	$$LocaleString:##VarPaymentModeOnline
+ 	732	:			   SET VALUE  : ChequePrinted 			:   0
+	734	:			   SET VALUE  : BankName				: 	##VarBillPatntOnlinecmpnyBank
+ 	736	:	  		   SET VALUE  : PaymentFavouring		: 	##VarRcptLedName
+	738	:			   Set Value  : BANKPARTYNAME			:	##VarRcptLedName
+ 	740	:			   SET VALUE  : Amount					:  -1*$$AsAmount:$$Number:##VarPaymentModeOnlineAmount
+	742	:			   SET VALUE  : PaymentMode    			:  $$SysName:Transacted
+	744	:			   SET VALUE  : Name           			:  $$MakeUniqueID	
+
+	746	:			   SET TARGET : ..
+	748	: 			   SET TARGET : ..
+	748M:		End Walk
+	750 :		  End If
+
+
+;/* If Payment Mode is Cheque */	
+
+
+	800	   :	If	:	 ##VarPaymentModeCheque="Cheque" AND $$Number:##VarPaymentModeChequeAmount>0
+	
+	800M   	: 	Walk Collection	:	GKCheqDetAggrCollM
+
+	801M	  :	 Set  : VarPaymentModeChequeAmount		: $GKChqAggrAmtUdf
+	802M	  :	 Set  : VarPaymentModeChequeNumber		: $GKChqNumudf
+	803M	  :	 Set  : VarPaymentModeChequeDate		: $GKChqDteudf
+	
+	802    :     INSERTCOLLECTION OBJECT : ALlLedgerEntries
+    804    :     SET TARGET        		 : ALlLedgerEntries
+    806    :     SET VALUE         		 : LedgerName        : ##VarPaymentModeChequeBank
+	808	   :	 Set Value				 : Narration		 : "Cheque/DD"
+    810    :     SET VALUE         		 : Amount        	 : $$AsAmount:##VarPaymentModeChequeAmount;*-1
+    812    :     SET VALUE         		 : Is Deemed Positive:	Yes
+
+
+	814	:	INSERTCOLLECTION OBJECT : BankAllocations 	
+	816	: 			   SET TARGET: BankAllocations
+	818	:			   SET VALUE  : Date 					:	$$Owner:$$Date:$Date
+ 	820	:			   SET VALUE  : InstrumentDate			:	##VarPaymentModeChequeDate
+	822	:			   SET VALUE  : InstrumentNumber		:   ##VarPaymentModeChequeNumber
+	824	:			   Set Value  : BranchName				:	""
+ 	826	:			   SET VALUE  : TransactionType 		:   "Cheque/DD"
+ 	828	:			   SET VALUE  : UniqueReferenceNumber	:   $$MakeTallyUniqueID
+	830 :			   SET VALUE  : Narration				: 	$$LocaleString:"Cheque/DD"
+ 	832	:			   SET VALUE  : ChequePrinted 			:   0
+	834	:			   SET VALUE  : BankName				: 	##VarPaymentModeChequeBank
+ 	836	:	  		   SET VALUE  : PaymentFavouring		: 	##VarRcptLedName
+	838	:			   Set Value  : BANKPARTYNAME			:	##VarRcptLedName
+ 	840	:			   SET VALUE  : Amount					:  -1*$$AsAmount:$$Number:##VarPaymentModeChequeAmount
+	842	:			   SET VALUE  : PaymentMode    			:  $$SysName:Transacted
+	844	:			   SET VALUE  : Name           			:  $$MakeUniqueID	
+	846	:			   SET TARGET : ..
+	848	: 			   SET TARGET : ..
+	848M:		 End Walk
+	850	:		End If
+	
+/* If Payment Mode is Finance */	
+			;sadfas:Log:##VarFinanceAmt
+	
+	600A			:	If	:	 ##VarFinanaceNm="Finance" AND $$Number:##VarFinanceAmt>0
+
+	600Z	:	Walk Collection	:	GKFinanceDetAggrCollM
+	
+	601Z	:	Set	:	VarFinanceAmt	:	$GKFinanceAggrAmt
+	602Z	:	Set	:	VarFinRefNo		:	$GKFinanceRefNo
+
+
+	602A    :     INSERTCOLLECTION OBJECT : ALlLedgerEntries
+    604A    :     SET TARGET        		 : ALlLedgerEntries
+    606A    :     SET VALUE         		 : LedgerName        : ##VarPaymentModeFinBank
+	608A	:	 Set Value					 : Narration		 : "Finance"
+    610A    :     SET VALUE         		 : Amount        	 : $$AsAmount:##VarFinanceAmt
+    611A    :     SET VALUE         		 : Is Deemed Positive:	Yes
+	612A    :     SET VALUE        		 	 : ISPARTYLEDGER	 :	Yes
+	613A    :     SET VALUE        		 	 : ISLASTDEEMEDPOSITIVE	:	Yes
+
+
+	614A	:	INSERTCOLLECTION OBJECT : BankAllocations 	
+	616A	: 			   SET TARGET: BankAllocations
+	618A	:			   SET VALUE  : Date 					:	$$Owner:$$Date:$Date
+ 	620A	:			   SET VALUE  : InstrumentDate			:	$$Owner:$$Date:$Date
+	622A	:			   SET VALUE  : InstrumentNumber		:   ""
+	624A	:			   Set Value  : BranchName				:	""
+ 	626A	:			   SET VALUE  : TransactionType 		:   "e-Fund Transfer"
+ 	628A	:			   SET VALUE  : UniqueReferenceNumber	:   $$MakeTallyUniqueID
+	630A 	:			   SET VALUE  : Narration				: 	$$LocaleString:##VarPaymentModeFinBank
+ 	632A	:			   SET VALUE  : ChequePrinted 			:   0
+	634A	:			   SET VALUE  : BankName				: 	##VarPaymentModeCardBank
+ 	636A	:	  		   SET VALUE  : PaymentFavouring		: 	##VarRcptLedName
+	638A	:			   Set Value  : BANKPARTYNAME			:	##VarRcptLedName
+ 	640A	:			   SET VALUE  : Amount					:  $$AsAmount:$$Number:##VarFinanceAmt
+	642A	:			   SET VALUE  : PaymentMode    			:  $$SysName:Transacted
+	644A	:			   SET VALUE  : Name           			:  $$MakeUniqueID	
+	646A	:			   SET TARGET : ..
+	648A	: 			   SET TARGET : ..
+	648Z	:	End Walk
+	650A	:  End If
+
+   900 :    SET TARGET        		: ..
+
+
+[Function:insertsalesfun]
+	
+	Variable	:	GKVSalesMID						:   String
+	Variable	:	VarRcptLedName					:	String
+	Variable	:	VarRcptVchNo					:	String
+	Variable	:	VarPaymentModeCash				:	String
+	Variable	:	VarPaymentModeCard				:	String
+	Variable	:	VarPaymentModeOnline			:	String
+	Variable	:	VarPaymentModeOnlineAmount		:	Number
+	Variable	:	VarPaymentModeCardAmount		:	Number
+	Variable	:	VarPaymentModeCashAmount		:	Number
+	Variable	:	VarPaymentModeCardNumber		:	String
+	Variable	:	VarPaymentModeCardRefNumber		:	String
+	Variable	:	VarPaymentModeCardBank			:	String
+	Variable	:	VarPaymentModeCheque			:	String
+	Variable	:	VarPaymentModeChequeAmount		:	String
+	Variable	:	VarPaymentModeChequeDate		:	Date
+	Variable	:	VarPaymentModeChequeBank		:	String
+	Variable	:	VarPaymentModeChequeNumber		:	String
+	Variable	:	VarTotalReceptAmount			:	Number
+	Variable	:	Var_InstruMenNo					: 	String
+	Variable	:	VarBranchName					:	String
+	Variable	:   Var_InstrDate					: 	Date
+	Variable	:   Var_PaymentMode					: 	String
+	Variable	:   Var_CmpyBankName				: 	String
+	Variable	:   Var_CusBankName					: 	String
+	Variable	:	VarBranchName					:	String
+	Variable	:	VarBillPatntOnlinecmpnyBank		:	String
+	Variable	:	VarPaymentModeOnlineRefNo		:	String
+	Variable	:	VarPaymentModeGiftCopnAmount	:	Number
+	Variable	:	VarFinanaceNm					:	String			
+    Variable	:	VarFinanceAmt					:	Number
+	Variable	:	VarFinRefNo						:	String
+	Variable	:	VarPaymentModeFinBank			:	String
+					
+	000	  :  Set  : SVSingleEntry 					: No
+	160   :	 Set  : VarRcptLedName 					: $PartyLedgerName
+	170   :	 Set  : VarRcptVchNo 					: $$LocaleString:"SI"+$$LocaleString:@@GKBranchCode+$$LocaleString:#VCHNumber
+	180	  :	 Set  : VarPaymentModeCash				: "CASH"
+	190   :	 Set  : VarPaymentModeCashAmount		: $$CollNumTotal:GKCashDetAggrCollS:$GKCashDetAggrAmt;##VarCashAmt
+	200   :	 Set  : VarPaymentModeCard				: "CARD"
+	210   :	 Set  : VarPaymentModeCardAmount		: $$CollNumTotal:GKCardDetAggrCollS:$GKCarAggrAmtUdf;##VarCardAmt
+;	220   :	 Set  : VarPaymentModeCardNumber		: $GKCarNumudf
+	230	  :	 Set  : VarPaymentModeCardBank			: @@GKCMPCardBankName
+	240	  :	 Set  : VarPaymentModeCheque			: "CHEQUE"
+	250	  :	 Set  : VarPaymentModeChequeAmount		: $$CollNumTotal:GKCheqDetAggrCollS:$GKCarAggrAmtUdf;##VarCheqAmt
+;	260	  :	 Set  : VarPaymentModeChequeNumber		: $GKChqNumudf
+;	270	  :	 Set  : VarPaymentModeChequeDate		: $GKChqDteudf
+	280	  :	 Set  : VarPaymentModeChequeBank		: @@GKCMPChequeBankName
+;	290	  :	 Set  :	VarPaymentModeOnline		    : $GKOnlineudf
+	300	  :	 Set  :	VarPaymentModeOnlineAmount		: $$CollNumTotal:GKOnlineDetAggrCollS:$GKOnlineAggrAmtUdf;##VarOnlnAmt
+	310	  :	 Set  : VarBillPatntOnlinecmpnyBank		: @@GKCMPOnlineBankName
+;	312	  :  Set  :	VarPaymentModeOnlineRefNo		: $GKOnlineRefNo
+	314	  :  Set  : VarPaymentModeGiftCopnAmount	: $$CollNumTotal:GKGiftDetAggrCollS:$GKGiftCoupnAmt;##VarGiftAmt 	
+	314A  :  Set  : VarFinanaceNm					: "FINANCE"
+	315	  :  Set  : VarFinanceAmt					: $$CollNumTotal:GKFinanceDetAggrCollS:$GKFinanceAggrAmt;##VarFinAmt	
+	315Y  :	 Set	:VarPaymentModeFinBank			: @@GKCMPFinBankName
+	
+	320   :	 Set  : VarTotalReceptAmount		:($$Number:##VarPaymentModeCashAmount+$$Number:##VarPaymentModeCardAmount+$$Number:##VarPaymentModeChequeAmount+$$Number:##VarPaymentModeOnlineAmount+$$Number:##VarPaymentModeGiftCopnAmount+$$Number:##VarFinanceAmt)
+
+
+			
+	/* Party Loop Starts*/
+
+	400    :     INSERTCOLLECTION OBJECT    	: AllLedgerEntries
+    402    :     SET TARGET        				: AllLedgerEntries
+    404    :     SET VALUE       				: LedgerName        	:$PartyLedgerName
+    406    :     SET VALUE        				: Amount        		:$$TgtObject:$$asAmount:##VarTotalReceptAmount
+	407	   :	 Set Value						: VATEXPAMOUNT			:	$$TgtObject:$$asAmount:##VarTotalReceptAmount
+    408    :     SET VALUE        				: Is Deemed Positive	:	No
+	410    :     SET VALUE        				: ISPARTYLEDGER			:	Yes
+	412    :     SET VALUE        				: ISLASTDEEMEDPOSITIVE	:	No
+	
+/* Party's Bill Allocations Loop */
+
+	416	  : INSERTCOLLECTION OBJECT	: BillAllocations
+	418	  :	SET VALUE		: BILLTYPE		: $$SysName:NewRef  
+	420	  : Set Value		: AMOUNT		: ##VarTotalReceptAmount 
+	422	  :	SET VALUE		: Name			: ##VarRcptVchNo
+	424   : SET TARGET      : ..
+	426   : SET TARGET      : ..
+	
+;		sadfsad:Log:##VarRcptVchNo
+
+
+/* If Payment Mode is Cash */	
+		
+	500		:	If	:	 ##VarPaymentModeCash="Cash" AND $$Number:##VarPaymentModeCashAmount>0
+	500M	:	Walk Collection	:	GKCashDetAggrCollS
+	
+	503M	:	Set	:	VarPaymentModeCashAmount	:	$GKCashDetAggrAmt
+	502    :     INSERTCOLLECTION OBJECT : ALlLedgerEntries
+    504    :     SET TARGET        		 : ALlLedgerEntries
+    506    :     SET VALUE         		 : LedgerName        : "Cash"
+	508	   :	 Set Value				 : Narration		 : "Cash"
+    510    :     SET VALUE         		 : Amount        	 : $$AsAmount:##VarPaymentModeCashAmount
+    512    :     SET VALUE         		 : Is Deemed Positive:	Yes
+	514	   : 	 SET TARGET : ..
+;sdaf:Log:$$LocaleString:"cash"+$$LocaleString:##VarPaymentModeCashAmount
+514M	:	End Walk
+	520	   :     End If
+
+/* If Payment Mode is Gift Vouchers */	
+		
+	570		:	If	:	  $$Number:##VarPaymentModeGiftCopnAmount>0
+	571M	:	Walk Collection		:	GKGiftDetAggrCollS
+	
+	572M	:	Set					:	VarPaymentModeGiftCopnAmount		:	$GKGiftCoupnAmt
+	572    :     INSERTCOLLECTION OBJECT : ALlLedgerEntries
+    574    :     SET TARGET        		 : ALlLedgerEntries
+    576    :     SET VALUE         		 : LedgerName        : "Cash"
+	578	   :	 Set Value				 : Narration		 : "Gift Coupons"
+    580    :     SET VALUE         		 : Amount        	 : $$AsAmount:##VarPaymentModeGiftCopnAmount;*-1
+    582    :     SET VALUE         		 : Is Deemed Positive:	Yes
+	584	   : 	 SET TARGET : ..
+	584B   :	End Walk
+	590	   :     End If
+
+/* If Payment Mode is Card */	
+
+			;asdfAS:Log:##VarPaymentModeCardAmount
+
+	600			:	If	:	 ##VarPaymentModeCard="Card" AND $$Number:##VarPaymentModeCardAmount>0
+
+	600M	:	Walk Collection		:	GKCardDetAggrCollS
+	
+	601M	:	Set					:	VarPaymentModeCardAmount		:	$GKCarAggrAmtUdf
+	602M	:	Set					:	VarPaymentModeCardNumber		:	$GKCarNumudf
+	603M	:	Set					:	VarPaymentModeCardRefNumber		:	$GKCarNumBankUdf
+	
+					;asdfasd:Log:$$LocaleString:"card"+$$LocaleString:##VarPaymentModeCardAmount
+	
+	602    :     INSERTCOLLECTION OBJECT : ALlLedgerEntries
+    604    :     SET TARGET        		 : ALlLedgerEntries
+    606    :     SET VALUE         		 : LedgerName        : ##VarPaymentModeCardBank
+	608	   :	 Set Value				 : Narration		 : "Card"
+    610    :     SET VALUE         		 : Amount        	 : $$AsAmount:##VarPaymentModeCardAmount;*-1
+    612    :     SET VALUE         		 : Is Deemed Positive:	Yes
+;sdafr:Log:$$LocaleString:"cared"+$$LocaleString:##VarPaymentModeCardAmount
+
+	614	:	INSERTCOLLECTION OBJECT : BankAllocations 	
+	616	: 			   SET TARGET: BankAllocations
+	618	:			   SET VALUE  : Date 					:	$$Owner:$$Date:$Date
+ 	620	:			   SET VALUE  : InstrumentDate			:	""
+	622	:			   SET VALUE  : InstrumentNumber		:   ##VarPaymentModeCardRefNumber
+	624	:			   Set Value  : BranchName				:	""
+ 	626	:			   SET VALUE  : TransactionType 		:   "e-Fund Transfer"
+ 	628	:			   SET VALUE  : UniqueReferenceNumber	:   $$MakeTallyUniqueID
+	630 :			   SET VALUE  : Narration				: 	$$LocaleString:##VarPaymentModeCardNumber
+ 	632	:			   SET VALUE  : ChequePrinted 			:   0
+	634	:			   SET VALUE  : BankName				: 	##VarPaymentModeCardBank
+ 	636	:	  		   SET VALUE  : PaymentFavouring		: 	##VarRcptLedName
+	638	:			   Set Value  : BANKPARTYNAME			:	##VarRcptLedName
+ 	640	:			   SET VALUE  : Amount					:  -1*$$AsAmount:$$Number:##VarPaymentModeCardAmount
+	642	:			   SET VALUE  : PaymentMode    			:  $$SysName:Transacted
+	644	:			   SET VALUE  : Name           			:  $$MakeUniqueID	
+	646	:			   SET TARGET : ..
+	648	: 			   SET TARGET : ..
+	648M:	End Walk
+	650 :  End If
+
+;/* If Payment Mode is Online */	
+
+
+
+	700			:	If	:	  $$Number:##VarPaymentModeOnlineAmount>0
+
+	700M		:	Walk Collection	:	GKOnlineDetAggrCollS
+	
+	701M		:	Set	:	VarPaymentModeOnlineAmount		: $GKOnlineAggrAmtUdf
+	702M		:	Set	:	VarPaymentModeOnlineRefNo		: $GKOnlineRefNo
+	703M	    :	Set :	VarPaymentModeOnline		    : $GKOnlineudf
+	
+
+	
+	702    :     INSERTCOLLECTION OBJECT : ALlLedgerEntries
+    704    :     SET TARGET        		 : ALlLedgerEntries
+    706    :     SET VALUE         		 : LedgerName           :  ##VarBillPatntOnlinecmpnyBank
+	708    :	 Set Value				 : Narration			:  ##VarPaymentModeOnline
+    710    :     SET VALUE         		 : Amount        	    :  $$AsAmount:##VarPaymentModeOnlineAmount;*-1
+    712    :     SET VALUE         		 : Is Deemed Positive   :  Yes
+
+
+	714	:			INSERTCOLLECTION OBJECT : BankAllocations 	
+	716	: 			   SET TARGET: BankAllocations
+	718 :			   SET VALUE  : Date 					:	$$Owner:$$Date:$Date
+ 	720	:			   SET VALUE  : InstrumentDate			:	""
+	722	:			   SET VALUE  : InstrumentNumber		:   $$LocaleString:##VarPaymentModeOnlineRefNo
+	724 :			   Set Value  : BranchName				:	""
+ 	726	:			   SET VALUE  : TransactionType 		:   "Others"
+ 	728 :			   SET VALUE  : UniqueReferenceNumber	:   $$MakeTallyUniqueID
+	730 :			   SET VALUE  : Narration				: 	$$LocaleString:##VarPaymentModeOnline
+ 	732	:			   SET VALUE  : ChequePrinted 			:   0
+	734	:			   SET VALUE  : BankName				: 	##VarBillPatntOnlinecmpnyBank
+ 	736	:	  		   SET VALUE  : PaymentFavouring		: 	##VarRcptLedName
+	738	:			   Set Value  : BANKPARTYNAME			:	##VarRcptLedName
+ 	740	:			   SET VALUE  : Amount					:  -1*$$AsAmount:$$Number:##VarPaymentModeOnlineAmount
+	742	:			   SET VALUE  : PaymentMode    			:  $$SysName:Transacted
+	744	:			   SET VALUE  : Name           			:  $$MakeUniqueID	
+
+	746	:			   SET TARGET : ..
+	748	: 			   SET TARGET : ..
+	748M:		End Walk
+	750 :		  End If
+
+
+;/* If Payment Mode is Cheque */	
+
+
+	800	   :	If	:	 ##VarPaymentModeCheque="Cheque" AND $$Number:##VarPaymentModeChequeAmount>0
+	
+	800M   	: 	Walk Collection	:	GKCheqDetAggrCollS
+
+	801M	  :	 Set  : VarPaymentModeChequeAmount		: $GKChqAggrAmtUdf
+	802M	  :	 Set  : VarPaymentModeChequeNumber		: $GKChqNumudf
+	803M	  :	 Set  : VarPaymentModeChequeDate		: $GKChqDteudf
+	
+	802    :     INSERTCOLLECTION OBJECT : ALlLedgerEntries
+    804    :     SET TARGET        		 : ALlLedgerEntries
+    806    :     SET VALUE         		 : LedgerName        : ##VarPaymentModeChequeBank
+	808	   :	 Set Value				 : Narration		 : "Cheque/DD"
+    810    :     SET VALUE         		 : Amount        	 : $$AsAmount:##VarPaymentModeChequeAmount;*-1
+    812    :     SET VALUE         		 : Is Deemed Positive:	Yes
+
+
+	814	:	INSERTCOLLECTION OBJECT : BankAllocations 	
+	816	: 			   SET TARGET: BankAllocations
+	818	:			   SET VALUE  : Date 					:	$$Owner:$$Date:$Date
+ 	820	:			   SET VALUE  : InstrumentDate			:	##VarPaymentModeChequeDate
+	822	:			   SET VALUE  : InstrumentNumber		:   ##VarPaymentModeChequeNumber
+	824	:			   Set Value  : BranchName				:	""
+ 	826	:			   SET VALUE  : TransactionType 		:   "Cheque/DD"
+ 	828	:			   SET VALUE  : UniqueReferenceNumber	:   $$MakeTallyUniqueID
+	830 :			   SET VALUE  : Narration				: 	$$LocaleString:"Cheque/DD"
+ 	832	:			   SET VALUE  : ChequePrinted 			:   0
+	834	:			   SET VALUE  : BankName				: 	##VarPaymentModeChequeBank
+ 	836	:	  		   SET VALUE  : PaymentFavouring		: 	##VarRcptLedName
+	838	:			   Set Value  : BANKPARTYNAME			:	##VarRcptLedName
+ 	840	:			   SET VALUE  : Amount					:  -1*$$AsAmount:$$Number:##VarPaymentModeChequeAmount
+	842	:			   SET VALUE  : PaymentMode    			:  $$SysName:Transacted
+	844	:			   SET VALUE  : Name           			:  $$MakeUniqueID	
+	846	:			   SET TARGET : ..
+	848	: 			   SET TARGET : ..
+	848M:		 End Walk
+	850	:		End If
+	
+/* If Payment Mode is Finance */	
+			
+	
+	600A			:	If	:	 ##VarFinanaceNm="Finance" AND $$Number:##VarFinanceAmt>0
+
+	600Z	:	Walk Collection	:	GKFinanceDetAggrCollS
+	
+	601Z	:	Set	:	VarFinanceAmt	:	$GKFinanceAggrAmt
+	602Z	:	Set	:	VarFinRefNo		:	$GKFinanceRefNo
+
+
+	602A    :     INSERTCOLLECTION OBJECT : ALlLedgerEntries
+    604A    :     SET TARGET        		 : ALlLedgerEntries
+    606A    :     SET VALUE         		 : LedgerName        : ##VarPaymentModeFinBank
+	608A	:	 Set Value					 : Narration		 : "Finance"
+    610A    :     SET VALUE         		 : Amount        	 : $$AsAmount:##VarFinanceAmt
+    611A    :     SET VALUE         		 : Is Deemed Positive:	Yes
+	612A    :     SET VALUE        		 	 : ISPARTYLEDGER	 :	Yes
+	613A    :     SET VALUE        		 	 : ISLASTDEEMEDPOSITIVE	:	Yes
+
+
+	614A	:	INSERTCOLLECTION OBJECT : BankAllocations 	
+	616A	: 			   SET TARGET: BankAllocations
+	618A	:			   SET VALUE  : Date 					:	$$Owner:$$Date:$Date
+ 	620A	:			   SET VALUE  : InstrumentDate			:	$$Owner:$$Date:$Date
+	622A	:			   SET VALUE  : InstrumentNumber		:   ""
+	624A	:			   Set Value  : BranchName				:	""
+ 	626A	:			   SET VALUE  : TransactionType 		:   "e-Fund Transfer"
+ 	628A	:			   SET VALUE  : UniqueReferenceNumber	:   $$MakeTallyUniqueID
+	630A 	:			   SET VALUE  : Narration				: 	$$LocaleString:##VarFinRefNo
+ 	632A	:			   SET VALUE  : ChequePrinted 			:   0
+	634A	:			   SET VALUE  : BankName				: 	##VarPaymentModeFinBank
+ 	636A	:	  		   SET VALUE  : PaymentFavouring		: 	##VarRcptLedName
+	638A	:			   Set Value  : BANKPARTYNAME			:	##VarRcptLedName
+ 	640A	:			   SET VALUE  : Amount					:  $$AsAmount:$$Number:##VarFinanceAmt
+	642A	:			   SET VALUE  : PaymentMode    			:  $$SysName:Transacted
+	644A	:			   SET VALUE  : Name           			:  $$MakeUniqueID	
+	646A	:			   SET TARGET : ..
+	648A	: 			   SET TARGET : ..
+	648Z	:	End Walk
+	650A	:  End If
+
+   900 :    SET TARGET        		: ..
+
+
+	
+[Collection	:	GKVISDeltRcpt]
+	
+		Type		:	Vouchers	:	VoucherType
+		Child Of	:	$$VchTypeReceipt
+		Belongs To	:	Yes
+		Fetch		:	Date,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount,IsOptional,Masterid
+		;Filter		:	GKMIDFltr
+		
+[System	:	Formulae]
+	GKMIDFltr:$MasterId=462
+		
+
+;;;Select $VoucherNumber,$MasterId from GKVISDeltRcpt
+
+
+[Function	:	insertsalesorderfun]
+;	sdfasdf:Log:"alter receipt called"
+	Variable	:	VarRcptLedName					:	String
+	Variable	:	VarRcptVchNo					:	String
+	Variable	:	VarPaymentModeCash				:	String
+	Variable	:	VarPaymentModeCard				:	String
+	Variable	:	VarPaymentModeOnline			:	String
+	Variable	:	VarPaymentModeOnlineAmount		:	String
+	Variable	:	VarPaymentModeCardAmount		:	String
+	Variable	:	VarPaymentModeCashAmount		:	String
+	Variable	:	VarPaymentModeCardNumber		:	String
+	Variable	:	VarPaymentModeCardRefNumber		:	String
+	Variable	:	VarPaymentModeCardBank			:	String
+	Variable	:	VarPaymentModeCheque			:	String
+	Variable	:	VarPaymentModeChequeAmount		:	String
+	Variable	:	VarPaymentModeChequeDate		:	Date
+	Variable	:	VarPaymentModeChequeBank		:	String
+	Variable	:	VarPaymentModeChequeNumber		:	String
+	Variable	:	VarTotalReceptAmount			:	String
+	Variable	:	Var_InstruMenNo					: 	String
+	Variable	:	VarBranchName					:	String
+	Variable	:   Var_InstrDate					: 	Date
+	Variable	:   Var_PaymentMode					: 	String
+	Variable	:   Var_CmpyBankName				: 	String
+	Variable	:   Var_CusBankName					: 	String
+	Variable	:	VarBranchName					:	String
+	Variable	:	VarBillPatntOnlinecmpnyBank		:	String
+	Variable	:	VarPaymentModeOnlineRefNo		:	String
+	Variable	:	VarPaymentModeGiftCopnAmount	:	Number
+	Variable	:	VarFinanceAmt					:	Number	
+	Variable	:	VarFinanaceNm					:	String
+	Variable	:	VarFinRefNo						:	String
+	Variable	:	GKSORcptMID						:	String
+	Variable	:	VarPaymentModeFinBank			:	String
+
+	000	  :	 Set  : SVSingleEntry 					: No
+	160   :	 Set  : VarRcptLedName 					: $PartyLedgerName
+	170   :	 Set  : VarRcptVchNo 					: #EIGetOrderNo;$Reference;VoucherNumber
+	180	  :	 Set  : VarPaymentModeCash				: "CASH"
+	190   :	 Set  : VarPaymentModeCashAmount		: ##VarCashAmt
+	200   :	 Set  : VarPaymentModeCard				: "CARD"
+	210   :	 Set  : VarPaymentModeCardAmount		: ##VarCardAmt
+	220   :	 Set  : VarPaymentModeCardNumber		: $GKCarNumudf
+	225   :	 Set  : VarPaymentModeCardRefNumber		: $GKCarNumBankUdf
+	230	  :	 Set  : VarPaymentModeCardBank			: @@GKCMPCardBankName
+	240	  :	 Set  : VarPaymentModeCheque			: "CHEQUE"
+	250	  :	 Set  : VarPaymentModeChequeAmount		: ##VarCheqAmt
+	260	  :	 Set  : VarPaymentModeChequeNumber		: $GKChqNumudf
+	270	  :	 Set  : VarPaymentModeChequeDate		: $GKChqDteudf
+	280	  :	 Set  : VarPaymentModeChequeBank		: @@GKCMPChequeBankName
+	290	  :	 Set  :	VarPaymentModeOnline		    : $GKOnlineudf
+	300	  :	 Set  :	VarPaymentModeOnlineAmount		: ##VarOnlnAmt
+	310	  :	 Set  : VarBillPatntOnlinecmpnyBank		: @@GKCMPOnlineBankName
+	312	  :  Set  :	VarPaymentModeOnlineRefNo		: $GKOnlineRefNo
+	314	  :  Set  : VarPaymentModeGiftCopnAmount	: ##VarGiftAmt 	
+	314A  :  Set  : VarFinanaceNm					: "FINANCE"
+	315	  :  Set  : VarFinanceAmt					: ##VarFinAmt	
+	315Y  :	 Set	:VarPaymentModeFinBank			: @@GKCMPFinBankName
+
+	320   :	 Set  : VarTotalReceptAmount			:($$Number:##VarPaymentModeCashAmount+$$Number:##VarPaymentModeCardAmount+$$Number:##VarPaymentModeChequeAmount+$$Number:##VarPaymentModeOnlineAmount+$$Number:##VarPaymentModeGiftCopnAmount+$$Number:##VarFinanceAmt)
+
+;			345aaa	:	Log	:	##VarTotalReceptAmount
+			
+	/* Party Loop Starts*/
+
+	400    :     INSERTCOLLECTION OBJECT    	: AllLedgerEntries
+    402    :     SET TARGET        				: AllLedgerEntries
+    404    :     SET VALUE       				: LedgerName        	:$PartyLedgerName
+    406    :     SET VALUE        				: Amount        		:$$TgtObject:$$asAmount:##VarTotalReceptAmount
+	407	   :	 Set Value						: VATEXPAMOUNT			:	$$TgtObject:$$asAmount:##VarTotalReceptAmount
+    408    :     SET VALUE        				: Is Deemed Positive	:	No
+	410    :     SET VALUE        				: ISPARTYLEDGER			:	Yes
+	412    :     SET VALUE        				: ISLASTDEEMEDPOSITIVE	:	No
+	
+;			asdfasD:Log:$PartyLedgerName
+;			sadfas:Log:##VarTotalReceptAmount
+			
+/* Party's Bill Allocations Loop */
+
+	416	  : INSERTCOLLECTION OBJECT	: BillAllocations
+	418	  :	SET VALUE		: BILLTYPE		: $$SysName:Advance  
+	420	  : Set Value		: AMOUNT		: $$TgtObject:$$AsAmount:##VarTotalReceptAmount 
+	422	  :	SET VALUE		: Name			: ##VarRcptVchNo
+	424   : SET TARGET      : ..
+	426   : SET TARGET      : ..
+
+
+/* If Payment Mode is Cash */	
+;		sdfasd:Log:##VarPaymentModeCashAmount
+		
+	500		:	If	:	 ##VarPaymentModeCash="Cash" AND $$Number:##VarPaymentModeCashAmount>0
+
+	502    :     INSERTCOLLECTION OBJECT : ALlLedgerEntries
+    504    :     SET TARGET        		 : ALlLedgerEntries
+    506    :     SET VALUE         		 : LedgerName        : "Cash"
+	508	   :	 Set Value				 : Narration		 : "Cash"
+    509    :     SET VALUE         		 : Amount        	 : $$TgtObject:$$AsAmount:##VarPaymentModeCashAmount;*-1
+    511    :     SET VALUE         		 : Is Deemed Positive:	Yes
+	512    :     SET VALUE        		 : ISPARTYLEDGER	 :	Yes
+	513    :     SET VALUE        		 : ISLASTDEEMEDPOSITIVE	:	Yes
+	514	   : 	 SET TARGET : ..
+
+	520	   :     End If
+
+/* If Payment Mode is Gift Vouchers */	
+		
+	570		:	If	:	  $$Number:##VarPaymentModeGiftCopnAmount>0
+	
+	571M	:	Walk Collection		:	GKGiftDetAggrColl
+	572M	:	Set					:	VarPaymentModeGiftCopnAmount		:	$GKGiftCoupnAmt
+		
+	572    :     INSERTCOLLECTION OBJECT : ALlLedgerEntries
+    574    :     SET TARGET        		 : ALlLedgerEntries
+    576    :     SET VALUE         		 : LedgerName        : "Cash"
+	578	   :	 Set Value				 : Narration		 : "Gift Coupons"
+    580    :     SET VALUE         		 : Amount        	 : $$AsAmount:##VarPaymentModeGiftCopnAmount;*-1
+    581    :     SET VALUE         		 : Is Deemed Positive:	Yes
+	582    :     SET VALUE        		 : ISPARTYLEDGER	 :	Yes
+	583    :     SET VALUE        		 : ISLASTDEEMEDPOSITIVE	:	Yes
+	584	   : 	 SET TARGET : ..
+	584B   :	End Walk
+	590	   :     End If
+
+/* If Payment Mode is Card */	
+
+;		sdafasD:Log:##VarPaymentModeCardAmount
+
+	600			:	If	:	 ##VarPaymentModeCard="Card" AND $$Number:##VarPaymentModeCardAmount>0
+		
+	600M	:	Walk Collection		:	GKCardDetAggrCollM
+	
+	601M	:	Set					:	VarPaymentModeCardAmount		:	$GKCarAggrAmtUdf
+	602M	:	Set					:	VarPaymentModeCardNumber		:	$GKCarNumudf
+	603M	:	Set					:	VarPaymentModeCardRefNumber		:	$GKCarNumBankUdf
+	
+						
+	602S    :     INSERTCOLLECTION OBJECT : ALlLedgerEntries
+	604S    :     SET TARGET        		 : ALlLedgerEntries
+	606S    :     SET VALUE         		 : LedgerName        : ##VarPaymentModeCardBank
+	608S	   :	 Set Value				 : Narration		 : "Card"
+	610S    :     SET VALUE         		 : Amount        	 : $$AsAmount:##VarPaymentModeCardAmount
+    611S    :     SET VALUE         		 : Is Deemed Positive:	Yes
+	612S    :     SET VALUE        		 : ISPARTYLEDGER	 :	Yes
+	613S    :     SET VALUE        		 : ISLASTDEEMEDPOSITIVE	:	Yes
+
+
+	614	:	INSERTCOLLECTION OBJECT : BANKALLOCATIONS 
+	616	: 			   SET TARGET : BankAllocations
+	618	:			   SET VALUE  : Date 					:	$$Owner:$$Date:$Date
+ 	620	:			   SET VALUE  : InstrumentDate			:	$$Owner:$$Date:$Date
+	622	:			   SET VALUE  : InstrumentNumber		:   ##VarPaymentModeCardRefNumber
+	624	:			   Set Value  : BranchName				:	""
+ 	626	:			   SET VALUE  : TransactionType 		:   "e-Fund Transfer"
+ 	628	:			   SET VALUE  : UniqueReferenceNumber	:   $$MakeTallyUniqueID
+	630 :			   SET VALUE  : Narration				: 	$$LocaleString:##VarPaymentModeCardNumber
+ 	632	:			   SET VALUE  : ChequePrinted 			:   0
+	634	:			   SET VALUE  : BankName				: 	##VarPaymentModeCardBank
+ 	636	:	  		   SET VALUE  : PaymentFavouring		: 	##VarRcptLedName
+	638	:			   Set Value  : BANKPARTYNAME			:	##VarRcptLedName
+ 	640	:			   SET VALUE  : Amount					:   $$AsAmount:$$Number:##VarPaymentModeCardAmount
+	642	:			   SET VALUE  : PaymentMode    			:   $$SysName:Transacted
+	644	:			   SET VALUE  : Name           			:   $$MakeUniqueID	
+	646	:			   SET TARGET : ..
+	648	: 			   SET TARGET : ..
+
+	648M:	End Walk
+	
+	650 :  End If
+
+/* If Payment Mode is Online */	
+
+
+	700			:	If	:	  $$Number:##VarPaymentModeOnlineAmount>0
+	
+	700M		:	Walk Collection	:	GKOnlineDetAggrCollM
+	
+	701M		:	Set	:	VarPaymentModeOnlineAmount		: $GKOnlineAggrAmtUdf
+	702M		:	Set	:	VarPaymentModeOnlineRefNo		: $GKOnlineRefNo
+	703M	    :	Set :	VarPaymentModeOnline		    : $GKOnlineudf
+
+				;f:Log:##VarPaymentModeOnlineAmount
+
+	702    :     INSERTCOLLECTION OBJECT : ALlLedgerEntries
+    704    :     SET TARGET        		 : ALlLedgerEntries
+    706    :     SET VALUE         		 : LedgerName           :  ##VarBillPatntOnlinecmpnyBank
+	708    :	 Set Value				 : Narration			:  "Online";##VarPaymentModeOnline
+    710    :     SET VALUE         		 : Amount        	    :  $$AsAmount:##VarPaymentModeOnlineAmount;*-1
+    711    :     SET VALUE         		 : Is Deemed Positive:	Yes
+	712    :     SET VALUE        		 : ISPARTYLEDGER	 :	Yes
+	713    :     SET VALUE        		 : ISLASTDEEMEDPOSITIVE	:	Yes
+
+		
+	714	:			INSERTCOLLECTION OBJECT : BankAllocations 	
+	
+	716	: 			   SET TARGET: BankAllocations
+	718 :			   SET VALUE  : Date 					:	$$Owner:$$Date:$Date
+ 	720	:			   SET VALUE  : InstrumentDate			:	$$Owner:$$Date:$Date
+	722	:			   SET VALUE  : InstrumentNumber		:   $$LocaleString:##VarPaymentModeOnlineRefNo
+	724 :			   Set Value  : BranchName				:	""
+ 	726	:			   SET VALUE  : TransactionType 		:   "Others"
+ 	728 :			   SET VALUE  : UniqueReferenceNumber	:   $$MakeTallyUniqueID
+	730 :			   SET VALUE  : Narration				: 	$$LocaleString:##VarPaymentModeOnline
+ 	732	:			   SET VALUE  : ChequePrinted 			:   0
+	734	:			   SET VALUE  : BankName				: 	##VarBillPatntOnlinecmpnyBank
+ 	736	:	  		   SET VALUE  : PaymentFavouring		: 	##VarRcptLedName
+	738	:			   Set Value  : BANKPARTYNAME			:	##VarRcptLedName
+ 	740	:			   SET VALUE  : Amount					:  $$AsAmount:$$Number:##VarPaymentModeOnlineAmount
+	742	:			   SET VALUE  : PaymentMode    			:  $$SysName:Transacted
+	744	:			   SET VALUE  : Name           			:  $$MakeUniqueID	
+
+	746	:			   SET TARGET : ..
+	748	: 			   SET TARGET : ..
+
+	748M:		End Walk
+	
+	750 :		  End If
+
+
+/* If Payment Mode is Cheque */	
+
+
+	800	   :	If	:	 ##VarPaymentModeCheque="Cheque" AND $$Number:##VarPaymentModeChequeAmount>0
+
+	800M   	: 	Walk Collection	:	GKCheqDetAggrCollM
+
+	801M	  :	 Set  : VarPaymentModeChequeAmount		: $GKChqAggrAmtUdf
+	802M	  :	 Set  : VarPaymentModeChequeNumber		: $GKChqNumudf
+	803M	  :	 Set  : VarPaymentModeChequeDate		: $GKChqDteudf
+	
+	802    :     INSERTCOLLECTION OBJECT : ALlLedgerEntries
+    804    :     SET TARGET        		 : ALlLedgerEntries
+    806    :     SET VALUE         		 : LedgerName        : ##VarPaymentModeChequeBank
+	808	   :	 Set Value				 : Narration		 : "Cheque/DD"
+    810    :     SET VALUE         		 : Amount        	 : $$AsAmount:##VarPaymentModeChequeAmount;*-1
+    811    :     SET VALUE         		 : Is Deemed Positive:	Yes
+	812    :     SET VALUE        		 : ISPARTYLEDGER	 :	Yes
+	813    :     SET VALUE        		 : ISLASTDEEMEDPOSITIVE	:	Yes
+
+
+	814	:	INSERTCOLLECTION OBJECT : BankAllocations 	
+	816	: 			   SET TARGET: BankAllocations
+	818	:			   SET VALUE  : Date 					:	$$Owner:$$Date:$Date
+ 	820	:			   SET VALUE  : InstrumentDate			:	##VarPaymentModeChequeDate
+	822	:			   SET VALUE  : InstrumentNumber		:   ##VarPaymentModeChequeNumber
+	824	:			   Set Value  : BranchName				:	""
+ 	826	:			   SET VALUE  : TransactionType 		:   "Cheque/DD"
+ 	828	:			   SET VALUE  : UniqueReferenceNumber	:   $$MakeTallyUniqueID
+	830 :			   SET VALUE  : Narration				: 	$$LocaleString:"Cheque/DD"
+ 	832	:			   SET VALUE  : ChequePrinted 			:   0
+	834	:			   SET VALUE  : BankName				: 	##VarPaymentModeChequeBank
+ 	836	:	  		   SET VALUE  : PaymentFavouring		: 	##VarRcptLedName
+	838	:			   Set Value  : BANKPARTYNAME			:	##VarRcptLedName
+ 	840	:			   SET VALUE  : Amount					:  $$AsAmount:$$Number:##VarPaymentModeChequeAmount
+	842	:			   SET VALUE  : PaymentMode    			:  $$SysName:Transacted
+	844	:			   SET VALUE  : Name           			:  $$MakeUniqueID	
+	846	:			   SET TARGET : ..
+	848	: 			   SET TARGET : ..
+	
+	848M:		 End Walk
+	
+	850	:		End If
+	
+	/* If Payment Mode is Finance */	
+
+	600A	:	If	:	 ##VarFinanaceNm="Finance" AND $$Number:##VarFinanceAmt>0
+
+	600Z	:	Walk Collection	:	GKFinanceDetAggrCollM
+	
+	601Z	:	Set	:	VarFinanceAmt	:	$GKFinanceAggrAmt
+	602Z	:	Set	:	VarFinRefNo		:	$GKFinanceRefNo
+
+
+	602A    :     INSERTCOLLECTION OBJECT : ALlLedgerEntries
+    604A    :     SET TARGET        		 : ALlLedgerEntries
+    606A    :     SET VALUE         		 : LedgerName        : ##VarPaymentModeFinBank
+	608A	:	 Set Value					 : Narration		 : "Finance"
+    610A    :     SET VALUE         		 : Amount        	 : $$AsAmount:##VarFinanceAmt
+    611A    :     SET VALUE         		 : Is Deemed Positive:	Yes
+	612A    :     SET VALUE        		 	 : ISPARTYLEDGER	 :	Yes
+	613A    :     SET VALUE        		 	 : ISLASTDEEMEDPOSITIVE	:	Yes
+
+
+	614A	:	INSERTCOLLECTION OBJECT : BankAllocations 	
+	
+	616A	: 			   SET TARGET: BankAllocations
+	618A	:			   SET VALUE  : Date 					:	$$Owner:$$Date:$Date
+ 	620A	:			   SET VALUE  : InstrumentDate			:	$$Owner:$$Date:$Date
+	622A	:			   SET VALUE  : InstrumentNumber		:   ""
+	624A	:			   Set Value  : BranchName				:	""
+ 	626A	:			   SET VALUE  : TransactionType 		:   "e-Fund Transfer"
+ 	628A	:			   SET VALUE  : UniqueReferenceNumber	:   $$MakeTallyUniqueID
+	630A 	:			   SET VALUE  : Narration				: 	$$LocaleString:##VarFinRefNo
+ 	632A	:			   SET VALUE  : ChequePrinted 			:   0
+	634A	:			   SET VALUE  : BankName				: 	##VarPaymentModeFinBank
+ 	636A	:	  		   SET VALUE  : PaymentFavouring		: 	##VarRcptLedName
+	638A	:			   Set Value  : BANKPARTYNAME			:	##VarRcptLedName
+ 	640A	:			   SET VALUE  : Amount					:  $$AsAmount:$$Number:##VarFinanceAmt
+	642A	:			   SET VALUE  : PaymentMode    			:  $$SysName:Transacted
+	644A	:			   SET VALUE  : Name           			:  $$MakeUniqueID	
+	646A	:			   SET TARGET : ..
+	648A	: 			   SET TARGET : ..
+	648Z	:	End Walk
+	650A	:  End If
+
+	
+    900 :    SET TARGET        		: ..
+
+
+[Collection	:	testrctpt]
+		Type		:	Vouchers	:	VoucherType
+		Child Of	:	$$VchTypeReceipt
+		Belongs To	:	Yes
+		Fetch		:	Date,Reference,VoucherNumber,VoucherTypeName,GKCSTriggered,PartyLedgerName,Amount,IsOptional,MasterId
+;;;Select $VoucherNumber,$MasterId from testrctpt	
+
+
+/*
+[#Form	:	Receipt Color]
+	
+		On	:	Form Accept	:	Yes	:	Form Accept
+		On	:	Form Accept	:	Yes	:	Call	:	GKRcptColor
+		
+[Function	:	GKRcptColor]
+	
+		Variable	:	VMid	:	String	:	($$Sprintf:@@VchMasterID:$MasterID)
+		
+		adsf:Log:##VMid
+;		100	:	Modify Object:(Voucher,##VMid).AllLedgerEntries[3].BankAllocations[1].InstrumentNumber:"12345"
+

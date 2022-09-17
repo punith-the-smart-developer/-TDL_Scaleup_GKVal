@@ -1,0 +1,618 @@
+
+	
+[Report	:	GKConsSOAlterRep]
+	
+		Form	:	GKConsSOAlterRep
+		
+[Form	:	GKConsSOAlterRep]
+	
+	On		:	Form Accept	:	Yes	:	Form Accept
+	On		:	Form Accept	:	Yes	:	Call	:	GKVConsolidatedSO
+	On		:	Form Accept	:	Yes	:	Call	:	GKVB2BIndivdualSO
+	Part	:	GKConsSOAlterRep
+	Height	:	10 % Page
+	Width	:	17 % Page
+	
+[Part	:	GKConsSOAlterRep]
+	
+		Space Top:0.2 cm
+		Line	:	GKConsSOAlterRep
+		
+[Line	:	GKConsSOAlterRep]
+	
+		Field	:	Medium Prompt,GKConsSOAlterRep
+		Local	:	Field	:	Medium Prompt	:	Set as	:	"Date:"
+		
+[Field	:	GKConsSOAlterRep]
+	
+		Use		:	Uni Date Field
+		Set as	:	$$MachineDate
+		Validate:	NOT $$IsEmpty:$$Value
+		Width	:	18
+		Align	:	Left
+	
+
+[Function	:	GKVConsolidatedSO]
+	
+			Variable	:	VchInvTot	:	Amount
+			Variable	:	VarTaxAmnt	:	Amount		
+			Variable	:	vSalesAccAmt:	Amount
+			Variable	:	vBillNo		:	String
+			Variable	:	VarTaxLed	:	String
+			Variable	:	VarMID		:	String
+			
+			;010		: 	Do If	:	($$NumItems:GKVConsoltdSOSubCollL>0):MSg Box:"Error":"Consolidated Sales Order Entry Triggered Already"
+			;020		:	Do If	:	($$NumItems:GKVConsoltdSOSubCollL>0):Continue	
+			
+			100		:	Set	:	VchInvTot	:	$$AsAmount:$$CollAmtTotal:GKVConsoltdSOSubColl:$Amount
+			105		:	If	:	##VchInvTot!=0
+			110		:	New Object	 	:	Voucher
+			112		: 	SET VALUE	 	: 	Date	 			: $$Date:#GKConsSOAlterRep
+			113		:	Set Value		:	REFERENCE			: "Consolidated Orders"
+			116		: 	SET VALUE	 	: 	VoucherTypeName		: @@GKConSOVchType
+			118		: 	SET 		 	:   SVViewName			: "Invoice Voucher View"
+			120		:	Set Value		:	PARTYLEDGERNAME		: @@CommonPartyName
+			122 	:   SET VALUE 	 	:   PersistedView 		: "Invoice Voucher View"
+			124		:	Set Value		:	IsOptional			: Yes
+			
+			750		: Call	:	GKVchSOInvtAllocations
+			
+			760		: Call	:	GKVchSOPartyLedFun
+			765		: Call	:	GKVchSODisLedFun
+			770		: Call	:	GKVchSOTaxAllocations
+			780		: Call	:	GKVchSOAllDetails
+			
+			1103 	: SET VALUE     : PersistedView : ##SVViewName
+		    1105 	: Create Target
+			
+			1110	: Walk Collection	:	GKVConsoltdSOSubColl
+			1111	: Set	:	VarMID:$$String:"Id:"+$$LocaleString:$MasterId
+			1112	: Modify Object:(Voucher,##VarMID).GKCSTriggered[1].GKCSTriggered:Yes
+			1114	: End Walk
+			1116	: End If
+			
+			
+
+[Function	:	GKVchSOPartyLedFun]
+
+			560	: 	INSERTCOLLECTION OBJECT	: LedgerEntries
+			570	:	Set Target				: LedgerEntries
+			580	:	SET VALUE				: LedgerName			:@@CommonPartyName
+			590	: 	SET VALUE				: Amount				:$$AsAmount:##VchInvTot*-1
+			600	: 	SET VALUE				: Is Deemed Positive	: Yes	
+			610	: 	SET VALUE				: ISPARTYLEDGER			: yes   
+			620	:	Set Value				: ISLASTDEEMEDPOSITIVE	: Yes
+			630 : 	Set Target				: ..
+			
+			
+[Function	: GKVchSOInvtAllocations]
+	
+
+	Variable	:	GKVchStkItm		:	String
+	Variable	:	GKVchStkQty		:	Number
+	Variable	:	GKVchStkRate	:	Number
+	Variable	:	GKVchStkdis		:	Number
+	Variable	:	GKVchStkAmt		:	Number
+	Variable	:	GKSalesLedger	:	String
+	Variable	:	GKSalesAmt		:	Number
+	Variable	:	GKVchStkdis		:	Number
+	
+	100	: Walk Collection	: GKVConsoltdSOInvColl
+	
+		102	:	Set	:	GKVchStkItm		:$StkItem	
+		104	:	Set	:	GKVchStkQty		:$BilledQty
+		106	:	Set	:	GKVchStkRate	:$StkRate
+		107	:	Set	:	GKVchStkdis		:$Discount
+		108	:	Set	:	GKVchStkAmt		:$StkAmt
+		
+	
+	118		:   INSERTCOLLECTION OBJECT	: ALLINVENTORYEntries	
+	120		:	SET VALUE		: STOCKITEMNAME			: $$LocaleString:##GKVchStkItm
+	122		: 	SET VALUE		: Is Deemed Positive	: "No"
+	124		:	SET VALUE		: ACTUALQTY				: ($$TgtObject:$$AsQty:##GKVchStkQty)*-1	
+	126		:	SET VALUE		: BILLEDQTY				: ($$TgtObject:$$AsQty:##GKVchStkQty)*-1
+ 	128		: 	SET VALUE		: Rate					: ($$TgtObject:$$AsRate:##GKVchStkRate)	
+	129		: 	SET VALUE		: Discount				: ($$TgtObject:$$AsRate:##GKVchStkdis)
+	130		: 	SET VALUE		: Amount				: ($$TgtObject:($$AsAmount:##GKVchStkAmt))
+	
+
+	132		:   INSERTCOLLECTION OBJECT	: BATCHALLOCATIONS
+	134		:	SET VALUE		: STOCKITEMNAME	 	: $$LocaleString:##GKVchStkItm
+	136		:	SET VALUE		: GODOWNNAME	 	: "Main Location"
+	138		:	SET VALUE		: ACTUALQTY		 	: ($$TgtObject:$$AsQty:##GKVchStkQty)*-1
+	140		:	SET VALUE		: BILLEDQTY		 	: ($$TgtObject:$$AsQty:##GKVchStkQty)*-1		
+ 	142		: 	SET VALUE		: Rate				: ($$TgtObject:($$AsRate:##GKVchStkRate))
+	143		: 	SET VALUE		: Discount				: ($$TgtObject:$$AsRate:##GKVchStkdis)
+	144		: 	SET VALUE		: Amount			: ($$TgtObject:($$AsAmount:##GKVchStkAmt))
+	131		:	Set Value		: ORDERDUEDATE		:  $$DateRange:#GKConsSOAlterRep:#GKConsSOAlterRep
+	145		:   SET TARGET      : .. 
+	
+	146		:	Walk Collection			: GKVConsoltdSOLedColl
+	
+		147		:	Set		:GKSalesLedger	:	$SalesActsLedName
+		14T		:	Set		:GKSalesAmt		:	$SalesActsLedamt
+	
+		148		: 	INSERT COLLECTION OBJECT: ACCOUNTINGALLOCATIONS
+		150		:   SET VALUE				: LedgerName				: ##GKSalesLedger
+		152		:   SET VALUE				: Amount					:($$TgtObject:($$AsAmount:##GKSalesAmt))
+		154		: 	SET VALUE				: Is Deemed Positive 		: No	
+		156		: 	SET VALUE				: ISPARTYLEDGER				: No 
+		160		:   SET TARGET      		: .. 	
+		162		:	End Walk
+	
+	170		: 	End Walk
+	
+
+
+[Function	:	GKVchSODisLedFun]
+	
+		Variable	:	GKVchDisLed	:	String
+		Variable	:	GKVchDisLedAmt:	Number
+	
+		800	:	Walk Collection	:	GKVConsltdSODisLedColl
+			
+		801	:	Set	:	GKVchDisLed		:	$OthersLedName
+		802	:	Set	:	GKVchDisLedAmt	:	$OthersLedAmount
+			
+;					sdfA:Log:##GKVchDisLedAmt
+				
+		1715:If:(##GKVchDisLedAmt!=0)
+
+		810	: 		Insert Collection Object		: Ledger Entries
+		820	: 		Set Value	: LedgerName		: ##GKVchDisLed
+		830	: 		Set Value	: IsDeemedPositive	: No
+		840	: 		Set Value	: Amount			: ##GKVchDisLedAmt
+		850	: 		Set Target	: ..
+		855	:		End If
+	
+	860	:	End Walk
+	
+
+[Function	:	GKVchSOTaxAllocations]
+
+	Variable	:	GKVchIGSTAmt	:	Number
+	Variable	:	GKVchCGSTAmt	:	Number
+	Variable	:	GKVchSGSTAmt	:	Number
+	Variable	:	GKVchTaxLed		:	String
+	Variable	:	GKVchOtherLed	:	String
+	Variable	:	GKVchOtherLedAmt:	Number
+	
+	100	:	Walk Collection	:	GKVConsltdSOTaxLedColl
+	
+		102	:	Set	:	GKVchTaxLed			:	$TaxLedName
+		130	:	Set	:	GKVchIGSTAmt	  	:	$TaxLedAmount
+		150	:	Set	:	GKVchCGSTAmt	  	:	$TaxLedAmount
+		170	:	Set	:	GKVchSGSTAmt	  	:	$TaxLedAmount
+	
+		220	: 	Insert Collection Object		: Ledger Entries
+		230	: 	Set Value	: Ledger Name				: ##GKVchTaxLed
+		240	: 	Set Value	: IsDeemedPositive			: No
+		250	: 	Set Value	: IsPartyLedger				: No
+		260	: 	Set Value	: Amount					: ##GKVchCGSTAmt  
+		270	: 	Set Target	: ..	
+		
+	700	:	End Walk
+	
+	800	:	Walk Collection	:	GKVConsltdSOOthersLedColl
+
+		801	:	Set	:	GKVchOtherLed	:	$OthersLedName
+		802	:	Set	:	GKVchOtherLedAmt:	$OthersLedAmount
+	
+		810	: 		Insert Collection Object		: Ledger Entries
+		820	: 		Set Value	: LedgerName		: ##GKVchOtherLed
+		830	: 		Set Value	: IsDeemedPositive	: No
+		840	: 		Set Value	: Amount			: $$AsAmount:##GKVchOtherLedAmt
+		850	: 		Set Target	: ..
+	
+	860	:	End Walk
+	
+[Function	:	GKVchSOPaymentAllocations]
+	
+		Variable	:	GKVarCashAmt	:	Number
+		Variable	:	GKVarCardAmt	:	Number
+		Variable	:	GKVarChqueAmt	:	Number
+		Variable	:	GKVarOnlineAmt	:	Number
+		Variable	:	GKVarGiftAmt	:	Number
+		
+		010	:	Set	:	GKVarCashAmt	:	$$CollAmtTotal:GKVConsoltdSOSubColl:$GKPMCashAmt
+		020	:	Set	:	GKVarCardAmt	:	$$CollAmtTotal:GKVConsoltdSOSubColl:$GKChqAmtudf
+		030	:	Set	:	GKVarChqueAmt	:	$$CollAmtTotal:GKVConsoltdSOSubColl:$GKCarAmtUdf
+		040	:	Set	:	GKVarOnlineAmt	:	$$CollAmtTotal:GKVConsoltdSOSubColl:$GKOnlineAmtUdf
+		050	:	Set	:	GKVarGiftAmt	:	$$CollAmtTotal:GKVConsoltdSOSubColl:$GKPMGiftAmt
+		
+		100	:	Set Value	:	GKPMCashAmt		: ##GKVarCashAmt	
+		110	:	Set Value	:	GKChqAmtudf     : ##GKVarCardAmt	
+		120	:	Set Value	:	GKCarAmtUdf     : ##GKVarChqueAmt	
+		130	:	Set Value	:	GKOnlineAmtUdf  : ##GKVarOnlineAmt	
+		140	:	Set Value	:	GKPMGiftAmt     : ##GKVarGiftAmt	
+
+
+[Function	:	GKVchSOAllDetails]
+	
+		Variable	:	GKVarSONo		:	String
+		Variable	:	GKVarSORef		:	String
+		Variable	:	GKVarSODate		:	Date
+		Variable	:	GKVarSOAmnt		:	Number
+		Variable	:	GKVarSOParty	:	String
+		Variable	:	GKVarSOPPhNo	:	String
+		Variable	:	GKVarSOPEmail	:	String
+		
+		000	:	Walk Collection			:	GKVConsoltdSOAll
+		
+		010	:	Set	:	GKVarSONo		:	$VoucherNumber
+		015	:	Set	:	GKVarSORef		:	$Reference
+		020	:	Set	:	GKVarSODate		:	$DAte
+		030	:	Set	:	GKVarSOAmnt		:	$Amount
+		040	:	Set	:	GKVarSOParty	:	$GKVchPartyNm
+		050	:	Set	:	GKVarSOPPhNo	:	$GKVchPartyPh
+		060	:	Set	:	GKVarSOPEmail	:	$GKVchPartyEmail
+		
+		090	:	Insert Collection Object:	GKSOAnnextureAggr	
+		
+		100	:	Set Value	:	GKSOAnxtureSONo			: ##GKVarSONo	
+		105	:	Set Value	:	GKSOAnxtureSORef		: ##GKVarSORef
+		110	:	Set Value	:	GKSOAnxtureSODt			: ##GKVarSODate
+		120	:	Set Value	:	GKSOAnxtureSOAmt		: ##GKVarSOAmnt			
+		130	:	Set Value	:	GKSOAnxtureSOParty		: ##GKVarSOParty	
+		140	:	Set Value	:	GKSOAnxtureSOPartyPh	: ##GKVarSOPPhNo
+		150	:	Set Value	:	GKSOAnxtureSOPartyEmail	: ##GKVarSOPEmail
+		160	:	Set Target	:	..
+		
+		500	:	End Walk
+
+
+[Collection	:	GKVConsoltdSOSubColl]
+	
+		Type		:	Vouchers	:	VoucherType
+		Child Of	:	$$VchTypeSalesOrder
+		Belongs To	:	Yes
+		Fetch		:	Date,Reference,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount,IsOptional,MasterId
+		Fetch		:	GKPMCashAmt,GKChqAmtudf,GKCarAmtUdf,GKOnlineAmtUdf,GKPMGiftAmt
+		Fetch		:	GKVchPartyNm,GKVchPartyPh,GKVchPartyEmail
+		Filter		:	NOTIsOptionalVoucher,CSTriggered,CounterCustFltr,GKSaOrdVchType
+		Parm Var	:	SVFromDate	:	Date	:	$$Date:#GKConsSOAlterRep
+		Parm Var	:	SVToDate	:	Date	:	$$Date:#GKConsSOAlterRep
+		
+;;;Select $Date,$Reference,$VoucherNumber from GKVConsoltdSOSubColl
+		
+[Collection	:	GKVConsoltdSOAll]
+	
+		Type		:	Vouchers	:	VoucherType
+		Child Of	:	$$VchTypeSalesOrder
+		Belongs To	:	Yes
+		Fetch		:	Date,Reference,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount,IsOptional,MasterId
+		Fetch		:	GKPMCashAmt,GKChqAmtudf,GKCarAmtUdf,GKOnlineAmtUdf,GKPMGiftAmt
+		Fetch		:	GKVchPartyNm,GKVchPartyPh,GKVchPartyEmail
+		Filter		:	NOTIsOptionalVoucher,CSTriggered,CounterCustFltr,GKSaOrdVchType
+		Parm Var	:	SVFromDate	:	Date	:	$$Date:#GKConsSOAlterRep
+		Parm Var	:	SVToDate	:	Date	:	$$Date:#GKConsSOAlterRep
+		
+[Collection	:	GKVConsoltdSOSubCollL]
+	
+		Type		:	Vouchers	:	VoucherType
+		Child Of	:	$$VchTypeSalesOrder
+		Belongs To	:	Yes
+		Fetch		:	Date,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount,IsOptional,MasterId
+		Filter		:	NOTIsOptionalVoucher,CSTriggeredYes,CounterCustFltr,GKSaOrdVchType
+		Parm Var	:	SVFromDate	:	Date	:	$$Date:#GKConsSOAlterRep
+		Parm Var	:	SVToDate	:	Date	:	$$Date:#GKConsSOAlterRep
+		
+		
+[Collection	:	GKVConsoltdSOInvColl]
+
+		Source Collection	:	GKVConsoltdSOSubColl
+		Walk				:	Inventory Entries
+		Fetch				:	StockItemName,Billedqty,Rate,Discount,Amount
+		Fetch				:	Date,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount
+		By					:	StkItem:$StockItemName
+		By					:	StkRate:$$AsRate:$Rate
+		Aggr Compute		:	StkAmt:Sum:$Amount
+		
+
+[Collection	:	GKVConsoltdSOLedColl]
+
+		Source Collection	:	GKVConsoltdSOSubColl
+		Walk				:	All Ledger Entries
+		Fetch				:	StockItem,Billedqty,Rate,Amount,LedgerName
+		Fetch				:	Date,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount
+		By					:	SalesActsLedName:$LedgerName
+		Aggr Compute		:	SalesActsLedamt :Sum:$Amount
+		Filter				:	FilSOAccts
+		
+;;;Select $SalesActsLedName,$SalesActsLedamt from GKVConsoltdSOLedColl
+		
+[Collection	:	GKVConsltdSOTaxLedColl]
+
+		Source Collection	:	GKVConsoltdSOSubColl
+		Walk				:	All Ledger Entries
+		Fetch				:	Amount,LedgerName
+		Fetch				:	Date,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount
+		By					:	TaxLedName:$LedgerName
+		Aggr Compute		:	TaxLedAmount:Sum:$Amount
+		Filter				:	FilSOTaxLedgs
+		
+;;;Select $LedName,$CGSTAmount from GKVConsoltdTaxLedColl
+
+
+[Collection	:	GKVConsltdSOOthersLedColl]
+
+		Compute Var			:	GKVarOthersLedAmt	:	Number	:	IF $$IsDr:$Amount then $$String:$Amount else $Amount
+		Source Collection	:	GKVConsoltdSOSubColl
+		Walk				:	All Ledger Entries
+		Fetch				:	Amount,LedgerName
+		Fetch				:	Date,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount
+		By					:	OthersLedName:$LedgerName
+		Aggr Compute		:	OthersLedAmount:Sum:##GKVarOthersLedAmt
+		Filter				:	FilSOOthersLedgs,RemDisLed
+		
+;;;Select $LedName,$CGSTAmount from GKVConsoltdTaxLedColl
+
+
+[Collection	:	GKVConsltdSODisLedColl]
+
+		Compute Var			:	GKVarOthersLedAmt	:	Number	:	IF $$IsDr:$Amount then $$String:$Amount else $Amount
+		Source Collection	:	GKVConsoltdSOSubColl
+		Walk				:	All Ledger Entries
+		Fetch				:	Amount,LedgerName
+		Fetch				:	Date,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount
+		By					:	OthersLedName:$LedgerName
+		Aggr Compute		:	OthersLedAmount:Sum:##GKVarOthersLedAmt
+		Filter				:	FilSODisLedgs
+		
+;;;Select $LedName,$CGSTAmount from GKVConsoltdTaxLedColl
+		
+[Collection	:	GKVConsoltdSOBillColl]
+
+		Source Collection	:	GKVConsoltdSOSubColl
+		Walk				:	Ledger Entries,Bill Allocations
+		Fetch				:	StockItem,Billedqty,Rate,Amount,Name,BillType
+		Fetch				:	Date,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount
+
+
+
+[Function	:	GKVB2BIndivdualSO]
+	
+			Variable	:	VchInvTot	:	Amount
+			Variable	:	VarTaxAmnt	:	Amount		
+			Variable	:	vSalesAccAmt:	Amount
+			Variable	:	vBillNo		:	String
+			Variable	:	VarTaxLed	:	String
+			Variable	:	VarMID		:	String
+	
+			100		:	Walk Collection	:	GKB2BIndvialSOCollMn
+			
+			101		:	Set	:	VchInvTot	:	$$AsAmount:$Amount
+			105		:	If	:	##VchInvTot!=0
+			110		:	New Object	 	:	Voucher
+			112		: 	SET VALUE	 	: 	Date	 			: $$Date:#GKConsSOAlterRep
+			113		:	Set Value		:	REFERENCE			: "B2B Individual Orders"
+			116		: 	SET VALUE	 	: 	VoucherTypeName		: @@GKConSOVchType
+			118		: 	SET 		 	:   SVViewName			: "Invoice Voucher View"
+			120		:	Set Value		:	PARTYLEDGERNAME		: @@CommonPartyName
+			122 	:   SET VALUE 	 	:   PersistedView 		: "Invoice Voucher View"
+			124		:	Set Value		:	IsOptional			: Yes
+			
+			750		: 	Call		  :	GKVchIndSOInvtAllocations
+			760		:	Call		  :	GKVchIndSOPartyLedFun
+			765		:	Call		  : GKIndlSIDisLedFun
+			770		:	Call		  :	GKVchIndSOTaxAllocations
+			1103 	: 	SET VALUE     : PersistedView : ##SVViewName
+		    1105 	: 	Create Target
+			1107	:	End If
+			
+			1200	: End Walk
+			1110	: Walk Collection	:	GKB2BIndvialSOColl
+			1111	: Set	:	VarMID:$$String:"Id:"+$$LocaleString:$MasterId
+			1112	: Modify Object:(Voucher,##VarMID).GKCSTriggered[1].GKCSTriggered:Yes
+			1114	: End Walk
+				
+
+[Function	: GKVchIndSOInvtAllocations]
+	
+
+	Variable	:	GKVchStkItm		:	String
+	Variable	:	GKVchStkQty		:	Number
+	Variable	:	GKVchStkRate	:	Number
+	Variable	:	GKVchStkdis		:	Number
+	Variable	:	GKVchStkAmt		:	Number
+	Variable	:	GKSalesLedger	:	String
+	Variable	:	GKSalesAmt		:	Number
+	
+	100	: Walk Collection	: GKVIndivdalSOInvColl
+	
+		102	:	Set	:	GKVchStkItm		:$StockItemName	
+		104	:	Set	:	GKVchStkQty		:$BilledQty
+		106	:	Set	:	GKVchStkRate	:$Rate
+		108	:	Set	:	GKVchStkAmt		:$Amount
+		
+	
+	118		:   INSERTCOLLECTION OBJECT	: ALLINVENTORYEntries	
+	120		:	SET VALUE		: STOCKITEMNAME			: $$LocaleString:##GKVchStkItm
+	122		: 	SET VALUE		: Is Deemed Positive	: "No"
+	124		:	SET VALUE		: ACTUALQTY				: ($$TgtObject:$$AsQty:##GKVchStkQty)*-1	
+	126		:	SET VALUE		: BILLEDQTY				: ($$TgtObject:$$AsQty:##GKVchStkQty)*-1
+ 	128		: 	SET VALUE		: Rate					: ($$TgtObject:$$AsRate:##GKVchStkRate)	
+	130		: 	SET VALUE		: Amount				: ($$TgtObject:($$AsAmount:##GKVchStkAmt))
+	
+
+	132		:   INSERTCOLLECTION OBJECT	: BATCHALLOCATIONS
+	134		:	SET VALUE		: STOCKITEMNAME	 	: $$LocaleString:##GKVchStkItm
+	136		:	SET VALUE		: GODOWNNAME	 	: "Main Location"
+	138		:	SET VALUE		: ACTUALQTY		 	: ($$TgtObject:$$AsQty:##GKVchStkQty)*-1
+	140		:	SET VALUE		: BILLEDQTY		 	: ($$TgtObject:$$AsQty:##GKVchStkQty)*-1		
+ 	142		: 	SET VALUE		: Rate				: ($$TgtObject:($$AsRate:##GKVchStkRate))
+	144		: 	SET VALUE		: Amount			: ($$TgtObject:($$AsAmount:##GKVchStkAmt))
+	131		:	Set Value		: ORDERDUEDATE		:  $$DateRange:#GKConsSOAlterRep:#GKConsSOAlterRep
+	145		:   SET TARGET      : .. 
+	
+	146		:	Walk Collection			: GKVIndivdalSOLedColl
+	
+		147		:	Set		:GKSalesLedger	:	$SalesActsLedName
+		14T		:	Set		:GKSalesAmt		:	$SalesActsLedamt
+	
+		148		: 	INSERT COLLECTION OBJECT: ACCOUNTINGALLOCATIONS
+		150		:   SET VALUE				: LedgerName				: ##GKSalesLedger
+		152		:   SET VALUE				: Amount					:($$TgtObject:($$AsAmount:##GKSalesAmt))
+		154		: 	SET VALUE				: Is Deemed Positive 		: No	
+		156		: 	SET VALUE				: ISPARTYLEDGER				: No 
+		160		:   SET TARGET      		: .. 	
+		162		:	End Walk
+	
+	170		: 	End Walk
+	
+[Function	:	GKVchIndSOPartyLedFun]
+
+			560	: 	INSERTCOLLECTION OBJECT	: LedgerEntries
+			570	:	Set Target				: LedgerEntries
+			580	:	SET VALUE				: LedgerName			:$PartyLedgerName
+			590	: 	SET VALUE				: Amount				:$$AsAmount:##VchInvTot*-1
+			600	: 	SET VALUE				: Is Deemed Positive	: Yes	
+			610	: 	SET VALUE				: ISPARTYLEDGER			: yes   
+			620	:	Set Value				: ISLASTDEEMEDPOSITIVE	: Yes
+			630 : 	Set Target				: ..
+			
+
+[Function	:	GKIndlSIDisLedFun]
+	
+		Variable	:	GKVchDisLed	:	String
+		Variable	:	GKVchDisLedAmt:	Number
+	
+		800	:	Walk Collection	:	GKVIndivdalSODisLedColl
+			
+		801	:	Set	:	GKVchDisLed		:	$OthersLedName
+		802	:	Set	:	GKVchDisLedAmt	:	$OthersLedAmount
+		
+				
+		1715:If:(##GKVchDisLedAmt!=0)
+
+		810	: 		Insert Collection Object		: Ledger Entries
+		820	: 		Set Value	: LedgerName		: ##GKVchDisLed
+		830	: 		Set Value	: IsDeemedPositive	: No
+		840	: 		Set Value	: Amount			: ##GKVchDisLedAmt
+		850	: 		Set Target	: ..
+		855	:		End If
+	
+	860	:	End Walk
+	
+	
+[Function	:	GKVchIndSOTaxAllocations]
+
+	Variable	:	GKVchIGSTAmt	:	Number
+	Variable	:	GKVchCGSTAmt	:	Number
+	Variable	:	GKVchSGSTAmt	:	Number
+	Variable	:	GKVchTaxLed		:	String
+	Variable	:	GKVchOtherLed	:	String
+	Variable	:	GKVchOtherLedAmt:	Number
+	
+	100	:	Walk Collection	:	GKVIndivdalSOTaxLedColl
+	
+		102	:	Set	:	GKVchTaxLed			:	$TaxLedName
+		130	:	Set	:	GKVchIGSTAmt	  	:	$TaxLedAmount
+		150	:	Set	:	GKVchCGSTAmt	  	:	$TaxLedAmount
+		170	:	Set	:	GKVchSGSTAmt	  	:	$TaxLedAmount
+	
+		220	: 	Insert Collection Object		: Ledger Entries
+		230	: 	Set Value	: Ledger Name				: ##GKVchTaxLed
+		240	: 	Set Value	: IsDeemedPositive			: No
+		250	: 	Set Value	: IsPartyLedger				: No
+		260	: 	Set Value	: Amount					: ##GKVchCGSTAmt  
+		270	: 	Set Target	: ..	
+		
+	700	:	End Walk
+	
+	800	:	Walk Collection	:	GKVIndivdalSOOthersLedColl
+
+		801	:	Set	:	GKVchOtherLed	:	$OthersLedName
+		802	:	Set	:	GKVchOtherLedAmt:	$OthersLedAmount
+	
+		810	: 		Insert Collection Object		: Ledger Entries
+		820	: 		Set Value	: LedgerName		: ##GKVchOtherLed
+		830	: 		Set Value	: IsDeemedPositive	: No
+		840	: 		Set Value	: Amount			: $$AsAmount:##GKVchOtherLedAmt
+		850	: 		Set Target	: ..
+	
+	860	:	End Walk
+	
+
+[Collection	:	GKB2BIndvialSOColl]
+	
+		Type		:	Vouchers	:	VoucherType
+		Child Of	:	$$VchTypeSalesOrder
+		Belongs To	:	Yes
+		Fetch		:	Date,Reference,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount,IsOptional,MasterId
+		Fetch		:	GKPMCashAmt,GKChqAmtudf,GKCarAmtUdf,GKOnlineAmtUdf,GKPMGiftAmt
+		Fetch		:	GKVchPartyNm,GKVchPartyPh,GKVchPartyEmail
+		Filter		:	NOTIsOptionalVoucher,CSTriggered,IndivdlCustFltr,GKSaOrdVchType
+		Parm Var	:	SVFromDate	:	Date	:	$$Date:#GKConsSOAlterRep
+		Parm Var	:	SVToDate	:	Date	:	$$Date:#GKConsSOAlterRep
+		
+;;;;Select $VoucherNumber,$PartyLedgerName,$StockItemName from GKB2BIndvialSOColl
+
+[Collection	:	GKB2BIndvialSOCollMn]
+	
+		Source Collection	:	GKB2BIndvialSOColl
+		Fetch				:	Date,Reference,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount,IsOptional,MasterId
+		Fetch				:	GKPMCashAmt,GKChqAmtudf,GKCarAmtUdf,GKOnlineAmtUdf,GKPMGiftAmt
+		Fetch				:	GKVchPartyNm,GKVchPartyPh,GKVchPartyEmail
+		By					:	PartyLedgerName:$PartyLedgerName
+		Aggr Compute		:	Amount	:	Sum	:	$Amount
+
+[Collection	:	GKVIndivdalSOInvColl]
+
+		Source Collection	:	GKB2BIndvialSOColl
+		Walk				:	Inventory Entries
+		Fetch				:	StockItemName,Billedqty,Rate,Amount
+		Fetch				:	Date,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount
+		By					:	VchNo:$VoucherNumber
+		By					:	PartyLedgerName:$PartyLedgerName
+		By					:   StkItem:$StockItemNAme
+		By					:	StkRate:$$AsRate:$Rate
+		Aggr Compute		:	StkAmount:Sum:$Amount
+		Filter				:	GKPartyVchFltr
+		
+;;;Select $VchNo,$PartyLedgerName,$StkItem from GKVIndivdalSOInvColl
+		
+[Collection	:	GKVIndivdalSOLedColl]
+
+		Source Collection	:	GKB2BIndvialSOColl
+		Walk				:	All Ledger Entries
+		Fetch				:	StockItem,Billedqty,Rate,Amount,LedgerName
+		Fetch				:	Date,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount
+		By					:	SalesActsLedName:$LedgerName
+		Aggr Compute		:	SalesActsLedamt :Sum:$Amount
+		Filter				:	FilSOAccts
+		
+[Collection	:	GKVIndivdalSOTaxLedColl]
+
+		Source Collection	:	GKB2BIndvialSOColl
+		Walk				:	All Ledger Entries
+		Fetch				:	Amount,LedgerName
+		Fetch				:	Date,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount
+		By					:	TaxLedName:$LedgerName
+		Aggr Compute		:	TaxLedAmount:Sum:$Amount
+		Filter				:	FilSOTaxLedgs
+		
+[Collection	:	GKVIndivdalSOOthersLedColl]
+
+		Compute Var			:	GKVarOthersLedAmt	:	Number	:	IF $$IsDr:$Amount then $$String:$Amount else $Amount
+		Source Collection	:	GKB2BIndvialSOColl
+		Walk				:	All Ledger Entries
+		Fetch				:	Amount,LedgerName
+		Fetch				:	Date,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount
+		By					:	OthersLedName:$LedgerName
+		Aggr Compute		:	OthersLedAmount:Sum:##GKVarOthersLedAmt
+		Filter				:	FilSOOthersLedgs,RemDisLed
+		
+[Collection	:	GKVIndivdalSODisLedColl]
+
+		Compute Var			:	GKVarOthersLedAmt	:	Number	:	IF $$IsDr:$Amount then $$String:$Amount else $Amount
+		Source Collection	:	GKB2BIndvialSOColl
+		Walk				:	All Ledger Entries
+		Fetch				:	Amount,LedgerName
+		Fetch				:	Date,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount
+		By					:	OthersLedName:$LedgerName
+		Aggr Compute		:	OthersLedAmount:Sum:##GKVarOthersLedAmt
+		Filter				:	FilSODisLedgs
+		
+;;;Select $LedName,$CGSTAmount from GKVConsoltdTaxLedColl
+		

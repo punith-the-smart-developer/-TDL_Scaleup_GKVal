@@ -1,0 +1,142 @@
+	
+		
+;[#Menu:Gatewayoftally]
+;	Add:Key Item:Auto Creation:A:Call:GK_AutoCreatingFun
+	
+[#Form: Company]
+	
+	On	:	Form Accept	:	Yes	:	Form Accept
+	On	:	Form Accept	:	Yes	:	Call		:	GK_AutoCreatingFun 
+	 
+[Function: GK_AutoCreatingFun]
+	
+	Variable	:	GK_AutoCreating	:	Number	:	200
+
+	010	:	If:$$NumItems:GKCountAutoVchrs=0
+	
+	100	 :	Start Progress	:	##GK_AutoCreating	:	"Creating VoucherTypes":@@CmpMailName
+	
+
+	110	 : Call	: GK_AutoCreatingReceipt
+	112	 : Call	: GK_AutoCreatingSales
+	113	 : Call	: GK_AutoCreatingSalesOrder
+;	114	 : Call	: GK_AutoCreatingConReceipt
+;	115	 : Call	: GK_AutoCreatingConSales
+;	116	 : Call	: GK_AutoCreatingConSalesOrder
+;	
+	200  : End Progress
+	
+	219	 : End If
+	
+
+[Collection	:	GKCountAutoVchrs]
+	Type:VoucherType
+	Fetch:Name
+	Filter:GKCountr
+	
+[System:Formulae]
+	GKCountr:$Name contains @@GKBranchName
+	
+;;;Select $Name from GKCountAutoVchrs
+	
+	
+[Function:GK_AutoCreatingReceipt]
+
+
+1000	:	If:NOT $$IsEmpty:($Name:VoucherType:$$LocaleString:@@GKBranchName+$$LocaleString:" Receipt")
+
+0112	:	New Object	:	Vouchertype
+
+0125	:	Insert Collection Object	:	Name
+1206	:	Set Value	:	Name	:	$$LocaleString:$GKBranchName:Company:##SVCurrentCompany+$$LocaleString:" Receipt"
+1207	:	Set Value	:	Parent	:	"Receipt"
+f222	:   Set Value	:   Numbering Method:$$SysName:Automatic
+ 145	  	: Set Value:IsActive:Yes
+1209	:	Set Target	:	..
+1300	:	Save Target	 
+1222	: 	End If
+
+[Function	:	GK_AutoCreatingSales]
+	
+1000	:	If:NOT $$IsEmpty:($Name:VoucherType:$$LocaleString:@@GKBranchName+$$LocaleString:" Sales")
+0112	:	New Object	:	Vouchertype
+
+0125	:	Insert Collection Object	:	Name
+1206	:	Set Value	:	Name	:	$$LocaleString:$GKBranchName:Company:##SVCurrentCompany+$$LocaleString:" Sales"
+1207	:	Set Value	:	Parent	:	"Sales"
+1212	:	Set Value	:   GKEnablePMAlloc	:	Yes
+f222	:   Set Value	:   Numbering Method:$$SysName:Automatic
+ 145	  	: Set Value:IsActive:Yes
+1209	:	Set Target	:	..
+1300	:	Save Target	 
+1222	:	End If
+
+
+[Function	:	GK_AutoCreatingSalesOrder]
+	
+1000	:	If:NOT $$IsEmpty:($Name:VoucherType:$$LocaleString:@@GKBranchName+$$LocaleString:" Sales Order")
+0112	:	New Object	:	Vouchertype
+
+0125	:	Insert Collection Object	:	Name
+1206	:	Set Value	:	Name	:	$$LocaleString:$GKBranchName:Company:##SVCurrentCompany+$$LocaleString:" Sales Order"
+1207	:	Set Value	:	Parent	:	"Sales Order"
+f222	:   Set Value	:   Numbering Method:$$SysName:Automatic
+1212	:	Set Value	:   GKEnablePMAlloc	:	Yes
+ 145	  	: Set Value:IsActive:Yes
+1209	:	Set Target	:	..
+1300	:	Save Target	 
+1222	:	End If
+
+[Function:GK_AutoCreatingConReceipt]
+
+1999	:	If:NOT $$IsEmpty:($Name:VoucherType:$$LocaleString:@@GKBranchName+$$LocaleString:" Consolidated Receipt")
+0112	:	New Object	:	Vouchertype
+
+0125	:	Insert Collection Object	:	Name
+1206	:	Set Value	:	Name	:	$$LocaleString:$GKBranchName:Company:##SVCurrentCompany+$$LocaleString:" Consolidated Receipt"
+1207	:	Set Value	:	Parent	:	"Receipt"
+f222	:   Set Value	:   Numbering Method:$$SysName:Automatic
+ 145	  	: Set Value:IsActive:Yes
+1209	:	Set Target	:	..
+1300	:	Save Target	 
+1222	:	End If
+
+
+[Function	:	GK_AutoCreatingConSales]
+	
+1999	:	If:NOT $$IsEmpty:($Name:VoucherType:$$LocaleString:@@GKBranchName+$$LocaleString:" Consolidated Sales")
+0112	:	New Object	:	Vouchertype
+
+0125	:	Insert Collection Object	:	Name
+1206	:	Set Value	:	Name	:	$$LocaleString:$GKBranchName:Company:##SVCurrentCompany+$$LocaleString:" Consolidated Sales"
+1207	:	Set Value	:	Parent	:	"Sales"
+f222	:   Set Value	:   Numbering Method:$$SysName:Automatic
+ 145	  	: Set Value:IsActive:Yes
+1209	:	Set Target	:	..
+1300	:	Save Target	 
+1222	:	End If
+
+
+[Function	:	GK_AutoCreatingConSalesOrder]
+	
+1999	:	If:NOT $$IsEmpty:($Name:VoucherType:$$LocaleString:@@GKBranchName+$$LocaleString:" Consolidated Sales Order")
+0112	:	New Object	:	Vouchertype
+
+0125	:	Insert Collection Object	:	Name
+1206	:	Set Value	:	Name	:	$$LocaleString:$GKBranchName:Company:##SVCurrentCompany+$$LocaleString:" Consolidated Sales Order"
+1207	:	Set Value	:	Parent	:	"Sales Order"
+f222	:   Set Value	:   Numbering Method:$$SysName:Automatic
+ 145	  	: Set Value:IsActive:Yes
+1209	:	Set Target	:	..
+1300	:	Save Target	 
+1222	:	End If
+;1310	:	Call		:	GK_AutoCreatingSales3
+
+
+[Function: GK_AutoCreatingSales3]
+
+  Object  	: VoucherType:$GKBranchName:Company:##SVCurrentCompany+$$LocaleString:" Consolidated Sales Order"
+  
+  100     	: Set Target
+  145	  	: Set Value:IsActive:Yes
+  146       : Accept Alter 

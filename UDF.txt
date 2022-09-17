@@ -1,0 +1,305 @@
+
+
+
+[System		:	UDF]
+	
+	GKAdvRcptAmt		:	Number		:	56010
+	CMPTransTypes		:	String		:	56011
+	GKTransTypes		:	Aggregate	:	56012
+	GKTransTypesUDF		:	String		:	56013
+	
+
+	GKPMCashAmt			:	Number		:	56021
+
+	GKChqAmtudf			:	Number		:	56022
+	GKChqNumudf			:	String		:	56023
+	GKChqDteudf			:	Date		:	56024
+	GKChqBankUdf		:	String		:	56025
+	GKChqCompyBankUdf	:	String		:	56026
+	
+	GKCarAmtUdf			:	Number		:	56027
+	GKCarNumudf			:	String		:	56028
+	GKCarNumBankUdf		:	String		:	56029
+	GKcmpnyBankUdf		:	String		:	56030
+	
+	GKOnlineAmtUdf		:	Number		:	56031
+	GKOnlineudf			:	String		:	56032
+	GKOnlineBankUdf		:	String		:	56033
+	GKOnlinecmpnyBankUdf:	String		:	56034
+	
+	
+	GKBalnceAmntudf		:	Number		:	56035
+	RecptCMPUserNameUDF	:	String		:	56036
+	GKRcptFromSales		:	Logical		:	56037
+	GKPaymode			:	String		:	56038
+	
+	GKOnlineRefNo		:	String		:	56040
+	
+	GKPMGiftAmt			:	Number		:	56051
+	GKGiftCouponsOthers	:	Logical		:	56052
+	GKGiftCoupnsAggr	:	Aggregate	:	56053
+	GKGiftCoupnIDsUDF	:	String		:	56054
+	
+	
+	IDocumentPath			: String	:	5012
+	IDocumentDesc			: String	:	5993
+	CanSelectMultiple		: Logical	:	5467
+	IDocumentCPath			: String	:	5234
+	IDocumentUser			: String	:	5678
+	DMFS_LocalOtherudf		: String	:	5679
+
+	DMFS_Aggr 				: Aggregate : 	12000
+	DMFS_DocDesc 			: String 	: 	12001
+	DMFS_FilePath 			: String 	: 	12002
+	VTYPEnableDMSUDF		: Logical	: 	12003
+	
+	EnableModUDF			: Logical	:	45690
+	ListOfDocuUDF			: Logical	:	45691
+	ListOfDocntsAggr		: Aggregate	:	45692
+	ListOfDocumntsUDF		: String	:	45693
+	
+	GKCMPBankName			: String	:	45694
+	
+	GK_PartyDetails			: Logical	:	45965
+	GKVchPartyNm			: String	:	45966
+	GKVchPartyPh			: Number	:	45967
+	GKVchPartyEmail			: String	:	45968
+	GKEnablePartyInfo		: Logical	:	45969
+	
+	GKCSTriggered			: Logical	:	45970
+	GKEnablePMAlloc			: Logical	:	45971
+	
+	GKSOAnnexture			: Logical	:	45972
+	GKSOAnnextureAggr		: Aggregate	:	45973
+	GKSOAnxtureSONo			: String	:	45974
+	GKSOAnxtureSODt			: Date		:	45975
+	GKSOAnxtureSOAmt		: Amount	:	45976
+	GKSOAnxtureSOParty		: String	:	45977
+	GKSOAnxtureSOPartyPh	: String	:	45978
+	GKSOAnxtureSOPartyEmail	: String	:	45979
+	GKSOAnxtureSORef		: String	:	45980
+	GKEnableCSOAnnex		: Logical	:	45981
+	GKCMPTimer				: Number	:	45982
+	
+	CMPLedVchMapping		: Logical	:	45983
+	GKLedVchMpngCSO			: String	:	45984
+	GKLedVchMpngCSI			: String	:	45895
+	GKLedVchMpngCR			: String	:	45896
+	
+	GKBranchName			: String	:	45897
+	GKBranchCode			: String	:	45898
+	
+	GKBillCustName			: String	:	45899
+	GKIsTDLEnable			: Logical	:	45900
+	
+	GKCMPBankYN				: Logical	:	45901
+	GKCMPCardBank			: String	:	45902
+	GKCMPChequeBank			: String	:	45903
+	GKCMPOnlineBank			: String	:	45904
+	GKPMTotAmtColtd			: Number	:	45905
+	GKVchBillAmt			: Number	:	45906
+	GKPMRcptCreatedNot		: String	:	45907
+	GKPMRcptCrAltrMode		: String	:	45908
+	GKBalnceSalesAmntudf	: Number	:	45909
+	
+	GKPMOrderAmt			: Number	:	45910
+	GKOptnToReglar			: Logical	:	45920
+
+	GKEnablePrint			: Logical	:	45921
+	GKOrderNoSeries			: String	:	45922
+	
+	GKIndivdalVchNumUDF		: String	:	45923
+	GKIndivdalBillType		: String	:	45924
+
+	GKAlterRcptPartyNm		: String	:	45927
+	GKAlterRcptBillType		: String	:	45928
+	GKAlterRcptBillNo		: String	:	45929
+	GKAlterRcptPartyAmt		: Number	:	45930
+	
+	GKARBillCashAmt			: Number	:	45941
+	
+	
+	GKAlterRcptBillCardAmt	: Number	:	45942
+	GKAlterRcptBillCardNo	: String	:	45943
+	GKAlterRcptBillCardRefNo: String	:	45944
+	
+	GKAlterRcptOnlineTypeUDF	: String	:	45945
+	GKAlterRcptOnlineTransRefNo	: String	:	45946
+	GKAlterRcptOnlineAmtUdf		: Number	:	45947
+	
+	GKAlterRcptChqDteudf		: Date		:	45948
+	GKAlterRcptChqNumUdf		: String	:	45949
+	GKAlterRcptChqAmtudf		: Number	:	45950
+	
+	GKAlterRcptGiftAmt			: Number	:	45951
+	
+	GKCardDetBdy				: Logical	:	45970
+	GKCardDetAggr				: Aggregate	:	45971
+	GKCarAggrAmtUdf				: Number	:	45972
+	
+	GKOnlineDetBdy				: Logical	:	45973
+	GKOnlineDetAggr				: Aggregate	:	45974
+	GKOnlineAggrAmtUdf			: Number	:	45975
+	
+	GKChequeDetBdy				: Logical	:	45976
+	GKChequeDetAggr				: Aggregate	:	45977
+	GKChqAggrAmtUdf				: Number	:	45978
+	
+	GKGiftCoupnAmt				: Number	:	45979
+	
+	GKFinanceDetBdy				: Logical	:	45980
+	GKFinanceAmtUDF				: Number	:	45981
+	GKFinanceDetAggr			: Aggregate	:	45982
+	GKFinanceAggrAmt			: Number	:	45983
+	GKFinanceType				: String	:	45984
+	GKFinanceRefNo				: String	:	45985
+	
+	GKCashDetBdy				: Logical	:	45986
+	GKCashDetAggr				: Aggregate	:	45987
+	GKCashDetAggrAmt			: Number	:	45988
+	
+	GKCashDetVchMId				: String	:	45989
+	GKOnlineDetVchMId			: String	:	45990
+	GKGiftCoupnsVchId			: String	:	45991
+	GKFinanceVchMId				: String	:	45992
+	GKChqDetVchMId				: String	:	45993
+	GKCardDetVchMId				: String	:	45994
+	
+	GKCashDetVchMode			: String	:	45995
+	GKGiftDetVchMode			: String	:	45996
+	GKOnlineDetVchMode			: String	:	45997
+	GKFinDetVchMode			    : String	:	45998
+    GKChqDetVchMode		        : String	:	45999
+    GKCardDetVchMode		    : String	:	46000
+	
+	GKPMRcptAltredNot			: String	:	46001
+	GKCashDetSlNo				: String	:	46002
+	GKCardSlNo					: String	:	46003
+	GKChqSlNo					: String	:	46004
+	GKOnlineSlNo				: String	:	46005
+	GKFiananceSlNo				: String	:	46006
+	GKGiftDetSlNo				: String	:	46007
+	
+	GKCMPFinanceBank			: String	:	46008
+	
+
+
+[System	:	Formulae]
+	
+		GKSalesVchType		:	$VoucherTypeName=$$LocaleString:$GKBranchName:Company:##SVCurrentCompany+$$LocaleString:" Sales"
+		GKSaOrdVchType		:	$VoucherTypeName Starting with $$LocaleString:$GKBranchName:Company:##SVCurrentCompany+$$LocaleString:" Sales Order"
+		GKRcptVchType		:	$VoucherTypeName=$$LocaleString:$GKBranchName:Company:##SVCurrentCompany+$$LocaleString:" Receipt"
+		
+		GKIsTDLEnable		:	$GKIsTDLEnable:Company:##SVCurrentCompany
+		GKCMPCardBankName	:	$GKCMPCardBank:Company:##SVCurrentCompany
+		GKCMPChequeBankName	:	$GKCMPChequeBank:Company:##SVCurrentCompany
+		GKCMPOnlineBankName	:	$GKCMPOnlineBank:Company:##SVCurrentCompany
+		GKCMPBankName		:	$GKCMPBankName:Company:##SVCurrentCompany
+		GKCMPFinBankName	:	$GKCMPFinanceBank:Company:##SVCurrentCompany
+		
+
+		PartyNmError		:	"Party Info is Compulsory. You Cannot Move Further."+$$NewLine+"Please Fill the Required Party's Details"
+
+		GKEnablePartyInfo	:	$GKEnablePartyInfo:VoucherType:$VoucherTypeName
+		GKEnablePMAlloc		:	$GKEnablePMAlloc:VoucherType:$VoucherTypeName
+		GKOrderNoSeries		:	$GKOrderNoSeries:VoucherType:$VoucherTypeName
+
+
+		FilSOAccts			:	$$IsLedOfGrp:$LedgerName:$$GroupSales
+		FilBankAccts		:	$$IsLedOfGrp:$LedgerName:$$GroupBank or $$IsLedOfGrp:$LedgerName:$$GroupCash or $$IsLedOfGrp:$LedgerName:$$GroupBankod
+		FilSOTaxLedgs		:	$$IsLedOfGrp:$LedgerName:$$GroupDuties 
+		FilSOOthersLedgs	:	$$IsLedOfGrp:$LedgerName:$$GroupIndirectExpenses or $$IsLedOfGrp:$LedgerName:$$GroupdirectExpenses or $$IsLedOfGrp:$LedgerName:$$Groupindirectincomes or $$IsLedOfGrp:$LedgerName:$$GroupDirectIncomes
+		RemDisLed			:	$Parent:Ledger:$LedgerName!="Discount"
+		FilSODisLedgs		:	$Parent:Ledger:$LedgerName="Discount"
+		CSTriggered			:	$GKCSTriggered=No
+		CSTriggeredYes		:	$GKCSTriggered=Yes
+		CommonPartyName		:	$$LocaleString:$GKBillCustName:Company:##SVCurrentCompany
+		CounterCustFltr		:	$PartyLedgerName=@@CommonPartyName
+		IndivdlCustFltr		:	$PartyLedgerName!=@@CommonPartyName
+		GKEnableCSOAnnex	:	$GKEnableCSOAnnex:VoucherType:$VoucherTypeName
+		GKConSOVchType		:	$GKLedVchMpngCSO:Company:##SVCurrentCompany
+		GKConSIVchType		:	$GKLedVchMpngCSI:Company:##SVCurrentCompany
+		GKConRcptVchType	:	$GKLedVchMpngCR:Company:##SVCurrentCompany
+		GKBranchName		:	$GKBranchName:Company:##SVCurrentCompany
+		GKBranchCode		:	$GKBranchCode:Company:##SVCurrentCompany
+		GKFirstSO			:	$$CollectionField:$BasicPurchaseOrderNo:1:InvoiceOrderList
+		FilSOVchNo			:	$VchNo=$$Owner:$VoucherNumber
+		GKPartyVchFltr		:	$PArtyLedgerName=$$Owner:$PartyLedgerName
+		GKStkItemFltr		:	$StkItem=$StockItemName
+		SalesAmnt			:	$$CollectionFieldByKey:$GKAdvRcptAmt:$BasicPurchaseOrderNo:GKToGetSalesOrderAdvAmnt
+		SalestotAmnt		:	$$CollectionFieldByKey:$Amount:$BasicPurchaseOrderNo:GKToGetSalesOrderAdvAmnt
+		TotalBillVal		:	$$Number:$GKPMCashAmt+$$Number:$GKChqAmtudf+$$Number:$GKCarAmtUdf+$$Number:$GKOnlineAmtUdf+$$Number:$GKPMGiftAmt
+		GKValExists			:	"Your Entered Values is Not Matching with Balance Amount"+$$NewLine+"Please Confirm Again"
+		ExceedBillAmount	:	"The Amount You Have Entered Is Exceeding the "+$$Newline+" Order Amount  "+$$LocaleString:$AMount+$$Newline+"Please Correct the Values"
+		GKFindDuplicateSeries:	"Series is Already Exists. Please Check"
+		GKSO_VchFilter		: @@GKSaOrdVchTypeNm
+		GKSaOrdVchTypeNm	: $Name Starting with $$LocaleString:$GKBranchName:Company:##SVCurrentCompany+$$LocaleString:" Sales Order"
+		GKSOSeriesNoFilter	: $GKOrderNoSeries = #GK_EnableOrderNoSeries
+
+
+		GKIsGiftMID			:	$GKGiftDetVchMode!="Create Mode"; or NOT $$Isempty:$GKGiftCoupnsVchId
+		GKIsCashMID			:	$GKCashDetVchMode!="Create Mode";" or NOT $$Isempty:$GKCashDetVchMId
+		GKIsOnlineMID		:	$GKOnlineDetVchMode!="Create Mode";" or NOT $$Isempty:$GKOnlineDetVchMId	
+		GKIsFincMID			:	$GKFinDetVchMode!="Create Mode";" or NOT $$Isempty:$GKFinanceVchMId		
+		GKIsCheqMID			:	$GKChqDetVchMode!="Create Mode";" or NOT $$Isempty:$GKChqDetVchMId		
+		GKIsCardMID			:	$GKCardDetVchMode!="Create Mode";" or NOT $$Isempty:$GKCardDetVchMId	
+		
+		GKIsFinMIDExists	:	NOT $$IsEmpty:$GKFinanceVchMId
+		GKIsOnlineIDExists	:	NOT $$IsEmpty:$GKOnlineDetVchMId
+		GKIsCheqIDExists	:	NOT $$IsEmpty:$GKIsCheqIDExists
+		GKIsCardIDExists	:	NOT $$IsEmpty:$GKCardDetVchMId
+		
+
+	
+	
+	
+		
+		
+	
+
+;[#Menu:gatewayoftally]
+;	Add:Key Item:auto receipt:t:Call:To Create Receipt
+[Function:To Create Receipt]
+	
+	100   :     NEW OBJECT     : Voucher
+	
+	110   :     SET VALUE     	: Date                     : "01-04-2022"
+	120   :     SET VALUE     	: VoucherTypeName          : "Receipt"
+    130   :     SET          	: SVViewName               : "Accounting Voucher View"
+	142	  :		Set Value		: VCHENTRYMODE			   : $$SysName:AsDoubleEntry;AsSingleEntry"; $$SysName:AsSingleEntry
+;	144	  :     Set Value		: Narration				   : "Being the Order raised for the Order No.";+$$LocaleString:$VoucherNumber+$$LocaleString:" ,Dated:"+$$LocaleString:$Date+$$LocaleString:" Cover Id:"+$$LocaleString:$$FullList:ListOfCoverIds:$BasicUserDescription	
+;;	148   : 	Set Value		: PARTYLEDGERNAME		   : "Cash Customer"
+;;	
+	400    :     INSERTCOLLECTION OBJECT    	: AllLedgerEntries
+    402    :     SET TARGET        				: AllLedgerEntries
+    404    :     SET VALUE       				: LedgerName        	:"Counter Billing Customer"
+    406    :     SET VALUE        				: Amount        		:$$TgtObject:$$asAmount:100;##VarTotalReceptAmount
+	407	   :	 Set Value						: VATEXPAMOUNT			:	$$TgtObject:$$asAmount:100;##VarTotalReceptAmount
+    408    :     SET VALUE        				: Is Deemed Positive	:	No
+	410    :     SET VALUE        				: ISPARTYLEDGER			:	Yes
+	412    :     SET VALUE        				: ISLASTDEEMEDPOSITIVE	:	No
+	
+/* Party's Bill Allocations Loop */
+
+	416	  : INSERTCOLLECTION OBJECT	: BillAllocations
+	418	  :	SET VALUE		: BILLTYPE		: $$SysName:Advance  
+	420	  : Set Value		: AMOUNT		: $$TgtObject:$$AsAmount:100;##VarTotalReceptAmount 
+	422	  :	SET VALUE		: Name			: "234";##VarRcptVchNo
+	424   : SET TARGET      : ..
+	426   : SET TARGET      : ..
+
+
+	502    :     INSERTCOLLECTION OBJECT : ALlLedgerEntries
+    504    :     SET TARGET        		 : ALlLedgerEntries
+    506    :     SET VALUE         		 : LedgerName        : "Cash"
+	508	   :	 Set Value				 : Narration		 : "Cash"
+    509    :     SET VALUE         		 : Amount        	 : $$TgtObject:$$AsAmount:100;*-1;##VarPaymentModeCashAmount*-1
+	510	   :	 Set Value				: VATEXPAMOUNT		 :	$$TgtObject:$$asAmount:100;*-1;##VarPaymentModeCashAmount*-1
+    511    :     SET VALUE         		 : Is Deemed Positive:	Yes
+	511a    :     SET VALUE         		 : ISPARTYLEDGER:	Yes
+	511b    :     SET VALUE         		 : ISLASTDEEMEDPOSITIVE:	Yes
+	514	   : 	 SET TARGET : ..
+
+	910    :	Set Value	:	PersistedView	:	##SVViewName
+	920    :	CREATE TARGET
+	

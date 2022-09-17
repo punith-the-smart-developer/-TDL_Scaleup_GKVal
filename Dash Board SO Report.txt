@@ -1,0 +1,256 @@
+		
+[Report	:	GKDashBoardSORep]
+	
+		Form	:	GKDashBoardSORep
+		Variable:	SVFromDate,SVToDate
+		Set		:	SVFromDate:@@LastVoucherDate
+		Set		:	SVToDate:@@LastVoucherDate
+		
+[Form	:	GKDashBoardSORep]
+	
+		Part	:	GKDashBoardSOHead,GKDashBoardSORep
+		Height	:	100 % Page
+		Width	:	100 % Page
+		Button	:	Change Period
+		Background:Very Light sea Green
+		
+
+[Part	:	GKDashBoardSOHead]
+	
+		Line	:	GKDashBoardSOHead
+		
+[Line	:	GKDashBoardSOHead]
+	
+		Space Bottom	:	0.3 cm
+		Space Top		:	0.1 cm
+		Field			:	GKDashBoardSOHead,GKDashBoardPeriod
+		
+[Field	:	GKDashBoardSOHead]
+	
+		Use			:	Name Field
+		Set as		:	"Dash Board Report - Order Transactions"
+		Full Width	: 	Yes
+		Align		:	Left
+		
+
+
+[Part	:	GKDashBoardSORep]
+	
+		Line			:	GKDashBoardSORepTit,GKDashBoardSORepBdy
+		Repeat			:	GKDashBoardSORepBdy	:	GKValeGrpCmpSOColl
+		Bottom Line		:	GKDashBoardSORepTot
+		Scroll			:	Vertical
+		Vertical		:	Yes
+		Common Border	:	Yes
+		Border			:	Thin Box
+		Total			:	GKDashBoardSORepAmt,GKDashBoardSORepCash,GKDashBoardSORepCard,GKDashBoardSORepOnline,GKDashBoardSORepCheque,GKDashBoardSORepGiftCoupn
+		
+[Line	:	GKDashBoardSORepTot]
+	
+		Field	:	GKDashBoardSORepDate,GKDashBoardSORepVchNo,GKDashBoardSORepVchtype,GKDashBoardSORepPartyName,GKDashBoardSORepBillNo
+		Field	:	GKDashBoardSORepAmt,GKDashBoardSORepCash,GKDashBoardSORepCard,GKDashBoardSORepOnline,GKDashBoardSORepCheque,GKDashBoardSORepGiftCoupn
+		Border	:	Thin Top
+		
+		Local	:	Field	:	Default					:	Delete	:	Storage
+		Local	:	Field	:	Default					:	Type	:	Number
+		Local	:	Field	:	Default					:	Format	:	"Decimals:2,No Zero"
+		Local	:	Field	:	Default					:	Style	:	GKValeDBBdy
+		
+		Local	:	Field	:	GKDashBoardSORepDate		:	Set as	:	""
+		Local	:	Field	:	GKDashBoardSORepVchNo		:	Set as	:	""
+		Local	:	Field	:	GKDashBoardSORepVchtype		:	Set as	:	""
+		Local	:	Field	:	GKDashBoardSORepPartyName	:	Type	:	String
+		Local	:	Field	:	GKDashBoardSORepPartyName	:	Set as	:	"Total"
+		Local	:	Field	:	GKDashBoardSORepBillNo		:	Set as	:	""
+		Local	:	Field	:	GKDashBoardSORepAmt			:	Set as	:	$$Total:GKDashBoardSORepAmt			
+		Local	:	Field	:	GKDashBoardSORepCash		:	Set as	:	$$Total:GKDashBoardSORepCash		
+		Local	:	Field	:	GKDashBoardSORepCard		:	Set as	:	$$Total:GKDashBoardSORepCard		
+		Local	:	Field	:	GKDashBoardSORepOnline		:	Set as	:	$$Total:GKDashBoardSORepOnline		
+		Local	:	Field	:	GKDashBoardSORepCheque		:	Set as	:	$$Total:GKDashBoardSORepCheque		
+		Local	:	Field	:	GKDashBoardSORepGiftCoupn	:	Set as	:	$$Total:GKDashBoardSORepGiftCoupn	
+		
+		
+[Line	:	GKDashBoardSORepTit]
+	
+		Field	:	GKDashBoardSORepDate,GKDashBoardSORepVchNo,GKDashBoardSORepVchtype,GKDashBoardSORepPartyName,GKDashBoardSORepBillNo
+		Field	:	GKDashBoardSORepAmt,GKDashBoardSORepCash,GKDashBoardSORepCard,GKDashBoardSORepOnline,GKDashBoardSORepCheque,GKDashBoardSORepGiftCoupn
+		Border	:	Thin Bottom
+		
+		Local	:	Field	:	Default					:	Delete	:	Storage
+		Local	:	Field	:	Default					:	Type	:	String
+		Local	:	Field	:	Default					:	Style	:	GKValeDBTit
+		
+		Local	:	Field	:	GKDashBoardSORepDate		:	Set as	:	"Date"
+		Local	:	Field	:	GKDashBoardSORepVchNo		:	Set as	:	"Vch No"
+		Local	:	Field	:	GKDashBoardSORepVchtype		:	Set as	:	"Vch Type"
+		Local	:	Field	:	GKDashBoardSORepPartyName	:	Set as	:	"Party Name"
+		Local	:	Field	:	GKDashBoardSORepBillNo		:	Set as	:	"Bill No"
+		Local	:	Field	:	GKDashBoardSORepAmt			:	Set as	:	"Amount"
+		Local	:	Field	:	GKDashBoardSORepCash		:	Set as	:	"Cash"
+		Local	:	Field	:	GKDashBoardSORepCard		:	Set as	:	"Card"
+		Local	:	Field	:	GKDashBoardSORepOnline		:	Set as	:	"Online"
+		Local	:	Field	:	GKDashBoardSORepCheque		:	Set as	:	"Cheque"
+		Local	:	Field	:	GKDashBoardSORepGiftCoupn	:	Set as	:	"Gift Coupons"
+		
+
+[Line	:	GKDashBoardSORepBdy]
+	
+		Field	:	GKDashBoardSORepDate,GKDashBoardSORepVchNo,GKDashBoardSORepVchtype,GKDashBoardSORepPartyName,GKDashBoardSORepBillNo
+		Field	:	GKDashBoardSORepAmt,GKDashBoardSORepCash,GKDashBoardSORepCard,GKDashBoardSORepOnline,GKDashBoardSORepCheque,GKDashBoardSORepGiftCoupn
+		Local	:	Field	:	Default					:	Style	:	GKValeDBBdy
+		
+[Field	:	GKDashBoardSORepDate]
+	
+		Use		:	Uni Date Field
+		Set as	:	$Date
+		Width	:	10
+		Align	:	Left
+		
+[Field	:	GKDashBoardSORepVchNo]
+	
+		Use		:	Name Field
+		Set as	:	$VoucherNumber
+		Width	:	10
+		Align	:	Left
+		
+[Field	:	GKDashBoardSORepVchtype]
+	
+		Use		:	Name Field
+		Set as	:	$VoucherTypeName
+		Width	:	20
+		Align	:	Left
+		
+[Field	:	GKDashBoardSORepPartyName]
+	
+		Use		:	Name Field
+		Set as	:	$PartyLedgerName
+		Width	:	30
+		Align	:	Left
+		
+[Field	:	GKDashBoardSORepBillNo]
+	
+		Use		:	Name Field
+		Set as	:	$Reference
+		Width	:	10
+		Align	:	Left
+		
+[Field	:	GKDashBoardSORepAmt]
+	
+		Use		:	Number Field
+		Set as	:	$Amount
+		Width	:	10
+		Align	:	Right
+		Format	:	"Decimals:2, No Zero"
+		
+[Field	:	GKDashBoardSORepCash]
+	
+		Use		:	Number Field
+		Set as	:	$$Number:$$CollectionFieldByKey:$Amount:@SRCKEY:GKPOSRegRcptMnColl
+		SRCKEY	:	$$LocaleString:#GKDashBoardSORepBillNo+$$LocaleString:"Cash"
+		Width	:	10
+		Align	:	Right
+		Format	:	"Decimals:2, No Zero"
+		
+[Field	:	GKDashBoardSORepCard]
+	
+		Use		:	Number Field
+		Set as	:	$$Number:$$CollectionFieldByKey:$Amount:@SRCKEY:GKPOSRegRcptMnColl
+		SRCKEY	:	$$LocaleString:#GKDashBoardSORepBillNo+$$LocaleString:"Card"
+		Width	:	10
+		Align	:	Right
+		Format	:	"Decimals:2, No Zero"
+		
+[Field	:	GKDashBoardSORepOnline]
+	
+		Use		:	Number Field
+		Set as	:	$$Number:$$CollectionFieldByKey:$Amount:@SRCKEY:GKPOSRegRcptMnColl
+		SRCKEY	:	$$LocaleString:#GKDashBoardSORepBillNo+$$LocaleString:"Online"
+		Width	:	10
+		Align	:	Right
+		Format	:	"Decimals:2, No Zero"
+		
+[Field	:	GKDashBoardSORepCheque]
+	
+		Use		:	Number Field
+		Set as	:	$$Number:$$CollectionFieldByKey:$Amount:@SRCKEY:GKPOSRegRcptMnColl
+		SRCKEY	:	$$LocaleString:#GKDashBoardSORepBillNo+$$LocaleString:"Cheque/DD"
+		Width	:	10
+		Align	:	Right
+		Format	:	"Decimals:2, No Zero"
+		
+[Field	:	GKDashBoardSORepGiftCoupn]
+		
+		Use		:	Number Field
+		Set as	:	$$Number:$$CollectionFieldByKey:$Amount:@SRCKEY:GKPOSRegRcptMnColl
+		SRCKEY	:	$$LocaleString:#GKDashBoardSORepBillNo+$$LocaleString:"Gift Coupons"
+		Width	:	10
+		Align	:	Right
+		Format	:	"Decimals:2, No Zero"
+		
+
+	
+[Collection	:	GKValeGrpCmpSOColl]
+	
+	Collection	:	GKValeSOMainColl	:	GKGrpCompColl
+	Fetch		:	Name,LedgerName,BillDate,OpeningBalance,ClosingBalance
+	
+;;;;Select $CmpName,$BranchName,$VoucherNumber,$Date,$VouchertypeName,$Name,$Amount from GKValeGrpCmpSalesColl
+
+[Collection:GKValeSOSubColl]
+
+		Type		:	Vouchers	:	VoucherType
+		Child Of	:	$$VchTypeSalesOrder
+		Belongs To	:	Yes
+		Fetch		:	Date,Reference,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount,IsOptional,MasterId
+		Filter		:	NOTIsOptionalVoucher
+		;Parm Var	:	SVFromDate	:	Date	:	$$Date:$$MachineDate
+		;Parm Var	:	SVToDate	:	Date	:	$$Date:$$MachineDate
+		
+;;Select $VoucherNumber,$VoucherTypeName,$LedgerName,$Narration from GKValeSalesSubColl
+		
+[Collection:GKValeSOMainColl]
+		
+		Source Collection:GKValeSOSubColl
+		Fetch	:	Date,Reference,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount,IsOptional,MasterId
+		Fetch	:	MasterId,Name,LedgerName,BillDate,OpeningBalance,ClosingBalance
+		Compute :   CmpName		:   $$LoopCollObj:$Name
+		Compute	:	BranchName	:	$$LoopCollObj:$GKBranchName
+		Compute	:	VchType		:	$VouchertypeName	
+		Filter	:	GKSOVchType1
+		
+
+;;;;Select $CmpName,$Reference,$VoucherNumber,$Date,$VouchertypeName,$Name,$Amount from GKValeSOMainColl
+
+
+;[Collection	:	GKValeGrpCmpRcptColl]
+;	
+;	Collection	:	GKValeRcptMainColl	:	GKGrpCompColl
+;	Fetch		:	Name,LedgerName,BillDate,OpeningBalance,ClosingBalance
+	
+;;;;Select $CmpName,$BranchName,$VoucherNumber,$Date,$VouchertypeName,$Name,$Amount from GKValeGrpCmpRcptColl
+
+/*
+[Collection:GKValeRcptSubColl]
+
+		Type		:	Vouchers	:	VoucherType
+		Child Of	:	$$VchTypeReceipt
+		Belongs To	:	Yes
+		Fetch		:	Date,Reference,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount,IsOptional,MasterId
+		Filter		:	NOTIsOptionalVoucher
+		
+;;;;Select $VoucherNumber,$VoucherTypeName,$LedgerName,$Narration from GKValeRcptSubColl
+		
+[Collection:GKValeRcptMainColl]
+		
+		Source Collection:GKValeRcptSubColl
+		Walk	:	Ledger Entries,Bill Allocations
+		Fetch	:	Date,Reference,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount,IsOptional,MasterId
+		Fetch	:	MasterId,Name,LedgerName,BillDate,OpeningBalance,ClosingBalance,Narration
+		Compute :   CmpName		:   $$LoopCollObj:$Name
+		Compute	:	BranchName	:	$$LoopCollObj:$GKBranchName
+		Compute	:	VchType		:	$$Owner:$VouchertypeName	
+		Compute	:	LedNartn	:	$$Owner:$Narration
+		Compute	:	BillName	:	$Ledgerentries[1].BillAllocations[1].Name
+		;Filter	:	GKRcptVchType1
+		
+;;;;Select $VoucherNumber,$VchType,$CmpName,$LedgerName,$BranchName,$LedNartn from GKValeRcptMainColl

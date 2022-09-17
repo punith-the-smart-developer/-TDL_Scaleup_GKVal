@@ -1,0 +1,469 @@
+
+
+[#Field:EI Value Total]
+	
+	Add	:	Option	:	EnableInSalesVchrs	:	 @@GKEnablePMAlloc=Yes and  $Vouchertypename=$GKBranchName:Company:##SVCurrentCompany+$$LocaleString:" Sales"
+			
+[!Field:EnableInSalesVchrs]
+
+
+/*  Sales Agst Sales Order With If  Advance amount not received   */
+
+			On	:	Focus	:	##VarAdvAmtRcvd!=0	and (NOT $$IsNotApplicable:$$FullList:InvoiceOrderList:$BasicPurchaseOrderNo)									:	Call	:	GK_AutoBillAllocSOWithAdv
+			
+/*  Sales Agst Sales Order With If any Advance Full amount received   */
+
+			On	:	Focus	:	##VarAdvAmtRcvd=0	and (##VarBalAmt=##VarTotlCltdAmt) and (NOT $$IsNotApplicable:$$FullList:InvoiceOrderList:$BasicPurchaseOrderNo):	Call	:	GK_AutoBillAllocSOWithFullPymt
+			
+/*  Sales Agst Sales Order With If any Advance Partial amount received   */
+
+			On	:	Focus	:	##VarAdvAmtRcvd=0	and (##VarBalAmt!=##VarTotlCltdAmt) and (NOT $$IsNotApplicable:$$FullList:InvoiceOrderList:$BasicPurchaseOrderNo):	Call	:	GK_AutoBillAllocSOWithPartialPymt
+			
+/*  Direct Sales  Without Advance  amount received   */
+
+			On	:	Focus	:	##VarBalAmt=0 and ##VarAdvAmtRcvd=0 and ##VarTotlCltdAmt=0 and ($$IsNotApplicable:$$FullList:InvoiceOrderList:$BasicPurchaseOrderNo):	Call	:	GK_AutoBillAllocDirSalesWithoutAdv
+			
+/*  Direct Sales  With Partial Advance  amount received   */
+
+			On	:	Focus	:	(##VarInvamt!=##VarTotlCltdAmt) and ##VarTotlCltdAmt!=0  and ($$IsNotApplicable:$$FullList:InvoiceOrderList:$BasicPurchaseOrderNo)	:	Call	:	GK_FillBillAllocForPartialPymt
+			
+/*  Direct Sales  With Full Advance  amount received   */
+
+			On	:	Focus	:	(##VarInvamt=##VarTotlCltdAmt)  and ##VarTotlCltdAmt!=0  and ($$IsNotApplicable:$$FullList:InvoiceOrderList:$BasicPurchaseOrderNo)	:	Call	:	GK_FillBillAllocForFullPymt
+		
+[Function	:	GK_AutoBillAllocSOWithAdv]
+	
+;asfdasDF:Log:"sa function 1"
+	Local Formula	:	CheckCond	:	If ($$CollectionFieldByKey:$GKAdvRcptAmt:@@GKFirstSO:ToFindAdvAmtFrmSO)!=0 then ($$CollectionFieldByKey:$GKAdvRcptAmt:@@GKFirstSO:ToFindAdvAmtFrmSO) else ##VarAdvAmtRcvd
+			
+	01	:	If	:	$$IsEmpty:$$CollectionField:$Name:1:BillAllocations
+
+	02 	: If :$$NumItems:GKToFindBillCount > 0 AND $$LoopIndex = 1
+		
+		03 	: SET TARGET: BillAllocations[1]  
+
+			04 	: ELSE
+
+				05 	: Insert Collection Object	:	BillAllocations
+
+					06 	: End If
+
+						100	: Set Value:BillType:$$SysName:AgstRef
+						110	: Set Value:Name:@@GKFirstSO
+						120	: Set Value:Amount:$$AsAmount:@CheckCond*-1
+						130	: Set Target:..
+						
+140: End If
+
+
+0112	:	If	:	$$IsEmpty:$$CollectionField:$Name:2:BillAllocations
+
+102 	: If :$$NumItems:GKToFindBillCount > 0 AND $$LoopIndex = 2
+		
+		103 	: SET TARGET: BillAllocations[2]  
+			
+			104 	: ELSE
+				
+				105 	: Insert Collection Object	:	BillAllocations
+						
+						106 	: End If
+			
+							1100	: Set Value:BillType:$$SysName:AgstRef
+							1110	: Set Value:Name:$$LocaleString:$$LocaleString:"SI"+$$LocaleString:@@GKBranchCode+$$LocaleString:#VCHNumber
+							1120	: Set Value:Amount:$$TgtObject:$$AsAmount:(##VarTotlCltdAmt)*-1
+							1130	: Set Target:..
+
+1140:End If
+
+
+[Function	:	GK_AutoBillAllocDirSalesWithoutAdv]
+	
+;		safd:Log:"function 1"
+01	:	If	:	$$IsEmpty:$$CollectionField:$Name:1:BillAllocations
+
+	02 	: If :$$NumItems:GKToFindBillCount > 0 AND $$LoopIndex = 1
+		
+		03 	: SET TARGET: BillAllocations[1]  
+
+			04 	: ELSE
+
+				05 	: Insert Collection Object	:	BillAllocations
+
+					06 	: End If
+
+						100	: Set Value:BillType:$$SysName:NewRef
+						110	: Set Value:Name:$$LocaleString:"SI"+$$LocaleString:@@GKBranchCode+$$LocaleString:#VCHNumber
+						120	: Set Value:Amount:$$AsAmount:##VarTotlCltdAmt
+						130	: Set Target:..
+						
+140: End If
+
+[Function	:	GK_AutoBillAllocSOWithFullPymt]
+	
+;asfdasDF:Log:"sa function 2"
+01	:	If	:	$$IsEmpty:$$CollectionField:$Name:1:BillAllocations
+
+	02 	: If :$$NumItems:GKToFindBillCount > 0 AND $$LoopIndex = 1
+		
+		03 	: SET TARGET: BillAllocations[1]  
+
+			04 	: ELSE
+
+				05 	: Insert Collection Object	:	BillAllocations
+
+					06 	: End If
+
+						100	: Set Value:BillType:$$SysName:AgstRef
+						110	: Set Value:Name:$$LocaleString:"SI"+$$LocaleString:@@GKBranchCode+$$LocaleString:#VchNumber
+						120	: Set Value:Amount:$$AsAmount:##VarTotlCltdAmt
+						130	: Set Target:..
+						
+140: End If
+		
+[Function	:	GK_FillBillAllocForPartialPymt]
+;	safd:Log:"function 2"
+		Variable	:	VarPendAmt	:	Number
+		
+		00	:	Set	:	VarPendAmt	:	$$Number:##VarInvamt-$$Number:##VarTotlCltdAmt
+	
+	
+		01	:	If	:	$$IsEmpty:$$CollectionField:$Name:1:BillAllocations
+
+	02 	: If :$$NumItems:GKToFindBillCount > 0 AND $$LoopIndex = 1
+		
+		03 	: SET TARGET: BillAllocations[1]  
+
+			04 	: ELSE
+
+				05 	: Insert Collection Object	:	BillAllocations
+
+					06 	: End If
+
+						100	: Set Value:BillType:$$SysName:AgstRef
+						110	: Set Value:Name:$$LocaleString:"SI"+$$LocaleString:@@GKBranchCode+$$LocaleString:#VCHNumber
+						120	: Set Value:Amount:$$AsAmount:##VarTotlCltdAmt*-1
+						130	: Set Target:..
+						
+140: End If
+
+
+0112	:	If	:	$$IsEmpty:$$CollectionField:$Name:2:BillAllocations
+
+102 	: If :$$NumItems:GKToFindBillCount > 0 AND $$LoopIndex = 2
+		
+		103 	: SET TARGET: BillAllocations[2]  
+			
+			104 	: ELSE
+				
+				105 	: Insert Collection Object	:	BillAllocations
+						
+						106 	: End If
+			
+							1100	: Set Value:BillType:$$SysName:NewRef
+							1110	: Set Value:Name:$$LocaleString:$$LocaleString:"SI"+$$LocaleString:@@GKBranchCode+$$LocaleString:#VCHNumber+$$LocaleString:"A"
+							1120	: Set Value:Amount:$$AsAmount:(##VarPendAmt)*-1
+							1130	: Set Target:..
+
+1140:End If
+
+
+[Function	:	GK_AutoBillAllocSOWithPartialPymt]
+;	asfdasDF:Log:"sa function 3"
+		
+Variable	:	VarPendAmt	:	Number
+		
+		00	:	Set	:	VarPendAmt	:	$$Number:##VarInvamt-$$Number:##VarTotlCltdAmt
+	
+	
+		01	:	If	:	$$IsEmpty:$$CollectionField:$Name:1:BillAllocations
+
+	02 	: If :$$NumItems:GKToFindBillCount > 0 AND $$LoopIndex = 1
+		
+		03 	: SET TARGET: BillAllocations[1]  
+
+			04 	: ELSE
+
+				05 	: Insert Collection Object	:	BillAllocations
+
+					06 	: End If
+
+						100	: Set Value:BillType:$$SysName:AgstRef
+						110	: Set Value:Name:$$LocaleString:"SI"+$$LocaleString:@@GKBranchCode+$$LocaleString:#VCHNumber
+						120	: Set Value:Amount:$$AsAmount:##VarTotlCltdAmt*-1
+						130	: Set Target:..
+						
+140: End If
+
+
+0112	:	If	:	$$IsEmpty:$$CollectionField:$Name:2:BillAllocations
+
+102 	: If :$$NumItems:GKToFindBillCount > 0 AND $$LoopIndex = 2
+		
+		103 	: SET TARGET: BillAllocations[2]  
+			
+			104 	: ELSE
+				
+				105 	: Insert Collection Object	:	BillAllocations
+						
+						106 	: End If
+			
+							1100	: Set Value:BillType:$$SysName:NewRef
+							1110	: Set Value:Name:$$LocaleString:"SI"+$$LocaleString:@@GKBranchCode+$$LocaleString:#VCHNumber+$$LocaleString:"A"
+							1120	: Set Value:Amount:$$AsAmount:(##VarPendAmt)*-1
+							1130	: Set Target:..
+
+1140:End If
+
+
+
+[Function	:	GK_FillBillAllocForFullPymt]
+	
+;		safd:Log:"function 3"
+		
+			01	:	If	:	$$IsEmpty:$$CollectionField:$Name:1:BillAllocations
+
+	02 	: If :$$NumItems:GKToFindBillCount > 0 AND $$LoopIndex = 1
+		
+		03 	: SET TARGET: BillAllocations[1]  
+
+			04 	: ELSE
+
+				05 	: Insert Collection Object	:	BillAllocations
+
+					06 	: End If
+
+						100	: Set Value:BillType:$$SysName:AgstRef
+						110	: Set Value:Name:$$LocaleString:"SI"+$$LocaleString:@@GKBranchCode+$$LocaleString:#VCHNumber
+						120	: Set Value:Amount:$$AsAmount:##VarTotlCltdAmt*-1
+						130	: Set Target:..
+						
+140: End If
+
+[Collection:GKToFindBillCount]
+	
+	Source Collection	:	..
+	Walk				:	Bill Allocations
+
+;/* This Following condition is checking that if there is Total Amount Collections is Not Equals to Zero and there is No Order against this invoice (direct sales)
+;	then it will set into "New Ref with Invoice Amount" */
+;
+;			On	:	Focus	:	($$Number:$GKPMTotAmtColtd!=0) and ($$IsNotApplicable:$$FullList:InvoiceOrderList:$BasicPurchaseOrderNo)		:	Call	:	GK_ToFillAutoBillAllocOne
+;			
+;/* This Following condition is checking that if there is Total Amount Collections is Equals to Zero and there is No Order against this invoice (direct sales)
+;	then it will set into "New Ref with Invoice Amount" */
+;
+;			On	:	Focus	:	($$Number:$GKPMTotAmtColtd=0) and ($$IsNotApplicable:$$FullList:InvoiceOrderList:$BasicPurchaseOrderNo)		:	Call	:	GK_ToFillAutoBillAllocTwo
+;	
+	
+
+
+[Function	:	GK_ToFillAutoBillAllocTwo]
+		
+01	:	If	:	$$IsEmpty:$$CollectionField:$Name:1:BillAllocations
+
+	02 	: If :$$NumItems:GKToFindBillCount > 0 AND $$LoopIndex = 1
+		
+		03 	: SET TARGET: BillAllocations[1]  
+
+			04 	: ELSE
+
+				05 	: Insert Collection Object	:	BillAllocations
+
+					06 	: End If
+
+						100	: Set Value:BillType:$$SysName:AgstRef
+						110	: Set Value:Name:@@GKFirstSO
+						120	: Set Value:Amount:$$AsAmount:$$CollectionFieldByKey:$GKAdvRcptAmt:@@GKFirstSO:ToFindAdvAmtFrmSO*-1
+						130	: Set Target:..
+
+
+[Function	:	GK_ToFillAutoBillAllocOne]
+		
+01	:	If	:	$$IsEmpty:$$CollectionField:$Name:1:BillAllocations
+
+	02 	: If :$$NumItems:GKToFindBillCount > 0 AND $$LoopIndex = 1
+		
+		03 	: SET TARGET: BillAllocations[1]  
+
+			04 	: ELSE
+
+				05 	: Insert Collection Object	:	BillAllocations
+
+					06 	: End If
+
+						100	: Set Value:BillType:$$SysName:AgstRef
+						110	: Set Value:Name:@@GKFirstSO
+						120	: Set Value:Amount:$$AsAmount:$$CollectionFieldByKey:$GKAdvRcptAmt:@@GKFirstSO:ToFindAdvAmtFrmSO*-1
+						130	: Set Target:..
+
+[Function:GK_ToFillAutoBillAlloc]
+	
+
+01	:	If	:	$$IsEmpty:$$CollectionField:$Name:1:BillAllocations
+
+	02 	: If :$$NumItems:GKToFindBillCount > 0 AND $$LoopIndex = 1
+		
+		03 	: SET TARGET: BillAllocations[1]  
+
+			04 	: ELSE
+
+				05 	: Insert Collection Object	:	BillAllocations
+
+					06 	: End If
+
+						100	: Set Value:BillType:$$SysName:AgstRef
+						110	: Set Value:Name:@@GKFirstSO
+						120	: Set Value:Amount:$$AsAmount:$$CollectionFieldByKey:$GKAdvRcptAmt:@@GKFirstSO:ToFindAdvAmtFrmSO*-1
+						130	: Set Target:..
+
+
+	102 	: If :$$NumItems:GKToFindBillCount > 0 AND $$LoopIndex = 2
+		
+		103 	: SET TARGET: BillAllocations[2]  
+			
+			104 	: ELSE
+				
+				105 	: Insert Collection Object	:	BillAllocations
+						
+						106 	: End If
+			
+							1100	: Set Value:BillType:$$SysName:AgstRef
+							1110	: Set Value:Name:$$LocaleString:"SI"+$$LocaleString:@@GKBranchCode+$$LocaleString:$VoucherNumber
+							1120	: Set Value:Amount:$$AsAmount:@@GKPendingAmt*-1;$$CollectionFieldByKey:$GKBalnceAmntudf:#VCHNumber:ToFindAdvAmtFrmSI*-1
+							1130	: Set Target:..
+
+1140:End If
+
+[System:Formulae]
+	
+		GKPendingAmt	:	$$AsAmount:$Amount-$$AsAmount:$$CollectionFieldByKey:$GKAdvRcptAmt:@@GKFirstSO:ToFindAdvAmtFrmSO
+
+
+	
+[Collection	:	GKLedRcpt]
+	Type:vouchers:VoucherType
+	Child Of:$$VchTypeReceipt
+	Belongs To:Yes
+	Fetch:Vouchernumber,Date,LedgerName,PArtyLedgerName,Amount
+	
+[Collection:GKLedRcptBillAlloc]
+	Source Collection:GKLedRcpt
+	Walk:Ledgerentries,Bill Allocations
+	Fetch:name,Billdate,Amount,Vouchernumber,Date,LedgerName,PArtyLedgerName,Amount
+	Filter:gkpfltr,dateflt,SoadvFlr;,SIAgstref
+	
+[Collection:GKLedRcptBillAlloc1]
+	Source Collection:GKLedRcpt
+	Walk:Ledgerentries,Bill Allocations
+	Fetch:name,Billdate,Amount,Vouchernumber,Date,LedgerName,PArtyLedgerName,Amount
+	Filter:gkpfltr,dateflt;,SIAgstref
+	Keep Source:()
+	
+	[System:Formulae]
+		dateflt:$$Date:$date=$$Date:"01-05-2022"
+		gkpfltr:$partyledgername="counter billing customer"
+		SoadvFlr:$Name=$$CollectionField:$BasicPurchaseOrderNo:1:InvoiceOrderList
+		SIAgstref:$Name=$$LocaleString:"SI"+$$LocaleString:@@GKBranchCode+$$LocaleString:$VoucherNumber
+		
+;;;select $vouchernumber,$date,$name,$partyLedgername,$amount from GKLedRcptBillAlloc1
+
+[Function:Testst1]
+;	d:Log:##VarTotlCltdAmt;$$CollectionField:($$Number:$GKPMCashAmt):1:ToFindAdvAmtFrmSINew
+	01	:	If	:	$$IsEmpty:$$CollectionField:$Name:1:BillAllocations
+11:Walk Collection:GKLedRcptBillAlloc
+	02 	: If :$$NumItems:GKToFindBillCount > 0 AND $$LoopIndex = 1
+		
+		03 	: SET TARGET: BillAllocations[1]  
+
+			04 	: ELSE
+				
+				05 	: Insert Collection Object	:	BillAllocations
+
+					06 	: End If
+						
+						100	: Set Value:BillType:$$SysName:AgstRef
+						110	: Set Value:Name:@@GKFirstSO
+						120	: Set Value:Amount:$$AsAmount:$Amount*-1;$$CollectionFieldByKey:$GKAdvRcptAmt:@@GKFirstSO:ToFindAdvAmtFrmSO*-1
+						130	: Set Target:..
+						21:End Walk
+						
+122:End If
+;
+;112:Walk Collection:GKLedRcptBillAlloc1
+;1021 	: If :$$NumItems:GKToFindBillCount > 0 AND $$LoopIndex = 2
+;		
+;		1031 	: SET TARGET: BillAllocations[2]  
+;			
+;			1041	: ELSE
+;				
+;				1051 	: Insert Collection Object	:	BillAllocations
+;						
+;						1061 	: End If
+;			
+;							1100	: Set Value:BillType:$$SysName:AgstRef
+;							1110	: Set Value:Name:$$LocaleString:"SI"+$$LocaleString:@@GKBranchCode+$$LocaleString:$VoucherNumber
+;							1120	: Set Value:Amount:$$AsAmount:$Amount*-1;@@GKPendingAmt*-1;$$CollectionFieldByKey:$GKBalnceAmntudf:#VCHNumber:ToFindAdvAmtFrmSI*-1
+;							1130	: Set Target:..
+;		
+;11401:End Walk
+
+[Collection	:	ToFindAdvAmtFrmSO]
+		
+		Type		:	Vouchers	:	VoucherType
+		Child Of	:	$$VchTypeSalesOrder
+		Belongs To	:	Yes
+		Fetch		:	Date,Reference,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount,IsOptional,MasterId
+		Fetch		:	GKPMCashAmt,GKChqAmtudf,GKCarAmtUdf,GKOnlineAmtUdf,GKPMGiftAmt,GKAdvRcptAmt,GKBalnceAmntudf
+		Fetch		:	GKVchPartyNm,GKVchPartyPh,GKVchPartyEmail
+		Search Key	:	$Reference
+		
+[Collection	:	ToFindAdvAmtFrmSI]
+		
+		Type		:	Vouchers	:	VoucherType
+		Child Of	:	$$VchTypeSales
+		Belongs To	:	Yes
+		Fetch		:	Date,Reference,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount,IsOptional,MasterId
+		Fetch		:	GKPMCashAmt,GKChqAmtudf,GKCarAmtUdf,GKOnlineAmtUdf,GKPMGiftAmt,GKAdvRcptAmt,GKBalnceAmntudf
+		Fetch		:	GKVchPartyNm,GKVchPartyPh,GKVchPartyEmail,GKPMTotAmtColtd
+		Search Key	:	$VoucherNumber
+		
+;;;Select $VoucherNumber,$VoucherTypeName,$GKPMTotAmtColtd from ToFindAdvAmtFrmSI
+		
+[Collection	:	ToFindAdvAmtFrmSINew]
+		
+		Type		:	Vouchers	:	VoucherType
+		Child Of	:	$$VchTypeSales
+		Belongs To	:	Yes
+		Fetch		:	Date,Reference,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount,IsOptional,MasterId
+		Fetch		:	GKPMCashAmt,GKChqAmtudf,GKCarAmtUdf,GKOnlineAmtUdf,GKPMGiftAmt,GKAdvRcptAmt,GKBalnceAmntudf
+		Fetch		:	GKVchPartyNm,GKVchPartyPh,GKVchPartyEmail,GKPMTotAmtColtd
+		Filter		:	GKWithinObj
+		
+[System:Formulae]
+	GKWithinObj:$VoucherNumber=#VchNumber
+[System	:	Formulae]
+	
+		GKSOTotAmt	:	$$CollectionFieldByKey:$Amount:($$CollectionField:$BasicPurchaseOrderNo:1:InvoiceOrderList):GKToGetSalesOrderAdvAmnt
+		GKSOAgstAdv	:	$$CollectionFieldByKey:$GKAdvRcptAmt:($$CollectionField:$BasicPurchaseOrderNo:1:InvoiceOrderList):GKToGetSalesOrderAdvAmnt
+		GKIfAnyAdv	:	$$Number:@@GKSOTotAmt-@@GKSOAgstAdv
+		
+
+[Collection:tesets]
+	
+	Source Collection:ToFindAdvAmtFrmSI
+	Walk:Ledger Entries,BillAllocations
+	Fetch:NAme,Amount,BillType
+	
+;;;Select $Name,$Amount,$BillType from tesets
+
+[Function	:	ToSetBillAllocations]
+	
+		Variable	:	VarMCurId	:	String	:	$$Number:$Cmpvchid:Company:##SVCurrentcompany-$$Number:1
+		Variable	:	VarMID		:	String	:	$$String:"Id:"+$$LocaleString:##VarMCurId
+		Variable	:	Varamt		:	Number	:	##VarTotlCltdAmt*-1
+		Variable	:	VarBillType	:	String	:	$$sysname:Agstref
+		Variable	:	VarBName	:	String	:	$$LocaleString:"SI"+$$LocaleString:@@GKBranchCode+$$LocaleString:$VoucherNumber
+		
+		110	:	Modify Object:(Voucher,##VarMID).ALLLedgerEntries.BillAllocations[1].Billtype:##VarBillType
+		100	:	Modify Object:(Voucher,##VarMID).ALLLedgerEntries.BillAllocations[1].Name:##VarBName
+		120	:	Modify Object:(Voucher,##VarMID).ALLLedgerEntries.BillAllocations[1].Amount:##Varamt

@@ -1,0 +1,1500 @@
+
+
+
+/*
+[Report	:	GKPOSRegister]
+	
+		Title	:	"PayMode Register"
+		Form	:	GKPOSRegister
+		Variable:	SVFromDate,SVToDate,ExplodeFlag
+		Set		:	SVFromDate:##SVFromDate
+		Set		:	SVToDate:##SVToDate
+		Set		:	ExplodeFlag:No
+		
+[Form	:	GKPOSRegister]
+	
+		Height	:	100 % page
+		Width	:	100 % Page
+		Background:Very Light sea Green
+		Button	:	Change Period,ExplodeFlag
+		Part	:	GKPOSRegHead,GKPOSRegister,GKPOSNarration
+		
+[Part	:	GKPOSRegHead]
+		
+	Line	:	GKPOSRegHead
+	
+[Line	:	GKPOSRegHead]
+
+		Space Bottom:	0.2 cm
+		Field		:	GKPOSRegHead
+		Right Field	:	GKPOSRegPeriod
+		
+[Field	:	GKPOSRegHead]
+	
+		Use			:	Name Field
+		Set as		:	"Payment Mode Register"
+		Full Width	: 	Yes
+		Align		:	Left
+		
+[Field	:	GKPOSRegPeriod]
+	
+		Use		:	Name Field
+		Set as	:	@@DSPDatestr
+		Full Width: Yes
+		Align	:	Right
+		
+[Part	:	GKPOSNarration]
+	
+		Line	:	GKPOSNarration
+		
+[Line	:	GKPOSNarration]
+	
+		Space Bottom	:	0.2 cm
+		Space Top		:	0.2 cm
+		Field			:	GKPOSNarration
+		
+[Field	:	GKPOSNarration]
+	
+		Use			:	Name Field
+		Set as		:	$$LocaleString:"Note : "+$$LocaleString:"This report is extracted from stores specific voucher types "	
+		Full Width	:	Yes
+		Align		:	Left
+		Style		:	Small Bold
+		
+		
+[Part	:	GKPOSRegister]
+	
+		Line		:	GKPOSRegisterTit,GKPOSRegisterBdy
+		Repeat		:	GKPOSRegisterBdy	:	GKPOSRegisterMainColl
+		Bottom Line	:	GKPOSRegisterTot
+		Scroll		:	Vertical
+		Vertical	:   Yes
+		Total		:	GKPOSRegCash,GKPOSRegCard,GKPOSRegCheque
+		Total		:	GKPOSRegOnline,GKPOSRegGift,GKPOSRegAdv,GKPOSRegTot,GKPOSRegBillCltns
+		
+		
+[Line	:	GKPOSRegisterTit]
+	
+		Border		:	Thin Top Bottom
+		Field		:	GKPOSRegDate,GKPOSRegVchType,GKPOSRegVchNo,GKPOSRegBillRef,GKPOSRegOrderNo
+		Field		:	GKPOSRegAdv,GKPOSRegBillCltns
+		Right Field	:	GKPOSRegCash,GKPOSRegCard,GKPOSRegCheque
+		Right Field	:	GKPOSRegOnline,GKPOSRegGift,GKPOSRegTot
+		
+		
+		Local	:	Field	:	Default		:	Delete	:	Storage
+		Local	:	Field	:	Default		:	Type	:	String
+		Local	:	Field	:	Default		:	Style	:	Small Bold
+		
+		Local	:	Field	:	GKPOSRegDate	:	Set as	:	"Date"
+		Local	:	Field	:	GKPOSRegVchType	:	Set as	:	"VoucherType"
+		Local	:	Field	:	GKPOSRegVchNo	:	Set as	:	"VoucherNumber"
+		Local	:	Field	:	GKPOSRegBillRef	:	Set as	:	"Bill Ref."
+		Local	:	Field	:	GKPOSRegOrderNo	:	Set as	:	"Order No"
+		Local	:	Field	:	GKPOSRegCash	:	Set as	:	"Cash"
+		Local	:	Field	:	GKPOSRegCard	:	Set as	:	"Card"
+		Local	:	Field	:	GKPOSRegCheque	:	Set as	:	"Cheque"
+		Local	:	Field	:	GKPOSRegOnline	:	Set as	:	"Online"
+		Local	:	Field	:	GKPOSRegGift	:	Set as	:	"Gift"
+		Local	:	Field	:	GKPOSRegTot		:	Set as	:	"PayMode Total"
+		Local	:	Field	:	GKPOSRegAdv		:	Set as	:	"Advance"
+		Local	:	Field	:	GKPOSRegBillCltns:  Set as	:	"Bill Colltns."
+		
+[Line	:	GKPOSRegisterTot]
+	
+		Border		:	Thin Top Bottom
+		Field		:	GKPOSRegDate,GKPOSRegVchType,GKPOSRegVchNo,GKPOSRegBillRef,GKPOSRegOrderNo
+		Field		:	GKPOSRegAdv,GKPOSRegBillCltns
+		Right Field	:	GKPOSRegCash,GKPOSRegCard,GKPOSRegCheque
+		Right Field	:	GKPOSRegOnline,GKPOSRegGift,GKPOSRegTot
+		
+		
+		Local	:	Field	:	Default		:	Delete	:	Storage
+		Local	:	Field	:	Default		:	Type	:	Number
+		Local	:	Field	:	Default		:	Style	:	Small Bold
+		
+		Local	:	Field	:	GKPOSRegDate	:	Type	:	String
+		Local	:	Field	:	GKPOSRegDate	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegVchType	:	Type	:	String
+		Local	:	Field	:	GKPOSRegVchType	:	Set as	:	"Total"
+		Local	:	Field	:	GKPOSRegVchNo	:	Type	:	String
+		Local	:	Field	:	GKPOSRegVchNo	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegOrderNo	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegBillRef	:	Type	:	String
+		Local	:	Field	:	GKPOSRegBillRef	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegCash	:	Set as	:	$$Total:GKPOSRegCash	
+		Local	:	Field	:	GKPOSRegCard	:	Set as	:	$$Total:GKPOSRegCard	
+		Local	:	Field	:	GKPOSRegCheque	:	Set as	:	$$Total:GKPOSRegCheque	
+		Local	:	Field	:	GKPOSRegOnline	:	Set as	:	$$Total:GKPOSRegOnline	
+		Local	:	Field	:	GKPOSRegGift	:	Set as	:	$$Total:GKPOSRegGift
+		Local	:	Field	:	GKPOSRegTot		:	Set as	:	$$Total:GKPOSRegTot
+		Local	:	Field	:	GKPOSRegAdv		:	Set as	:	$$Total:GKPOSRegAdv	
+		Local	:	Field	:	GKPOSRegBillCltns:  Set as	:	$$Total:GKPOSRegBillCltns
+		
+		
+[Line	:	GKPOSRegisterBdy]
+	
+		Remove if	:	($Reference=$$PrevLine:#GKPOSRegBillRef and $Date=$$PrevLine:#GKPOSRegDate) ;or #GKPOSRegTot=0
+		Field		:	GKPOSRegDate,GKPOSRegVchType,GKPOSRegVchNo,GKPOSRegBillRef,GKPOSRegOrderNo
+		Field		:	GKPOSRegAdv,GKPOSRegBillCltns
+		Right Field	:	GKPOSRegCash,GKPOSRegCard,GKPOSRegCheque
+		Right Field	:	GKPOSRegOnline,GKPOSRegGift,GKPOSRegTot
+		
+
+		Local		:	Field	:	Default		:	Style	:	Small
+		;Option		:	AlterOnEnter
+		Explode		:	GKPOSExplode:##ExplodeFlag
+		
+
+		
+[Field	:	GKPOSRegDate]
+	
+		Use		:	Uni Date Field
+		Set as	:	$Date
+		Width	:	10
+		Align	:	Center
+		
+		
+[Field	:	GKPOSRegVchType]
+	
+		Use		:	Name Field
+		Set as	:	$VoucherTypeName
+		Width	:	20
+		Align	:	Center
+		
+[Field	:	GKPOSRegVchNo]
+	
+		Use		:	Name Field
+		Set as	:	$VoucherNumber
+		Width	:	30
+		Align	:	Center
+		;Alter	:	Voucher
+		
+[Field	:	GKPOSRegOrderNo]
+	
+		Use		:	Name Field
+		Set as	:	$$CollectionFieldByKey:$BasicPurchaseOrderNo:#GKPOSRegVchNo:GKPOSRegisterMainCollO
+		Width	:	20
+		Align	:	Center
+		Invisible:	Yes
+		
+[Field	:	GKPOSRegBillRef]
+	
+		Use		:	Name Field
+		Set as	:	IF @@GKSaOrdVchType then $Reference else $Name
+		Width	:	20
+		Align	:	Center
+		
+[Field	:	GKPOSRegCash]
+	
+		Use		:	Number Field
+		Set as	:	$$Number:$$CollectionFieldByKey:$Amount:@SRCKEY:GKPOSRegRcptMnColl
+		SRCKEY	:	$$LocaleString:#GKPOSRegBillRef+$$LocaleString:"Cash"
+		Width	:	10
+		Align	:	Right
+		Format	:	"Decimals:2"
+		
+[Field	:	GKPOSRegCard]
+	
+		Use		:	Number Field
+		Set as	:	$$Number:$$CollectionFieldByKey:$Amount:@SRCKEY:GKPOSRegRcptMnColl
+		SRCKEY	:	$$LocaleString:#GKPOSRegBillRef+$$LocaleString:"Card"
+		Width	:	10
+		Align	:	Right
+		Format	:	"Decimals:2"
+		
+[Field	:	GKPOSRegCheque]
+	
+		Use		:	Number Field
+		Set as	:	$$Number:$$CollectionFieldByKey:$Amount:@SRCKEY:GKPOSRegRcptMnColl
+		SRCKEY	:	$$LocaleString:#GKPOSRegBillRef+$$LocaleString:"Cheque/DD"
+		Width	:	10
+		Align	:	Right
+		Format	:	"Decimals:2"
+		
+[Field	:	GKPOSRegOnline]
+	
+		Use		:	Number Field
+		Set as	:	$$Number:$$CollectionFieldByKey:$Amount:@SRCKEY:GKPOSRegRcptMnColl
+		SRCKEY	:	$$LocaleString:#GKPOSRegBillRef+$$LocaleString:"Online"
+		Width	:	10
+		Align	:	Right
+		Format	:	"Decimals:2"
+		
+[Field	:	GKPOSRegGift]
+		
+		Use		:	Number Field
+		Set as	:	$$Number:$$CollectionFieldByKey:$Amount:@SRCKEY:GKPOSRegRcptMnColl
+		SRCKEY	:	$$LocaleString:#GKPOSRegBillRef+$$LocaleString:"Gift Coupons"
+		Width	:	10
+		Align	:	Right
+		Format	:	"Decimals:2"
+		
+[Field	:	GKPOSRegTot]
+	
+		Use		:	Number Field
+		Set as	:	$$Number:#GKPOSRegCash+$$Number:#GKPOSRegCard+$$Number:#GKPOSRegCheque+$$Number:#GKPOSRegOnline+$$Number:#GKPOSRegGift
+		Width	:	20
+		Align	:	Right
+		Format	:	"Decimals:2"
+		
+[Field	:	GKPOSRegAdv]
+	
+		Use			:	Number Field
+		Set as		:	IF (@@GKSalesVchType and !$$IsEmpty:#GKPOSRegOrderNo)then $$Number:@SOAdvAmt else $$Number:$$CollectionFieldByKey:$Amount:@SRCKEY:GKPOSRegRcptMnCollL
+		SRCKEY		:	$$LocaleString:#GKPOSRegBillRef+$$LocaleString:"Advance"
+		SOAdvAmt	:	$$CollectionFieldByKey:$GKAdvRcptAmt:(#GKPOSRegBillRef):GKToGetSalesOrderAdvAmnt
+		;Set as		:	@Checkcond
+		;Checkcond	:	If (@@GKSaOrdVchType and $GKVCHAdvAmt!=0) then $GKVCHAdvAmt else  If ($Amount=$GKVCHAdvAmt) then "" else if (@@GKSalesVchType and $$IsEmpty:$$CollectionField:$BasicPurchaseOrderNo:1:GKToGetOrderDetails) then $GKVCHAdvAmt else ""
+		Width		:	10
+		Align		:	Right
+		Format		:	"Decimals:2"
+		
+[Collection:GKToGetOrderDetails]
+
+		Source Collection	:	GKPOSRegisterSalesColl
+		Walk				:	InvoiceOrderList
+		Fetch				:	BasicPurchaseOrderNo,VoucherNumber
+		Filter				:	GKVchFltr
+		
+
+[Field	:	GKPOSRegAmt]
+	
+		Use		:	Number Field
+		Set as	:	$$CollectionFieldByKey:$GKAdvRcptAmt:#GKPOSRegVchNo:GKPOSRegisterSOColl
+		Width	:	20
+		Align	:	Right
+		Format	:	"Decimals:2"
+		Invisible: Yes
+		
+		
+[Field	:	GKPOSRegAmt1]
+	
+		Use		:	Number Field
+		Set as	:	$Amount
+		Width	:	20
+		Align	:	Right
+		Format	:	"Decimals:2"
+		Color	:blue
+		Invisible: Yes
+	
+		
+[Field	:	GKPOSRegAmt2]
+	
+		Use		:	Name Field
+		Set as	:	If (@@GKSaOrdVchType) then "" else $$CollectionField:$BasicPurchaseOrderNo:1:GKToGetOrderDetails
+		Width	:	20
+		Align	:	Right
+		Format	:	"Decimals:2"
+		Invisible: Yes
+		
+[Field	:	GKPOSRegBillCltns]
+	
+		Use			:	Number Field
+		Set as		:	If #GKPOSRegAdv!=0 then "" else $$Number:$$CollectionFieldByKey:$Amount:@SRCKEY:GKPOSRegRcptMnCollA
+		SRCKEY		:	$$LocaleString:#GKPOSRegBillRef
+		;Set as		:	IF #GKPOSRegAdv!=0 then "" else $Amount ;If (@@GKSaOrdVchType) then "" else if (($Amount=$GKAdvRcptAmt) and ($$IsEmpty:#GKPOSRegAmt2)) then $GKAdvRcptAmt else if ($Amount!=$GKAdvRcptAmt) then #GKPOSRegTot else if #GKPOSRegAmt=0 then "" else  $Amount-#GKPOSRegAmt;+#GKPOSRegAdv;@CheckCond
+		CheckCond	:   "" 
+		SalesOrdr	:   If @@GKSaOrdVchType and $GKAdvRcptAmt!=0 then "" else ""
+		SalesOrdr	:   If (@@GKSalesVchType and $GKAdvRcptAmt!=0 and $$IsNotApplicable:$$FullList:InvoiceOrderList:$BasicPurchaseOrderNo) then "" else ""
+		Width		:	15
+		Align		:	Right
+		Format		:	"Decimals:2"
+
+		
+[Report	:	GKPOSExplode]
+	
+		Form	:	GKPOSExplode
+		
+[Form	:	GKPOSExplode]
+	
+		Part	:	GKPOSExplode
+		
+[Part	:	GKPOSExplode]
+	
+		Line		:	GKPOSExplode,GKPOSExplode1,GKPOSExplode2
+		Repeat		:	GKPOSExplode	:	GKPOSRegisterMainCollL
+		Scroll		:	Vertical
+		Vertical	:	Yes
+		
+
+[Line	:	GKPOSExplode1]
+	
+		Field		:	GKPOSRegDate,GKPOSRegVchType,GKPOSRegVchNo,GKPOSRegBillRef,GKPOSRegOrderNo
+		Field		:	GKPOSRegAdv,GKPOSRegBillCltns
+		Right Field	:	GKPOSRegCash,GKPOSRegCard,GKPOSRegCheque
+		Right Field	:	GKPOSRegOnline,GKPOSRegGift,GKPOSRegTot
+		
+		
+		Local	:	Field	:	Default		:	Delete	:	Storage
+		Local	:	Field	:	Default		:	Type	:	String
+		Local	:	Field	:	Default		:	Style	:	Small
+		
+		Local	:	Field	:	GKPOSRegDate	:	Type	:	String
+		Local	:	Field	:	GKPOSRegDate	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegVchType	:	Type	:	String
+		Local	:	Field	:	GKPOSRegVchType	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegVchNo	:	Indent	:	3
+		Local	:	Field	:	GKPOSRegVchNo	:	Color	:	Blue
+		Local	:	Field	:	GKPOSRegVchNo	:	Type	:	String
+		Local	:	Field	:	GKPOSRegVchNo	:	Set as	:	$$LocaleString:"Party Ph No : "+$$LocaleString:$GKVchPartyPh
+		Local	:	Field	:	GKPOSRegOrderNo	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegBillRef	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegCash	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegCard	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegCheque	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegOnline	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegGift	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegTot		:	Set as	:	""
+		Local	:	Field	:	GKPOSRegAdv		:	Set as	:	""
+		Local	:	Field	:	GKPOSRegBillCltns:  Set as	:	""
+		
+[Line	:	GKPOSExplode2]
+	
+		Field		:	GKPOSRegDate,GKPOSRegVchType,GKPOSRegVchNo,GKPOSRegBillRef,GKPOSRegOrderNo
+		Field		:	GKPOSRegAdv,GKPOSRegBillCltns
+		Right Field	:	GKPOSRegCash,GKPOSRegCard,GKPOSRegCheque
+		Right Field	:	GKPOSRegOnline,GKPOSRegGift,GKPOSRegTot
+		
+		Local	:	Field	:	Default		:	Delete	:	Storage
+		Local	:	Field	:	Default		:	Type	:	String
+		Local	:	Field	:	Default		:	Style	:	Small
+		
+		Local	:	Field	:	GKPOSRegDate	:	Type	:	String
+		Local	:	Field	:	GKPOSRegDate	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegVchType	:	Type	:	String
+		Local	:	Field	:	GKPOSRegVchType	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegVchNo	:	Indent	:	3
+		Local	:	Field	:	GKPOSRegVchNo	:	Color	:	Blue
+		Local	:	Field	:	GKPOSRegVchNo	:	Type	:	String
+		Local	:	Field	:	GKPOSRegVchNo	:	Set as	:	$$LocaleString:"Party Email : "+$$LocaleString:$GKVchPartyEmail
+		Local	:	Field	:	GKPOSRegOrderNo	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegBillRef	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegCash	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegCard	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegCheque	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegOnline	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegGift	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegTot		:	Set as	:	""
+		Local	:	Field	:	GKPOSRegAdv		:	Set as	:	""
+		Local	:	Field	:	GKPOSRegBillCltns:  Set as	:	""
+		
+		
+[Line	:	GKPOSExplode]
+	
+		Field		:	GKPOSRegDate,GKPOSRegVchType,GKPOSRegVchNo,GKPOSRegBillRef,GKPOSRegOrderNo
+		Field		:	GKPOSRegAdv,GKPOSRegBillCltns
+		Right Field	:	GKPOSRegCash,GKPOSRegCard,GKPOSRegCheque
+		Right Field	:	GKPOSRegOnline,GKPOSRegGift,GKPOSRegTot
+		
+		Local	:	Field	:	Default		:	Delete	:	Storage
+		Local	:	Field	:	Default		:	Type	:	String
+		Local	:	Field	:	Default		:	Style	:	Small
+		
+		Local	:	Field	:	GKPOSRegDate	:	Type	:	String
+		Local	:	Field	:	GKPOSRegDate	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegVchType	:	Type	:	String
+		Local	:	Field	:	GKPOSRegVchType	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegVchNo	:	Indent	:	3
+		Local	:	Field	:	GKPOSRegVchNo	:	Color	:	Blue
+		Local	:	Field	:	GKPOSRegVchNo	:	Type	:	String
+		Local	:	Field	:	GKPOSRegVchNo	:	Set as	:	$$LocaleString:"Party Name : "+$$LocaleString:$GKVchPartyNm
+		Local	:	Field	:	GKPOSRegOrderNo	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegBillRef	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegCash	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegCard	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegCheque	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegOnline	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegGift	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegTot		:	Set as	:	""
+		Local	:	Field	:	GKPOSRegAdv		:	Set as	:	""
+		Local	:	Field	:	GKPOSRegBillCltns:  Set as	:	""
+		
+		
+[Collection	:	GKPOSRegisterSalesColl]
+	
+		Type		:	Vouchers	:	VoucherType
+		Child Of	:	$$VchTypeSales
+		Belongs To	:	Yes
+		Fetch		:	VoucherNumber,VoucherTypeName,PartyLedgerName,Amount,Date,MasterId,IsCancelled
+		Fetch		:	GKPMCashAmt,GKChqAmtudf,GKCarAmtUdf,GKOnlineAmtUdf,GKPMGiftAmt,GKAdvRcptAmt
+		Fetch		:	GKVchPartyNm,GKVchPartyPh,GKVchPartyEmail
+		Filter		:	GKBranchSales
+		
+[Collection	:	GKPOSRegisterSOColl]
+	
+		Type		:	Vouchers	:	VoucherType
+		Child Of	:	$$VchTypeSalesOrder
+		Belongs To	:	Yes
+		Fetch		:	VoucherNumber,VoucherTypeName,PartyLedgerName,Amount,Date,MasterId,IsCancelled
+		Fetch		:	GKPMCashAmt,GKChqAmtudf,GKCarAmtUdf,GKOnlineAmtUdf,GKPMGiftAmt,GKAdvRcptAmt
+		Fetch		:	GKVchPartyNm,GKVchPartyPh,GKVchPartyEmail
+		Search Key	:	$VoucherNumber
+		Filter		:	GKBranchOrder
+		
+[Collection	:	GKPOSRegisterMainColl]
+	
+		Source Collection	:	GKPOSRegisterSalesColl,GKPOSRegisterSOColl
+		Walk				:	Ledger Entries,BillAllocations
+		Fetch				:	Name,BillDate
+		Fetch				:	VoucherNumber,VoucherTypeName,Reference,PartyLedgerName,Amount,Date,MasterId,IsCancelled
+		Fetch				:	GKPMCashAmt,GKChqAmtudf,GKCarAmtUdf,GKOnlineAmtUdf,GKPMGiftAmt,GKAdvRcptAmt
+		Fetch				:	GKVchPartyNm,GKVchPartyPh,GKVchPartyEmail
+		Compute				:	GKVCHAdvAmt:$$Owner:$$Owner:$GKAdvRcptAmt
+		Filter				:	GKCancelledVchrs;,GKValueZeroFltr
+		Sort				:	Default:$VouchertypeName,$Name
+		
+;;;Select $VoucherNumber,$VoucherTypeName,$Name,$GKPMCashAmt from GKPOSRegisterMainColl
+		
+[Collection	:	GKPOSRegisterMainCollO]
+	
+		Source Collection	:	GKPOSRegisterSalesColl,GKPOSRegisterSOColl
+		Walk				:	InvoiceOrderList
+		Fetch				:	Name,BillDate,BasicPurchaseOrderNo
+		Fetch				:	VoucherNumber,VoucherTypeName,Reference,PartyLedgerName,Amount,Date,MasterId,IsCancelled
+		Fetch				:	GKPMCashAmt,GKChqAmtudf,GKCarAmtUdf,GKOnlineAmtUdf,GKPMGiftAmt,GKAdvRcptAmt
+		Fetch				:	GKVchPartyNm,GKVchPartyPh,GKVchPartyEmail
+		Compute				:	GKVCHAdvAmt:$$Owner:$$Owner:$GKAdvRcptAmt
+		Filter				:	GKCancelledVchrs	
+		Sort				:	Default:$VouchertypeName,$Name
+		Search Key			:	$VoucherNumber
+
+[Collection	:	GKPOSRegisterMainCollL]
+	
+		Source Collection	:	GKPOSRegisterSalesColl,GKPOSRegisterSOColl
+		Fetch				:	VoucherNumber,VoucherTypeName,PartyLedgerName,Amount,Date,MasterId,IsCancelled
+		Fetch				:	GKPMCashAmt,GKChqAmtudf,GKCarAmtUdf,GKOnlineAmtUdf,GKPMGiftAmt,GKAdvRcptAmt
+		Fetch				:	GKVchPartyNm,GKVchPartyPh,GKVchPartyEmail
+		Sort				:	Default:-$VouchertypeName
+		Filter				:	GKVchFltr
+		
+[System	:	Formulae]
+	
+		GKVchFltr			:	$VoucherNumber=#GKPOSRegVchNo and $VoucherTypename=#GKPOSRegVchType
+		GKCancelledVchrs	:	NOT $IsCancelled
+		GKValueZeroFltr		:	$$Number:$GKPMCashAmt!=0; or $$Number:$GKChqAmtudf!=0 or $$Number:$GKCarAmtUdf!=0 or $$Number:$GKOnlineAmtUdf!=0 or $$Number:$GKPMGiftAmt!=0 or $$Number:$GKAdvRcptAmt!=0	
+		
+			
+
+;;;Select $VoucherNumber,$date,$VoucherTypename,$GKPMCashAmt from GKPOSRegisterMainColl
+
+[Collection	:	GKPOSRegRcptSubColl]
+	
+		Type		:	Vouchers	:	VoucherType
+		Child Of	:	$$VchTypeReceipt
+		Belongs To	:	Yes
+		Fetch		:	VoucherNumber,VoucherTypeName,PartyLedgerName,LedgerName,Amount,Date,MasterId,IsCancelled
+		Filter		:	GKCancelledVchrs,GKBranchRcpt
+		
+[Collection	:	GKPOSRegRcptMnColl]
+	
+			
+			Source Collection	:	GKPOSRegRcptSubColl
+			Walk				:	All Ledger Entries
+			Fetch				:	VoucherNumber,Narration,VoucherTypeName,PartyLedgerName,LedgerName,Amount,Date,MasterId,IsCancelled
+			Compute				:	VchBillName:$LedgerEntries[1].Billallocations[1].Name
+			Fetch				:	Name,BillDate
+			Search Key			:	$VchBillName+$Narration
+			Filter				:	GKFltrCashBankLed;,Datefltr
+			
+			
+			
+;;;;Select $Date,$VoucherNumber,$LedgerName,$Narration,$Amount,$VchBillName from GKPOSRegRcptMnColl
+
+[Collection	:	GKPOSRegRcptMnCollA]
+	
+			Source Collection	:	GKPOSRegRcptSubColl
+			Walk				:	All Ledger Entries,Bill Allocations
+			Fetch				:	VoucherNumber,Narration,VoucherTypeName,PartyLedgerName,LedgerName,Amount,Date,MasterId,IsCancelled
+			Compute				:	VchBillName:$LedgerEntries[1].Billallocations[1].Name
+			Fetch				:	Name,BillDate
+			Search Key			:	$VchBillName
+			Filter				:	GKFltrNotCashBankLed
+			
+
+;;;;select $Vouchernumber,$VchBillName,$Amount from GKPOSRegRcptMnCollA
+			
+[Collection	:	GKPOSRegRcptMnCollL]
+	
+			Source Collection	:	GKPOSRegRcptSubColl
+			Walk				:	All Ledger Entries;,BillAllocations
+			Fetch				:	VoucherNumber,Narration,VoucherTypeName,PartyLedgerName,LedgerName,Amount,Date,MasterId,IsCancelled
+			Compute				:	VchBillName:$LedgerEntries[1].Billallocations[1].Name
+			Fetch				:	Name,BillDate
+			Search Key			:	$VchBillName+$Narration
+			Filter				:	GKFltrNotCashBankLed;,GKNarrCash
+
+[System	:	Formulae]
+	
+		GKFltrCashBankLed	:	$$IsLedOfGrp:$LedgerName:$$GroupCash or $$IsLedOfGrp:$LedgerName:$$GroupBank or $$IsLedOfGrp:$LedgerName:$$GroupBankOD 
+		GKFltrNotCashBankLed:   !$$IsLedOfGrp:$LedgerName:$$GroupCash or !$$IsLedOfGrp:$LedgerName:$$GroupBank or !$$IsLedOfGrp:$LedgerName:$$GroupBankOD 
+		GKNarrCash			:	$Narration="Cash"
+		Datefltr			:	$$Date:$Date=$$Date:"15-07-2022"
+		GKBranchSales		:	$VoucherTypeName=$$LocaleString:$GKBranchName:Company:##SVCurrentCompany+$$LocaleString:" Sales"
+		GKBranchOrder		:	$VoucherTypeName=$$LocaleString:$GKBranchName:Company:##SVCurrentCompany+$$LocaleString:" Sales Order"
+		GKBranchRcpt		:	$VoucherTypeName=$$LocaleString:$GKBranchName:Company:##SVCurrentCompany+$$LocaleString:" Receipt"
+		
+
+*/
+
+
+/*
+[#Menu	:	Gatewayoftally]
+	
+		Add	:	Key Item	:	PayMode Register	:	P	:	Display	:	GKPOSRegister
+		
+[Report	:	GKPOSRegister]
+	
+		Title	:	"PayMode Register"
+		Form	:	GKPOSRegister
+		Variable:	SVFromDate,SVToDate,ExplodeFlag
+		Set		:	SVFromDate:##SVFromDate
+		Set		:	SVToDate:##SVToDate
+		Set		:	ExplodeFlag:No
+		
+[Form	:	GKPOSRegister]
+	
+		Height	:	100 % page
+		Width	:	100 % Page
+		Background:Very Light sea Green
+		Button	:	Change Period,ExplodeFlag
+		Part	:	GKPOSRegHead,GKPOSRegister,GKPOSNarration
+		
+[Part	:	GKPOSRegHead]
+		
+	Line	:	GKPOSRegHead
+	
+[Line	:	GKPOSRegHead]
+
+		Space Bottom:	0.2 cm
+		Field		:	GKPOSRegHead
+		Right Field	:	GKPOSRegPeriod
+		
+[Field	:	GKPOSRegHead]
+	
+		Use			:	Name Field
+		Set as		:	"Payment Mode Register"
+		Full Width	: 	Yes
+		Align		:	Left
+		
+[Field	:	GKPOSRegPeriod]
+	
+		Use		:	Name Field
+		Set as	:	@@DSPDatestr
+		Full Width: Yes
+		Align	:	Right
+		
+[Part	:	GKPOSNarration]
+	
+		Line	:	GKPOSNarration
+		
+[Line	:	GKPOSNarration]
+	
+		Space Bottom	:	0.2 cm
+		Space Top		:	0.2 cm
+		Field			:	GKPOSNarration
+		
+[Field	:	GKPOSNarration]
+	
+		Use			:	Name Field
+		Set as		:	$$LocaleString:"Note : "+$$LocaleString:"This report is extracted from stores specific voucher types "	
+		Full Width	:	Yes
+		Align		:	Left
+		Style		:	Small Bold
+		
+		
+[Part	:	GKPOSRegister]
+	
+		Line		:	GKPOSRegisterTit,GKPOSRegisterBdy
+		Repeat		:	GKPOSRegisterBdy	:	GKPOSRegisterMainColl
+		Bottom Line	:	GKPOSRegisterTot
+		Scroll		:	Vertical
+		Vertical	:   Yes
+		Total		:	GKPOSRegCash,GKPOSRegCard,GKPOSRegCheque
+		Total		:	GKPOSRegOnline,GKPOSRegGift,GKPOSRegAdv,GKPOSRegTot,GKPOSRegBillCltns
+		
+		
+[Line	:	GKPOSRegisterTit]
+	
+		Border		:	Thin Top Bottom
+		Field		:	GKPOSRegDate,GKPOSRegVchType,GKPOSRegVchNo,GKPOSRegBillRef,GKPOSRegOrderNo
+		Field		:	GKPOSRegAdv,GKPOSRegBillCltns
+		Right Field	:	GKPOSRegCash,GKPOSRegCard,GKPOSRegCheque
+		Right Field	:	GKPOSRegOnline,GKPOSRegGift,GKPOSRegTot
+		
+		
+		Local	:	Field	:	Default		:	Delete	:	Storage
+		Local	:	Field	:	Default		:	Type	:	String
+		Local	:	Field	:	Default		:	Style	:	Small Bold
+		
+		Local	:	Field	:	GKPOSRegDate	:	Set as	:	"Date"
+		Local	:	Field	:	GKPOSRegVchType	:	Set as	:	"VoucherType"
+		Local	:	Field	:	GKPOSRegVchNo	:	Set as	:	"VoucherNumber"
+		Local	:	Field	:	GKPOSRegBillRef	:	Set as	:	"Bill Ref."
+		Local	:	Field	:	GKPOSRegOrderNo	:	Set as	:	"Order No"
+		Local	:	Field	:	GKPOSRegCash	:	Set as	:	"Cash"
+		Local	:	Field	:	GKPOSRegCard	:	Set as	:	"Card"
+		Local	:	Field	:	GKPOSRegCheque	:	Set as	:	"Cheque"
+		Local	:	Field	:	GKPOSRegOnline	:	Set as	:	"Online"
+		Local	:	Field	:	GKPOSRegGift	:	Set as	:	"Gift"
+		Local	:	Field	:	GKPOSRegTot		:	Set as	:	"PayMode Total"
+		Local	:	Field	:	GKPOSRegAdv		:	Set as	:	"Advance"
+		Local	:	Field	:	GKPOSRegBillCltns:  Set as	:	"Bill Colltns."
+		
+[Line	:	GKPOSRegisterTot]
+	
+		;Remove if	:	($Reference=$$PrevLine:#GKPOSRegBillRef and $Date=$$PrevLine:#GKPOSRegDate) ;or #GKPOSRegTot=0
+		Border		:	Thin Top Bottom
+		Field		:	GKPOSRegDate,GKPOSRegVchType,GKPOSRegVchNo,GKPOSRegBillRef,GKPOSRegOrderNo
+		Field		:	GKPOSRegAdv,GKPOSRegBillCltns
+		Right Field	:	GKPOSRegCash,GKPOSRegCard,GKPOSRegCheque
+		Right Field	:	GKPOSRegOnline,GKPOSRegGift,GKPOSRegTot
+		
+		
+		Local	:	Field	:	Default		:	Delete	:	Storage
+		Local	:	Field	:	Default		:	Type	:	Number
+		Local	:	Field	:	Default		:	Style	:	Small Bold
+		
+		Local	:	Field	:	GKPOSRegDate	:	Type	:	String
+		Local	:	Field	:	GKPOSRegDate	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegVchType	:	Type	:	String
+		Local	:	Field	:	GKPOSRegVchType	:	Set as	:	"Total"
+		Local	:	Field	:	GKPOSRegVchNo	:	Type	:	String
+		Local	:	Field	:	GKPOSRegVchNo	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegOrderNo	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegBillRef	:	Type	:	String
+		Local	:	Field	:	GKPOSRegBillRef	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegCash	:	Set as	:	$$Total:GKPOSRegCash	
+		Local	:	Field	:	GKPOSRegCard	:	Set as	:	$$Total:GKPOSRegCard	
+		Local	:	Field	:	GKPOSRegCheque	:	Set as	:	$$Total:GKPOSRegCheque	
+		Local	:	Field	:	GKPOSRegOnline	:	Set as	:	$$Total:GKPOSRegOnline	
+		Local	:	Field	:	GKPOSRegGift	:	Set as	:	$$Total:GKPOSRegGift
+		Local	:	Field	:	GKPOSRegTot		:	Set as	:	$$Total:GKPOSRegTot
+		Local	:	Field	:	GKPOSRegAdv		:	Set as	:	$$Total:GKPOSRegAdv	
+		Local	:	Field	:	GKPOSRegBillCltns:  Set as	:	$$Total:GKPOSRegBillCltns
+		
+		
+[Line	:	GKPOSRegisterBdy]
+	
+		
+		;Remove if	:	($Reference=$$PrevLine:#GKPOSRegBillRef and $Date=$$PrevLine:#GKPOSRegDate)
+		
+		Field		:	GKPOSRegDate,GKPOSRegVchType,GKPOSRegVchNo,GKPOSRegBillRef,GKPOSRegOrderNo
+		Field		:	GKPOSRegAdv,GKPOSRegBillCltns
+		Right Field	:	GKPOSRegCash,GKPOSRegCard,GKPOSRegCheque
+		Right Field	:	GKPOSRegOnline,GKPOSRegGift,GKPOSRegTot
+		
+
+		Local		:	Field	:	Default		:	Style	:	Small
+		;Option		:	AlterOnEnter
+		Explode		:	GKPOSExplode:##ExplodeFlag
+		
+
+		
+[Field	:	GKPOSRegDate]
+	
+		Use		:	Uni Date Field
+		Set as	:	$Date
+		Width	:	10
+		Align	:	Center
+		
+		
+[Field	:	GKPOSRegVchType]
+	
+		Use		:	Name Field
+		Set as	:	$VoucherTypeName
+		Width	:	20
+		Align	:	Center
+		
+[Field	:	GKPOSRegVchNo]
+	
+		Use		:	Name Field
+		Set as	:	$VoucherNumber
+		Width	:	30
+		Align	:	Center
+		;Alter	:	Voucher
+		
+[Field	:	GKPOSRegOrderNo]
+	
+		Use		:	Name Field
+		Set as	:	$$CollectionFieldByKey:$BasicPurchaseOrderNo:#GKPOSRegVchNo:GKPOSRegisterMainCollO
+		Width	:	20
+		Align	:	Center
+		Invisible:	Yes
+		
+[Field	:	GKPOSRegBillRef]
+	
+		Use		:	Name Field
+		Set as	:	$GKBillRef;IF @@GKSaOrdVchType then $Reference else $Name
+		Width	:	20
+		Align	:	Center
+		
+[Field	:	GKPOSRegCash]
+	
+		Use		:	Number Field
+		Set as	:	$$Number:$$CollectionFieldByKey:$Amount:@SRCKEY:GKPOSRegRcptMnColl
+		SRCKEY	:	$$LocaleString:#GKPOSRegBillRef+$$LocaleString:"Cash"
+		Width	:	10
+		Align	:	Right
+		Format	:	"Decimals:2"
+		
+[Field	:	GKPOSRegCard]
+	
+		Use		:	Number Field
+		Set as	:	$$Number:$$CollectionFieldByKey:$Amount:@SRCKEY:GKPOSRegRcptMnColl
+		SRCKEY	:	$$LocaleString:#GKPOSRegBillRef+$$LocaleString:"Card"
+		Width	:	10
+		Align	:	Right
+		Format	:	"Decimals:2"
+		
+[Field	:	GKPOSRegCheque]
+	
+		Use		:	Number Field
+		Set as	:	$$Number:$$CollectionFieldByKey:$Amount:@SRCKEY:GKPOSRegRcptMnColl
+		SRCKEY	:	$$LocaleString:#GKPOSRegBillRef+$$LocaleString:"Cheque/DD"
+		Width	:	10
+		Align	:	Right
+		Format	:	"Decimals:2"
+		
+[Field	:	GKPOSRegOnline]
+	
+		Use		:	Number Field
+		Set as	:	$$Number:$$CollectionFieldByKey:$Amount:@SRCKEY:GKPOSRegRcptMnColl
+		SRCKEY	:	$$LocaleString:#GKPOSRegBillRef+$$LocaleString:"Online"
+		Width	:	10
+		Align	:	Right
+		Format	:	"Decimals:2"
+		
+[Field	:	GKPOSRegGift]
+		
+		Use		:	Number Field
+		Set as	:	$$Number:$$CollectionFieldByKey:$Amount:@SRCKEY:GKPOSRegRcptMnColl
+		SRCKEY	:	$$LocaleString:#GKPOSRegBillRef+$$LocaleString:"Gift Coupons"
+		Width	:	10
+		Align	:	Right
+		Format	:	"Decimals:2"
+		
+[Field	:	GKPOSRegTot]
+	
+		Use		:	Number Field
+		Set as	:	$$Number:#GKPOSRegCash+$$Number:#GKPOSRegCard+$$Number:#GKPOSRegCheque+$$Number:#GKPOSRegOnline+$$Number:#GKPOSRegGift
+		Width	:	20
+		Align	:	Right
+		Format	:	"Decimals:2"
+		
+[Field	:	GKPOSRegAdv]
+	
+		Use			:	Name Field
+		Set as		:	$$PrevLine:#GKPOSRegBillRef;If $$Line= 1 then #GKPOSRegBillRef else $$PrevLine:#GKPOSRegBillRef;IF (@@GKSalesVchType and !$$IsEmpty:#GKPOSRegOrderNo)then $$Number:@SOAdvAmt else $$Number:$$CollectionFieldByKey:$Amount:@SRCKEY:GKPOSRegRcptMnCollL
+		SRCKEY		:	$$LocaleString:#GKPOSRegBillRef+$$LocaleString:"Advance"
+		SOAdvAmt	:	$$CollectionFieldByKey:$GKAdvRcptAmt:(#GKPOSRegBillRef):GKToGetSalesOrderAdvAmnt
+		;Set as		:	@Checkcond
+		;Checkcond	:	If (@@GKSaOrdVchType and $GKVCHAdvAmt!=0) then $GKVCHAdvAmt else  If ($Amount=$GKVCHAdvAmt) then "" else if (@@GKSalesVchType and $$IsEmpty:$$CollectionField:$BasicPurchaseOrderNo:1:GKToGetOrderDetails) then $GKVCHAdvAmt else ""
+		Width		:	10
+		Align		:	Right
+		Format		:	"Decimals:2"
+		
+[Collection:GKToGetOrderDetails]
+
+		Source Collection	:	GKPOSRegisterSalesColl
+		Walk				:	InvoiceOrderList
+		Fetch				:	BasicPurchaseOrderNo,VoucherNumber
+		Filter				:	GKVchFltr
+		
+
+[Field	:	GKPOSRegAmt]
+	
+		Use		:	Number Field
+		Set as	:	$$CollectionFieldByKey:$GKAdvRcptAmt:#GKPOSRegVchNo:GKPOSRegisterSOColl
+		Width	:	20
+		Align	:	Right
+		Format	:	"Decimals:2"
+		Invisible: Yes
+		
+		
+[Field	:	GKPOSRegAmt1]
+	
+		Use		:	Number Field
+		Set as	:	$Amount
+		Width	:	20
+		Align	:	Right
+		Format	:	"Decimals:2"
+		Color	:blue
+		Invisible: Yes
+	
+		
+[Field	:	GKPOSRegAmt2]
+	
+		Use		:	Name Field
+		Set as	:	If (@@GKSaOrdVchType) then "" else $$CollectionField:$BasicPurchaseOrderNo:1:GKToGetOrderDetails
+		Width	:	20
+		Align	:	Right
+		Format	:	"Decimals:2"
+		Invisible: Yes
+		
+[Field	:	GKPOSRegBillCltns]
+	
+		Use			:	Number Field
+		Set as		:	If #GKPOSRegAdv!=0 then "" else $$Number:$$CollectionFieldByKey:$Amount:@SRCKEY:GKPOSRegRcptMnCollA
+		SRCKEY		:	$$LocaleString:#GKPOSRegBillRef
+		;Set as		:	IF #GKPOSRegAdv!=0 then "" else $Amount ;If (@@GKSaOrdVchType) then "" else if (($Amount=$GKAdvRcptAmt) and ($$IsEmpty:#GKPOSRegAmt2)) then $GKAdvRcptAmt else if ($Amount!=$GKAdvRcptAmt) then #GKPOSRegTot else if #GKPOSRegAmt=0 then "" else  $Amount-#GKPOSRegAmt;+#GKPOSRegAdv;@CheckCond
+		CheckCond	:   "" 
+		SalesOrdr	:   If @@GKSaOrdVchType and $GKAdvRcptAmt!=0 then "" else ""
+		SalesOrdr	:   If (@@GKSalesVchType and $GKAdvRcptAmt!=0 and $$IsNotApplicable:$$FullList:InvoiceOrderList:$BasicPurchaseOrderNo) then "" else ""
+		Width		:	15
+		Align		:	Right
+		Format		:	"Decimals:2"
+
+		
+[Report	:	GKPOSExplode]
+	
+		Form	:	GKPOSExplode
+		
+[Form	:	GKPOSExplode]
+	
+		Part	:	GKPOSExplode
+		
+[Part	:	GKPOSExplode]
+	
+		Line		:	GKPOSExplode,GKPOSExplode1,GKPOSExplode2
+		Repeat		:	GKPOSExplode	:	GKPOSRegisterMainCollL
+		Scroll		:	Vertical
+		Vertical	:	Yes
+		
+
+[Line	:	GKPOSExplode1]
+	
+		Field		:	GKPOSRegDate,GKPOSRegVchType,GKPOSRegVchNo,GKPOSRegBillRef,GKPOSRegOrderNo
+		Field		:	GKPOSRegAdv,GKPOSRegBillCltns
+		Right Field	:	GKPOSRegCash,GKPOSRegCard,GKPOSRegCheque
+		Right Field	:	GKPOSRegOnline,GKPOSRegGift,GKPOSRegTot
+		
+		
+		Local	:	Field	:	Default		:	Delete	:	Storage
+		Local	:	Field	:	Default		:	Type	:	String
+		Local	:	Field	:	Default		:	Style	:	Small
+		
+		Local	:	Field	:	GKPOSRegDate	:	Type	:	String
+		Local	:	Field	:	GKPOSRegDate	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegVchType	:	Type	:	String
+		Local	:	Field	:	GKPOSRegVchType	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegVchNo	:	Indent	:	3
+		Local	:	Field	:	GKPOSRegVchNo	:	Color	:	Blue
+		Local	:	Field	:	GKPOSRegVchNo	:	Type	:	String
+		Local	:	Field	:	GKPOSRegVchNo	:	Set as	:	$$LocaleString:"Party Ph No : "+$$LocaleString:$GKVchPartyPh
+		Local	:	Field	:	GKPOSRegOrderNo	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegBillRef	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegCash	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegCard	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegCheque	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegOnline	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegGift	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegTot		:	Set as	:	""
+		Local	:	Field	:	GKPOSRegAdv		:	Set as	:	""
+		Local	:	Field	:	GKPOSRegBillCltns:  Set as	:	""
+		
+[Line	:	GKPOSExplode2]
+	
+		Field		:	GKPOSRegDate,GKPOSRegVchType,GKPOSRegVchNo,GKPOSRegBillRef,GKPOSRegOrderNo
+		Field		:	GKPOSRegAdv,GKPOSRegBillCltns
+		Right Field	:	GKPOSRegCash,GKPOSRegCard,GKPOSRegCheque
+		Right Field	:	GKPOSRegOnline,GKPOSRegGift,GKPOSRegTot
+		
+		Local	:	Field	:	Default		:	Delete	:	Storage
+		Local	:	Field	:	Default		:	Type	:	String
+		Local	:	Field	:	Default		:	Style	:	Small
+		
+		Local	:	Field	:	GKPOSRegDate	:	Type	:	String
+		Local	:	Field	:	GKPOSRegDate	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegVchType	:	Type	:	String
+		Local	:	Field	:	GKPOSRegVchType	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegVchNo	:	Indent	:	3
+		Local	:	Field	:	GKPOSRegVchNo	:	Color	:	Blue
+		Local	:	Field	:	GKPOSRegVchNo	:	Type	:	String
+		Local	:	Field	:	GKPOSRegVchNo	:	Set as	:	$$LocaleString:"Party Email : "+$$LocaleString:$GKVchPartyEmail
+		Local	:	Field	:	GKPOSRegOrderNo	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegBillRef	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegCash	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegCard	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegCheque	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegOnline	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegGift	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegTot		:	Set as	:	""
+		Local	:	Field	:	GKPOSRegAdv		:	Set as	:	""
+		Local	:	Field	:	GKPOSRegBillCltns:  Set as	:	""
+		
+		
+[Line	:	GKPOSExplode]
+	
+		Field		:	GKPOSRegDate,GKPOSRegVchType,GKPOSRegVchNo,GKPOSRegBillRef,GKPOSRegOrderNo
+		Field		:	GKPOSRegAdv,GKPOSRegBillCltns
+		Right Field	:	GKPOSRegCash,GKPOSRegCard,GKPOSRegCheque
+		Right Field	:	GKPOSRegOnline,GKPOSRegGift,GKPOSRegTot
+		
+		Local	:	Field	:	Default		:	Delete	:	Storage
+		Local	:	Field	:	Default		:	Type	:	String
+		Local	:	Field	:	Default		:	Style	:	Small
+		
+		Local	:	Field	:	GKPOSRegDate	:	Type	:	String
+		Local	:	Field	:	GKPOSRegDate	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegVchType	:	Type	:	String
+		Local	:	Field	:	GKPOSRegVchType	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegVchNo	:	Indent	:	3
+		Local	:	Field	:	GKPOSRegVchNo	:	Color	:	Blue
+		Local	:	Field	:	GKPOSRegVchNo	:	Type	:	String
+		Local	:	Field	:	GKPOSRegVchNo	:	Set as	:	$$LocaleString:"Party Name : "+$$LocaleString:$GKVchPartyNm
+		Local	:	Field	:	GKPOSRegOrderNo	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegBillRef	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegCash	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegCard	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegCheque	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegOnline	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegGift	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegTot		:	Set as	:	""
+		Local	:	Field	:	GKPOSRegAdv		:	Set as	:	""
+		Local	:	Field	:	GKPOSRegBillCltns:  Set as	:	""
+		
+*/	
+[Collection	:	GKPOSRegisterSalesColl]
+	
+		Type		:	Vouchers	:	VoucherType
+		Child Of	:	$$VchTypeSales
+		Belongs To	:	Yes
+		Fetch		:	VoucherNumber,VoucherTypeName,PartyLedgerName,Amount,Date,MasterId,IsCancelled
+		Fetch		:	GKPMCashAmt,GKChqAmtudf,GKCarAmtUdf,GKOnlineAmtUdf,GKPMGiftAmt,GKAdvRcptAmt
+		Fetch		:	GKVchPartyNm,GKVchPartyPh,GKVchPartyEmail
+		Filter		:	GKBranchSales
+		
+[Collection	:	GKPOSRegisterSOColl]
+	
+		Type		:	Vouchers	:	VoucherType
+		Child Of	:	$$VchTypeSalesOrder
+		Belongs To	:	Yes
+		Fetch		:	VoucherNumber,VoucherTypeName,PartyLedgerName,Amount,Date,MasterId,IsCancelled
+		Fetch		:	GKPMCashAmt,GKChqAmtudf,GKCarAmtUdf,GKOnlineAmtUdf,GKPMGiftAmt,GKAdvRcptAmt
+		Fetch		:	GKVchPartyNm,GKVchPartyPh,GKVchPartyEmail
+		Search Key	:	$VoucherNumber
+		Filter		:	GKBranchOrder
+		
+;[Collection	:	GKPOSRegisterMainColl]
+;	
+;		Source Collection	:	GKPOSRegisterSalesColl,GKPOSRegisterSOColl
+;		Walk				:	Ledger Entries,BillAllocations
+;		Fetch				:	Name,BillDate
+;		Fetch				:	VoucherNumber,VoucherTypeName,Reference,PartyLedgerName,Amount,Date,MasterId,IsCancelled
+;		Fetch				:	GKPMCashAmt,GKChqAmtudf,GKCarAmtUdf,GKOnlineAmtUdf,GKPMGiftAmt,GKAdvRcptAmt
+;		Fetch				:	GKVchPartyNm,GKVchPartyPh,GKVchPartyEmail
+;		Compute				:	GKVCHAdvAmt:$$Owner:$$Owner:$GKAdvRcptAmt
+;		Compute				:	GKBillRef:IF @@GKSaOrdVchType then $Reference else $Name
+;		Filter				:	GKCancelledVchrs,Datefltr;,GKValueZeroFltr
+;		Filter				:	CheckCond1
+;		Sort				:	Default:$VouchertypeName,$Name
+;		Search Key			:	$Name
+		
+[System:Formulae]
+	CheckCond:$Reference=$$PrevLine:$Reference; and $Date=$$PrevLine:#GKPOSRegDate
+		
+;;;Select $VoucherNumber,$VoucherTypeName,$GKBillRef,$GKPMCashAmt from GKPOSRegisterMainColl
+		
+[Collection	:	GKPOSRegisterMainCollO]
+	
+		Source Collection	:	GKPOSRegisterSalesColl,GKPOSRegisterSOColl
+		Walk				:	InvoiceOrderList
+		Fetch				:	Name,BillDate,BasicPurchaseOrderNo
+		Fetch				:	VoucherNumber,VoucherTypeName,Reference,PartyLedgerName,Amount,Date,MasterId,IsCancelled
+		Fetch				:	GKPMCashAmt,GKChqAmtudf,GKCarAmtUdf,GKOnlineAmtUdf,GKPMGiftAmt,GKAdvRcptAmt
+		Fetch				:	GKVchPartyNm,GKVchPartyPh,GKVchPartyEmail
+		Compute				:	GKVCHAdvAmt:$$Owner:$$Owner:$GKAdvRcptAmt
+		Filter				:	GKCancelledVchrs	
+		Sort				:	Default:$VouchertypeName,$Name
+		Search Key			:	$VoucherNumber
+
+[Collection	:	GKPOSRegisterMainCollL]
+	
+		Source Collection	:	GKPOSRegisterSalesColl,GKPOSRegisterSOColl
+		Fetch				:	VoucherNumber,VoucherTypeName,PartyLedgerName,Amount,Date,MasterId,IsCancelled
+		Fetch				:	GKPMCashAmt,GKChqAmtudf,GKCarAmtUdf,GKOnlineAmtUdf,GKPMGiftAmt,GKAdvRcptAmt
+		Fetch				:	GKVchPartyNm,GKVchPartyPh,GKVchPartyEmail
+		Sort				:	Default:-$VouchertypeName
+		Filter				:	GKVchFltr
+		
+[System	:	Formulae]
+	
+		GKVchFltr			:	$VoucherNumber=#GKPOSRegVchNo and $VoucherTypename=#GKPOSRegVchType
+		GKCancelledVchrs	:	NOT $IsCancelled
+		GKValueZeroFltr		:	$$Number:$GKPMCashAmt!=0; or $$Number:$GKChqAmtudf!=0 or $$Number:$GKCarAmtUdf!=0 or $$Number:$GKOnlineAmtUdf!=0 or $$Number:$GKPMGiftAmt!=0 or $$Number:$GKAdvRcptAmt!=0	
+		
+			
+
+;;;Select $VoucherNumber,$date,$VoucherTypename,$GKPMCashAmt from GKPOSRegisterMainColl
+
+[Collection	:	GKPOSRegRcptMnColl]
+	
+			
+			Source Collection	:	GKPOSRegRcptSubColl
+			Walk				:	All Ledger Entries
+			Fetch				:	VoucherNumber,Narration,VoucherTypeName,PartyLedgerName,LedgerName,Amount,Date,MasterId,IsCancelled
+			Compute				:	VchBillName:$LedgerEntries[1].Billallocations[1].Name
+			Fetch				:	Name,BillDate
+			Search Key			:	$VchBillName+$Narration
+			Filter				:	GKFltrCashBankLed;,Datefltr
+			
+			
+			
+;;;;Select $Date,$VoucherNumber,$LedgerName,$Narration,$Amount,$VchBillName from GKPOSRegRcptMnColl
+
+[Collection	:	GKPOSRegRcptMnCollA]
+	
+			Source Collection	:	GKPOSRegRcptSubColl
+			Walk				:	All Ledger Entries,Bill Allocations
+			Fetch				:	VoucherNumber,Narration,VoucherTypeName,PartyLedgerName,LedgerName,Amount,Date,MasterId,IsCancelled
+			Compute				:	VchBillName:$LedgerEntries[1].Billallocations[1].Name
+			Fetch				:	Name,BillDate
+			Search Key			:	$VchBillName
+			Filter				:	GKFltrNotCashBankLed
+			
+
+;;;;select $Vouchernumber,$VchBillName,$Amount from GKPOSRegRcptMnCollA
+			
+[Collection	:	GKPOSRegRcptMnCollL]
+	
+			Source Collection	:	GKPOSRegRcptSubColl
+			Walk				:	All Ledger Entries;,BillAllocations
+			Fetch				:	VoucherNumber,Narration,VoucherTypeName,PartyLedgerName,LedgerName,Amount,Date,MasterId,IsCancelled
+			Compute				:	VchBillName:$LedgerEntries[1].Billallocations[1].Name
+			Fetch				:	Name,BillDate
+			Search Key			:	$VchBillName+$Narration
+			Filter				:	GKFltrNotCashBankLed;,GKNarrCash
+
+[System	:	Formulae]
+	
+		GKFltrCashBankLed	:	$$IsLedOfGrp:$LedgerName:$$GroupCash or $$IsLedOfGrp:$LedgerName:$$GroupBank or $$IsLedOfGrp:$LedgerName:$$GroupBankOD 
+		GKFltrNotCashBankLed:   !$$IsLedOfGrp:$LedgerName:$$GroupCash or !$$IsLedOfGrp:$LedgerName:$$GroupBank or !$$IsLedOfGrp:$LedgerName:$$GroupBankOD 
+		GKNarrCash			:	$Narration="Cash"
+		Datefltr			:	$$Date:$Date=$$Date:"1-08-2022"
+		GKBranchSales		:	$VoucherTypeName=$$LocaleString:$GKBranchName:Company:##SVCurrentCompany+$$LocaleString:" Sales"
+		GKBranchOrder		:	$VoucherTypeName=$$LocaleString:$GKBranchName:Company:##SVCurrentCompany+$$LocaleString:" Sales Order"
+		GKBranchRcpt		:	$VoucherTypeName=$$LocaleString:$GKBranchName:Company:##SVCurrentCompany+$$LocaleString:" Receipt"
+		
+
+
+[Collection	:	GKPOSRegisterMainCollTest]
+	
+		Source Collection	:	GKPOSRegisterSalesColl,GKPOSRegisterSOColl
+		Walk				:	Ledger Entries,BillAllocations
+		Fetch				:	Name,BillDate
+		Fetch				:	VoucherNumber,VoucherTypeName,Reference,PartyLedgerName,Amount,Date,MasterId,IsCancelled
+		Fetch				:	GKPMCashAmt,GKChqAmtudf,GKCarAmtUdf,GKOnlineAmtUdf,GKPMGiftAmt,GKAdvRcptAmt
+		Fetch				:	GKVchPartyNm,GKVchPartyPh,GKVchPartyEmail
+		Compute				:	GKVCHAdvAmt:$$Owner:$$Owner:$GKAdvRcptAmt
+		Compute				:	GKBillRef:IF @@GKSaOrdVchType then $Reference else $Name
+		Compute				:	PrvRef:$$PrevObj:(IF @@GKSaOrdVchType then $Reference else $Name)
+		Filter				:	GKCancelledVchrs,Datefltr;,GKValueZeroFltr
+		Filter				:	CheckCond1
+		Sort				:	Default:-$VouchertypeName;,$Name
+		
+[System:Formulae]
+	;CheckCond1:$$PrevObj:$GKBillRef=$GKBillRef
+	CheckCond1:$$DebugLog:($GKBillRef=$$PrevLine:#GKPOSRegBillRef);!=$$PrevObj:$GKBillRef );and $Date!=$$PrevLine:#GKPOSRegDate)
+	;CheckCond1:$GKBillRef!="SOBL5";$$PrevFld:$GKBillRef;$$CollectionFieldByKey:$NAme:$Reference:GKPOSRegisterSalesColl;$$PrevLine:$Reference; and $Date=$$PrevLine:#GKPOSRegDate
+	
+
+;;Select $VoucherNumber,$date,$VoucherTypeName,$GKBillRef,$PrvRef,$GKPMCashAmt from GKPOSRegisterMainCollTest
+		
+
+
+/**/
+
+;
+;[#Menu:Gatewayoftally]
+;	
+;Add	:	Option	:	EnableeGKModu1le	:	@@GKIsTDLEnable
+;
+;[!Menu	:	EnableeGKModu1le]
+;	
+;		Add	:	Key Item	:	PayMode Register	:	P	:	Display	:	GKPOSRegister
+		
+[Report	:	GKPOSRegister]
+	
+		Title	:	"PayMode Register"
+		Form	:	GKPOSRegister
+		Variable:	SVFromDate,SVToDate,ExplodeFlag
+		Set		:	SVFromDate:@@LastVoucherDate
+		Set		:	SVToDate:@@LastVoucherDate
+		Set		:	ExplodeFlag:No
+		
+[Form	:	GKPOSRegister]
+	
+		Height	:	100 % page
+		Width	:	100 % Page
+		Background:Very Light sea Green
+		Button	:	Change Period,ExplodeFlag
+		Part	:	GKPOSRegHead,GKPOSRegister,GKPOSNarration
+		
+[Part	:	GKPOSRegHead]
+		
+	Line	:	GKPOSRegHead
+	
+[Line	:	GKPOSRegHead]
+
+		Space Bottom:	0.2 cm
+		Field		:	GKPOSRegHead
+		Right Field	:	GKPOSRegPeriod
+		
+[Field	:	GKPOSRegHead]
+	
+		Use			:	Name Field
+		Set as		:	"Payment Mode Register"
+		Full Width	: 	Yes
+		Align		:	Left
+		
+[Field	:	GKPOSRegPeriod]
+	
+		Use		:	Name Field
+		Set as	:	@@DSPDatestr
+		Full Width: Yes
+		Align	:	Right
+		
+[Part	:	GKPOSNarration]
+	
+		Line	:	GKPOSNarration
+		
+[Line	:	GKPOSNarration]
+	
+		Space Bottom	:	0.2 cm
+		Space Top		:	0.2 cm
+		Field			:	GKPOSNarration
+		
+[Field	:	GKPOSNarration]
+	
+		Use			:	Name Field
+		Set as		:	$$LocaleString:"Note : "+$$LocaleString:"This report is extracted from stores specific voucher types "	
+		Full Width	:	Yes
+		Align		:	Left
+		Style		:	Small Bold
+		
+		
+[Part	:	GKPOSRegister]
+	
+		Line		:	GKPOSRegisterTit,GKPOSRegisterBdy
+		Repeat		:	GKPOSRegisterBdy	:	GKPOSRegisterMainColl
+		Bottom Line	:	GKPOSRegisterTot
+		Scroll		:	Vertical
+		Vertical	:   Yes
+		Total		:	GKPOSRegCash,GKPOSRegCard,GKPOSRegCheque
+		Total		:	GKPOSRegOnline,GKPOSRegGift,GKPOSRegAdv,GKPOSRegTot,GKPOSRegBillCltns
+		
+		
+[Line	:	GKPOSRegisterTit]
+	
+		Border		:	Thin Top Bottom
+		Field		:	GKPOSRegDate,GKPOSRegVchType,GKPOSRegVchNo,GKPOSRegBillRef,GKPOSRegOrderNo
+		Field		:	GKPOSRegAdv,GKPOSRegBillCltns
+		Right Field	:	GKPOSRegCash,GKPOSRegCard,GKPOSRegCheque
+		Right Field	:	GKPOSRegOnline,GKPOSRegGift,GKPOSRegTot
+		
+		
+		Local	:	Field	:	Default		:	Delete	:	Storage
+		Local	:	Field	:	Default		:	Type	:	String
+		Local	:	Field	:	Default		:	Style	:	Small Bold
+		
+		Local	:	Field	:	GKPOSRegDate	:	Set as	:	"Date"
+		Local	:	Field	:	GKPOSRegVchType	:	Set as	:	"VoucherType"
+		Local	:	Field	:	GKPOSRegVchNo	:	Set as	:	"VoucherNumber"
+		Local	:	Field	:	GKPOSRegBillRef	:	Set as	:	"Bill Ref."
+		Local	:	Field	:	GKPOSRegOrderNo	:	Set as	:	"Order No"
+		Local	:	Field	:	GKPOSRegCash	:	Set as	:	"Cash"
+		Local	:	Field	:	GKPOSRegCard	:	Set as	:	"Card"
+		Local	:	Field	:	GKPOSRegCheque	:	Set as	:	"Cheque"
+		Local	:	Field	:	GKPOSRegOnline	:	Set as	:	"Online"
+		Local	:	Field	:	GKPOSRegGift	:	Set as	:	"Gift"
+		Local	:	Field	:	GKPOSRegTot		:	Set as	:	"PayMode Total"
+		Local	:	Field	:	GKPOSRegAdv		:	Set as	:	"Advance"
+		Local	:	Field	:	GKPOSRegBillCltns:  Set as	:	"Order/Inv. Amount"
+		
+[Line	:	GKPOSRegisterTot]
+	
+		Border		:	Thin Top Bottom
+		Field		:	GKPOSRegDate,GKPOSRegVchType,GKPOSRegVchNo,GKPOSRegBillRef,GKPOSRegOrderNo
+		Field		:	GKPOSRegAdv,GKPOSRegBillCltns
+		Right Field	:	GKPOSRegCash,GKPOSRegCard,GKPOSRegCheque
+		Right Field	:	GKPOSRegOnline,GKPOSRegGift,GKPOSRegTot
+		
+		
+		Local	:	Field	:	Default		:	Delete	:	Storage
+		Local	:	Field	:	Default		:	Type	:	Number
+		Local	:	Field	:	Default		:	Style	:	Small Bold
+		
+		Local	:	Field	:	GKPOSRegDate	:	Type	:	String
+		Local	:	Field	:	GKPOSRegDate	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegVchType	:	Type	:	String
+		Local	:	Field	:	GKPOSRegVchType	:	Set as	:	"Total"
+		Local	:	Field	:	GKPOSRegVchNo	:	Type	:	String
+		Local	:	Field	:	GKPOSRegVchNo	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegOrderNo	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegBillRef	:	Type	:	String
+		Local	:	Field	:	GKPOSRegBillRef	:	Set as	:	""
+		Local	:	Field	:	GKPOSRegCash	:	Set as	:	$$Total:GKPOSRegCash	
+		Local	:	Field	:	GKPOSRegCard	:	Set as	:	$$Total:GKPOSRegCard	
+		Local	:	Field	:	GKPOSRegCheque	:	Set as	:	$$Total:GKPOSRegCheque	
+		Local	:	Field	:	GKPOSRegOnline	:	Set as	:	$$Total:GKPOSRegOnline	
+		Local	:	Field	:	GKPOSRegGift	:	Set as	:	$$Total:GKPOSRegGift
+		Local	:	Field	:	GKPOSRegTot		:	Set as	:	$$Total:GKPOSRegTot
+		Local	:	Field	:	GKPOSRegAdv		:	Set as	:	$$Total:GKPOSRegAdv	
+		Local	:	Field	:	GKPOSRegBillCltns:  Set as	:	"";$$Total:GKPOSRegBillCltns
+		Local	:	Field	:	GKPOSRegBillCltns:  Format	:	"No Zero"
+		
+		
+		
+[Line	:	GKPOSRegisterBdy]
+	
+		
+		;Remove if	:	($Reference=$$PrevLine:#GKPOSRegBillRef and $Date=$$PrevLine:#GKPOSRegDate)
+		
+		Field		:	GKPOSRegDate,GKPOSRegVchType,GKPOSRegVchNo,GKPOSRegBillRef,GKPOSRegOrderNo
+		Field		:	GKPOSRegAdv,GKPOSRegBillCltns
+		Right Field	:	GKPOSRegCash,GKPOSRegCard,GKPOSRegCheque
+		Right Field	:	GKPOSRegOnline,GKPOSRegGift,GKPOSRegTot
+		
+
+		Local		:	Field	:	Default		:	Style	:	Small
+		;Option		:	AlterOnEnter
+;		Explode		:	GKPOSExplode:##ExplodeFlag
+		
+[Field	:	GKPOSRegDate]
+	
+		Use		:	Uni Date Field
+		Set as	:	$Date
+		Width	:	10
+		Align	:	Center
+		
+		
+[Field	:	GKPOSRegVchType]
+	
+		Use		:	Name Field
+		Set as	:	$VoucherTypeName
+		Width	:	20
+		Align	:	Center
+		
+[Field	:	GKPOSRegVchNo]
+	
+		Use		:	Name Field
+		Set as	:	$VoucherNumber
+		Width	:	30
+		Align	:	Center
+		;Alter	:	Voucher
+		
+[Field	:	GKPOSRegOrderNo]
+	
+		Use		:	Name Field
+		Set as	:	"";$$CollectionFieldByKey:$BasicPurchaseOrderNo:#GKPOSRegVchNo:GKPOSRegisterMainCollO
+		Width	:	20
+		Align	:	Center
+		Invisible:	Yes
+		
+[Field	:	GKPOSRegBillRef]
+	
+		Use		:	Name Field
+		Set as	:	IF @@GKSaOrdVchType then $Reference else $Name
+		Width	:	20
+		Align	:	Center
+		
+[Field	:	GKPOSRegCash]
+	
+		Use		:	Number Field
+		Set as	:	$$Number:$$CollectionFieldByKey:$Amount:@SRCKEY:GKPOSRegisterMainCollN
+		SRCKEY	:	$$LocaleString:#GKPOSRegVchNo+$$LocaleString:"Cash"
+		Width	:	10
+		Align	:	Right
+		Format	:	"Decimals:2"
+		
+[Field	:	GKPOSRegCard]
+	
+		Use		:	Number Field
+		Set as	:	$$Number:$$CollectionFieldByKey:$Amount:@SRCKEY:GKPOSRegisterMainCollN
+		SRCKEY	:	$$LocaleString:#GKPOSRegVchNo+$$LocaleString:"Card"
+		Width	:	10
+		Align	:	Right
+		Format	:	"Decimals:2"
+		
+[Field	:	GKPOSRegCheque]
+	
+		Use		:	Number Field
+		Set as	:	$$Number:$$CollectionFieldByKey:$Amount:@SRCKEY:GKPOSRegisterMainCollN
+		SRCKEY	:	$$LocaleString:#GKPOSRegVchNo+$$LocaleString:"Cheque/DD"
+		Width	:	10
+		Align	:	Right
+		Format	:	"Decimals:2"
+		
+[Field	:	GKPOSRegOnline]
+	
+		Use		:	Number Field
+		Set as	:	$$Number:$$CollectionFieldByKey:$Amount:@SRCKEY:GKPOSRegisterMainCollN
+		SRCKEY	:	$$LocaleString:#GKPOSRegVchNo+$$LocaleString:"Online"
+		Width	:	10
+		Align	:	Right
+		Format	:	"Decimals:2"
+		
+[Field	:	GKPOSRegGift]
+		
+		Use		:	Number Field
+		Set as	:	$$Number:$$CollectionFieldByKey:$Amount:@SRCKEY:GKPOSRegisterMainCollN
+		SRCKEY	:	$$LocaleString:#GKPOSRegVchNo+$$LocaleString:"Gift Coupons"
+		Width	:	10
+		Align	:	Right
+		Format	:	"Decimals:2"
+		
+[Field	:	GKPOSRegTot]
+	
+		Use		:	Number Field
+		Set as	:	$$Number:#GKPOSRegCash+$$Number:#GKPOSRegCard+$$Number:#GKPOSRegCheque+$$Number:#GKPOSRegOnline+$$Number:#GKPOSRegGift
+		Width	:	20
+		Align	:	Right
+		Format	:	"Decimals:2"
+		
+[Field	:	GKPOSRegAdv]
+	
+		Use			:	Name Field
+		Set as		:	@CheckCond
+		CheckCond	:	IF #GKPOSRegBillRef Starting With "SI" then $$CollectionFieldByKey:$VoucherNumber:@SRCHKEY:GKPOSRegisterMainCollM else $$CollectionFieldByKey:$Reference:@SRCHKEY:GKPOSRegisterMainCollMnt 
+		SRCHKEY		:	$$LocaleString:#GKPOSRegBillRef
+		Width		:	10
+		Align		:	Right
+		Format		:	"Decimals:2"
+		Invisible	:	Yes	
+			
+
+		
+[Field	:	GKPOSRegBillCltns]
+	
+		Use			:	Number Field
+		Set as		:	$$CollectionFieldByKey:$Amount:@SRCHKEY:GKPOSRegisterMainCollMn
+		SRCHKEY		:	$$LocaleString:#GKPOSRegAdv
+		Width		:	15
+		Align		:	Right
+		Format		:	"Decimals:2"
+		
+
+
+[Collection	:	GKPOSRegRcptSubColl]
+	
+		Type		:	Vouchers	:	VoucherType
+		Child Of	:	$$VchTypeReceipt
+		Belongs To	:	Yes
+		Fetch		:	VoucherNumber,VoucherTypeName,PartyLedgerName,LedgerName,Amount,Date,MasterId,IsCancelled
+		Filter		:	GKCancelledVchrs,GKBranchRcpt
+		;Parm Var    : 	SVFromDate  : Date  : @@ITCurrFinYrBgn
+		;Parm Var    : 	SVToDate  	: Date  : @@LastVoucherDate
+		
+
+[Collection	:	GKPOSRegisterMainColl]
+	
+		Source Collection	:	GKPOSRegRcptSubColl
+		Walk				:	Ledger Entries,BillAllocations
+		Fetch				:	Name,BillDate
+		Fetch				:	VoucherNumber,VoucherTypeName,LedgerName,Reference,PartyLedgerName,Amount,Date,MasterId,IsCancelled
+		Fetch				:	GKPMCashAmt,GKChqAmtudf,GKCarAmtUdf,GKOnlineAmtUdf,GKPMGiftAmt,GKAdvRcptAmt
+		Fetch				:	GKVchPartyNm,GKVchPartyPh,GKVchPartyEmail
+		Compute				:	GKVCHAdvAmt:$$Owner:$$Owner:$GKAdvRcptAmt
+		Compute				:	GKBillRef:IF @@GKSaOrdVchType then $Reference else $Name
+		Filter				:	GKCancelledVchrs;,GKLastVchrDate
+		Sort				:	Default:$Date;,$Name
+		Search Key			:	$VoucherNumber+$Name
+		
+
+;;;Select $VoucherNumber,$Date,$LedgerName,$Narration from GKPOSRegisterMainColl
+
+[Collection	:	GKPOSRegisterMainCollN]
+	
+		Source Collection	:	GKPOSRegRcptSubColl
+		Walk				:	Ledger Entries
+		Fetch				:	Name,BillDate
+		Fetch				:	VoucherNumber,VoucherTypeName,LedgerName,Reference,PartyLedgerName,Amount,Date,MasterId,IsCancelled
+		Fetch				:	GKPMCashAmt,GKChqAmtudf,GKCarAmtUdf,GKOnlineAmtUdf,GKPMGiftAmt,GKAdvRcptAmt
+		Fetch				:	GKVchPartyNm,GKVchPartyPh,GKVchPartyEmail
+		Compute				:	GKVCHAdvAmt:$$Owner:$$Owner:$GKAdvRcptAmt
+		Compute				:	Narration:$Narration
+		Compute				:	GKBillRef:IF @@GKSaOrdVchType then $Reference else $Name
+		Filter				:	GKCancelledVchrs,FilBankAccts;,GKLastVchrDate;Datefltr;,GKValueZeroFltr
+		Sort				:	Default:$Date;,$Name
+		Search Key			:	$VoucherNumber+$Narration
+		
+;;;Select $VoucherNumber,$Date,$LedgerName,$Narration,$Amount from GKPOSRegisterMainCollN
+		
+[System	:	Formulae]
+	
+;		GKCancelledVchrs	:	NOT $IsCancelled
+;		GKBranchRcpt		:	$VoucherTypeName=$$LocaleString:$GKBranchName:Company:##SVCurrentCompany+$$LocaleString:" Receipt"
+;		FilBankAccts		:	$$IsLedOfGrp:$LedgerName:$$GroupBank or $$IsLedOfGrp:$LedgerName:$$GroupCash or $$IsLedOfGrp:$LedgerName:$$GroupBankod
+		GKLastVchrDate		:	$$Date:##SVFromdAte=>$$Date:@@ITCurrFinYrBgn and $$Date:##SVToDate<=$$Date:$LastVoucherDate:Company:##SVCurrentCompany
+;		GKBranchSales		:	$VoucherTypeName=$$LocaleString:$GKBranchName:Company:##SVCurrentCompany+$$LocaleString:" Sales"
+;		GKFltrNotCashBankLed:   !$$IsLedOfGrp:$LedgerName:$$GroupCash or !$$IsLedOfGrp:$LedgerName:$$GroupBank or !$$IsLedOfGrp:$LedgerName:$$GroupBankOD 
+;		GKBranchOrder		:	$VoucherTypeName=$$LocaleString:$GKBranchName:Company:##SVCurrentCompany+$$LocaleString:" Sales Order"
+				
+[Collection	:	GKPOSRegisterSalesCollM]
+	
+		Type		:	Vouchers	:	VoucherType
+		Child Of	:	$$VchTypeSales
+		Belongs To	:	Yes
+		Fetch		:	VoucherNumber,VoucherTypeName,PartyLedgerName,Amount,Date,MasterId,IsCancelled
+		Fetch		:	GKPMCashAmt,GKChqAmtudf,GKCarAmtUdf,GKOnlineAmtUdf,GKPMGiftAmt,GKAdvRcptAmt
+		Fetch		:	GKVchPartyNm,GKVchPartyPh,GKVchPartyEmail
+		Filter		:	GKBranchSales
+		Search Key	:	$VoucherNumber
+		
+;;;Select $Date,$VoucherNumber,$VoucherTypeName,$Name,$Amount from GKPOSRegisterMainCollM
+
+[Collection	:	GKPOSRegisterSOCollM]
+	
+		Type		:	Vouchers	:	VoucherType
+		Child Of	:	$$VchTypeSalesOrder
+		Belongs To	:	Yes
+		Fetch		:	VoucherNumber,VoucherTypeName,PartyLedgerName,Amount,Date,MasterId,IsCancelled
+		Fetch		:	GKPMCashAmt,GKChqAmtudf,GKCarAmtUdf,GKOnlineAmtUdf,GKPMGiftAmt,GKAdvRcptAmt
+		Fetch		:	GKVchPartyNm,GKVchPartyPh,GKVchPartyEmail
+		Search Key	:	$VoucherNumber
+		Filter		:	GKBranchOrder
+		
+[Collection	:	GKPOSRegisterMainCollM]
+	
+		Source Collection	:	GKPOSRegisterSalesCollM;,GKPOSRegisterSOCollM
+		Walk				:	Ledger Entries,BillAllocations
+		Fetch				:	Name,BillDate
+		Fetch				:	VoucherNumber,VoucherTypeName,Reference,PartyLedgerName,Amount,Date,MasterId,IsCancelled
+		Fetch				:	GKPMCashAmt,GKChqAmtudf,GKCarAmtUdf,GKOnlineAmtUdf,GKPMGiftAmt,GKAdvRcptAmt
+		Fetch				:	GKVchPartyNm,GKVchPartyPh,GKVchPartyEmail
+		Filter				:	GKCancelledVchrs
+		Sort				:	Default:$VouchertypeName,$Name
+		Search Key			:	$Name
+		
+;;;Select $Date,$VoucherNumber,$VoucherTypeName,$Name,$Amount from GKPOSRegisterMainCollM
+
+[Collection	:	GKPOSRegisterMainCollMnt]
+	
+		Source Collection	:	GKPOSRegisterSOCollM
+		Fetch				:	Name,BillDate
+		Fetch				:	VoucherNumber,VoucherTypeName,Reference,PartyLedgerName,Amount,Date,MasterId,IsCancelled
+		Fetch				:	GKPMCashAmt,GKChqAmtudf,GKCarAmtUdf,GKOnlineAmtUdf,GKPMGiftAmt,GKAdvRcptAmt
+		Fetch				:	GKVchPartyNm,GKVchPartyPh,GKVchPartyEmail
+		Filter				:	GKCancelledVchrs
+		Sort				:	Default:$VouchertypeName,$Name
+		Search Key			:	$Reference
+		
+;;;Select $Date,$REference,$VoucherTypeName,$VchAmt from GKPOSRegisterMainCollMnt
+		
+[Collection	:	GKPOSRegisterMainCollMn]
+	
+		Compute Var			:	VarVchRef	:	String	:	IF @@GKBranchOrder then $Reference else $VoucherNumber
+		Source Collection	:	GKPOSRegisterSalesCollM,GKPOSRegisterSOCollM
+		;Walk				:	ALl Ledger Entries
+		Fetch				:	Name,BillDate
+		Fetch				:	VoucherNumber,VoucherTypeName,Reference,PartyLedgerName,Amount,Date,MasterId,IsCancelled
+		Fetch				:	GKPMCashAmt,GKChqAmtudf,GKCarAmtUdf,GKOnlineAmtUdf,GKPMGiftAmt,GKAdvRcptAmt
+		Fetch				:	GKVchPartyNm,GKVchPartyPh,GKVchPartyEmail
+		Filter				:	GKCancelledVchrs
+		By					:	VchNo	:	##VarVchRef
+		Aggr Compute		:	VchAmt	:	Sum	:	$Amount
+		Sort				:	Default:$VouchertypeName,$Name
+		Search Key			:	$VchNo
+		
+;;;Select $Date,$VchNo,$VoucherTypeName,$VchAmt from GKPOSRegisterMainCollMn

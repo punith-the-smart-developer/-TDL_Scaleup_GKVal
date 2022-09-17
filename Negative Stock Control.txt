@@ -1,0 +1,36 @@
+
+[#Part: CMP TallyShopFeatures Left]
+	
+	Add : Line  : GK_ControlNegStk
+	  
+	   [Line: GK_ControlNegStk]
+		   
+		   Fields : Medium Prompt, GK_ControlNegStk
+		   Local : Field : Medium Prompt : Set as : $$LocaleString:"Activate Negative Stock Control : "
+		   Local   : 	Field 	: 	Medium Prompt 	: 	Width	: 	25
+		   
+		   [Field: GK_ControlNegStk] 
+			   
+			   Use 			: Logical Field
+			   Storage 		: Negtv_Contol
+			   Table 		: YesNoTable 
+			   Show Table 	: Always 
+			   
+
+
+[#Field:VCHBATCH NrmlBQty]
+	 
+	 Add	:	Option	:	VCH_NrmlBilledQty1	:	@@IsSales 
+
+ [!Field:VCH_NrmlBilledQty1]
+
+    Delete : Notify
+    Delete : Control
+    Add  :   Control : NegativeStock : $$IsNegative:@@FinalStockTotal  and $Negtv_Contol:Company:##svCurrentCompany = Yes ;It vl nt allow Cursor To move Next field incase of negative stock  
+  
+
+[System	:	UDF]
+	
+			Negtv_Contol	: Logical	:	55952
+
+	

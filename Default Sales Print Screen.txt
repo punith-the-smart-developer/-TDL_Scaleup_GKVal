@@ -1,0 +1,59 @@
+
+
+[#Part	:	EXPINV Buyer]
+	
+	Add	:	Option	:	EnableSalesPrint:	$GKEnablePrint:VoucherType:##SVVoucherType
+	
+[!Part	:	EnableSalesPrint]
+
+	Add	:	Option	:	EnableInPrint	:	@@GKSalesVchType or @@GKSaOrdVchType
+	
+[!Part	:	EnableInPrint]
+	
+	Add	:	Lines       	: After	:	 EXPINV Buyer	:	GK_BuyerMobileNo,GK_BuyerEmail
+	
+[Line	:	GK_BuyerMobileNo]
+	
+		Field	:	Medium Prompt,GK_BuyerMobileNo
+		Local	:	Field	:	Medium Prompt	:	Set as	:	"Phone No:"
+		Local	:	Field	:	Medium Prompt	:	Width	:	10
+		Local	:	Field	:	Medium Prompt	:	Style	:	Small
+		
+[Field	:	GK_BuyerMobileNo]
+	
+		Use		:	Name Field
+		Set as	:	$GKVchPartyPh
+		Width	:	15
+		Align	:	Left
+		Style	:	Small Bold
+;		Print FG:	Blue
+		
+[Line	:	GK_BuyerEmail]
+	
+		Field	:	Medium Prompt,GK_BuyerEmail
+		Local	:	Field	:	Medium Prompt	:	Set as	:	"EMail:"
+		Local	:	Field	:	Medium Prompt	:	Width	:	10
+		Local	:	Field	:	Medium Prompt	:	Style	:	Small
+		
+[Field	:	GK_BuyerEmail]
+	
+		Use		:	Name Field
+		Set as	:	$GKVchPartyEmail
+		Width	:	15
+		Align	:	Left
+		Style	:	Small Bold
+;		Print FG:	Blue
+
+
+[#Line: EXPINV Buyer]
+
+Add	:	Option	:	EnableInPrint	:	@@GKSalesVchType or @@GKSaOrdVchType
+	
+[!Line	:	EnableInPrint]
+	
+        Field   : Name Field
+		Local   : Field : Name Field : Set as   : if @@RejInvoice then @@RejinOutPartyName else $GKVchPartyNm
+        Local   : Field : Name Field : Width    : 50% Page
+;		Local	: Field	: Name Field : Print FG:	Blue
+		Local   : Field : Name Field : Cells    : 2 * ($$Quotient:@@ExcelCellColumn:4)  
+        Option  : GST EXPINV ItemTaxAnalysisPrint TinyBoldStyle : @@IsGSTOnAppl AND @@IsGSTTaxAnalysisWithItems

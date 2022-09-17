@@ -1,0 +1,76 @@
+
+
+;[#Menu: Exchange TopMenu]
+;	
+;	Indent		: @@locDataSyncronize
+;
+;	Delete	:   Key Item	: @@locSyncronize	: 		O	 		:		Synchronize										: NOT ($$IsEmpty:$$SelectedCmps) AND ($$NumberOfMasterTrnRules > 0)
+;    Add		:	Key Item	: After				: @@locServerRules	:		@@locSyncronize		: 	O 	: Call	:	LogFunc	: NOT ($$IsEmpty:$$SelectedCmps) AND ($$NumberOfMasterTrnRules > 0)
+;	
+;	
+[Function	:	LogFunc]
+ 
+	010	:	If	:	$$IsTallyServer
+	100	:	Synchronize
+	110	:	Call:	ToModifyOptnVcrs
+	120	:	Else
+	130	:	Synchronize
+	140	:	End If
+	
+[Function:ToModifyOptnVcrs]
+	
+
+		Variable	:	VarMID	:	String
+		Variable	:	VarNo	:	String	:	No
+			
+		100	:	Walk Collection	:	GKModifyOptional
+		
+		110	:	Set	:	VarMID	:	$$String:"Id:"+$$LocaleString:$MasterId
+
+		120	:	Modify Object:(Voucher,##VarMID).IsOptional:##VarNo
+		
+		130	:	End Walk
+		
+
+
+[Collection	:	GKModifyOptionalL]
+	
+	Type	:	Voucher
+	Fetch	:	IsOptional,VoucherTypeName,VoucherNumber,MasterId,PArtyLedgerName
+	Filter	:	OnlyFltrVchrs1;,BS
+	
+[Collection:GKModifyOptional]
+	Source Collection:GKModifyOptionalL
+	Walk:Inventory Entries
+	Fetch:IsOptional,VoucherTypeName,VoucherNumber,MasterId,PArtyLedgerName
+	By:MID:$MasterId
+			
+	
+	
+[System:Formulae]
+	BS:$VouchertypeName="Bangalore Consolidated sales"
+	OnlyFltrVchrs1	:	$Isoptional=Yes
+	
+;;;;Select $IsOptional,$VoucherTypeName,$VoucherNumber,$MID,$PArtyLedgerName from GKModifyOptional
+
+	
+;[Function	:	GKModifyOptionalFun]
+;	
+;		Variable:GKVarMID:String
+;		100	:	Walk Collection	:	GKModifyOptional
+;		103	:	Set	:	GKVarMID	:	$$String:"Id:"+$$LocaleString:$MasterId
+;;		1:Log:$$LocaleString:$VoucherNumber+$$LocaleString:##GKVarMID
+;		110	:	Modify Object:(Voucher,##GKVarMID).IsOptional[1].IsOptional:No
+;		120	:	End Walk
+;		
+;;[Variable	:	GKVarMID]
+;;	
+;	Type		:	String
+;	Persistent	:	Yes
+;	
+;[System	:	Variable]
+;	
+;		GKVarMID	:	""
+;	
+
+

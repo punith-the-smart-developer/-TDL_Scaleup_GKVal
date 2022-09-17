@@ -1,0 +1,96 @@
+
+
+[Line	:	GKSynctimerSetUp]
+	Fields	:	Medium Prompt,GKSynctimerSetUp
+	
+	Local	:	Field	:	Medium Prompt	:	Set as	:	"Set Timer (In Minutes):"
+	Local   : 	Field 	: 	Medium Prompt 	: 	Width	: 	25
+	
+[Field	:	GKSynctimerSetUp]
+	Use			:	Number Field
+	Storage		:	GKTimersetup
+	Set Always	:	Yes
+	Full Width	:	Yes
+	Format		: "nocomma"
+	Style		: Small
+
+[System:UDF]
+		GKTimersetup			:	Number	:	32201
+		
+
+
+[#Menu:Gatewayoftally]
+	
+	Add	:	Option	:	EnableeGKModu1le1	:	@@GKIsTDLEnable
+	
+[!Menu	:	EnableeGKModu1le1]
+
+		Add	:	Button	:	btnStartTimer1,btnStopTimer1
+		
+[Button	:	btnStartTimer1]
+	
+	Key		:	Alt+1
+	Title	:	Start Timer
+	Action	:	Call	:	GKDataSyncReStartTimer
+	
+
+
+[Button	:	btnStopTimer1]
+	
+	Key		:	Alt+2
+	Title	:	Stop Timer
+	Action	:	Call	:	GKDataSyncStopTimer
+	
+
+[Function: GKDataSyncStartTimer]
+	
+	Local Formula	:	SystemTime	:	($$SysInfo:SystemTimeHMS)
+	
+	ST01	: Log	:	"Start"
+	ST00	: START TIMER		: 	GKInvoiceSyncTimer	: $$Number:@@TimerSyncSeconds1
+	ST10	: Log	:	$$Sprintf:"Timer Started at %s for %s minutes":@SystemTime:@@TallySchedularTime1
+	
+	
+[Function: GKDataSyncStopTimer]
+	
+	Local Formula	:	SystemTime	:	($$SysInfo:SystemTimeHMS)
+	
+	SP00	: STOP TIMER		:	GKInvoiceSyncTimer
+	SP01	: Log	:	$$Sprintf:"Timer Stoped at %s":@SystemTime
+
+
+
+[Function: GKDataSyncReStartTimer]
+	
+	Local Formula	:	SystemTime	:	($$SysInfo:SystemTimeHMS)
+	
+
+	RST02	: Do If	:	@@TimerSyncSeconds1=0	:	Log	:	"Zero Seconds not Allowed for Timer!!"
+	RST03	: Do If	:	@@TimerSyncSeconds1=0	:	Continue
+	RST00	: START TIMER		: 	GKInvoiceSyncTimer	: $$Number:@@TimerSyncSeconds1
+	RST10	: Log	:	$$Sprintf:"Timer Started at %s":@SystemTime
+	
+	
+
+	
+[System:Formulae]
+	
+		TimerSyncSeconds1				: @@TallySchedularTime1*60
+		TallySchedularTime1				: $GKTimersetup:Company:##SVCurrentCompany
+		IsNotTimerSecondsEmpty1			: !$$IsEmpty:@@TallySchedularTime1
+
+[System	:	Events]
+	
+	InvoiceSync				: Load Company		: @@IsNotTimerSecondsEmpty1	: Call 	: 	GKDataSyncStartTimer
+	GKInvoiceSyncTimer		: Timer				: Yes						: Call	:	ToSyncTrans
+
+[Function	:	ToSyncTrans]	
+		
+		Local Formula	:	SystemTime	:	($$SysInfo:SystemTimeHMS)
+		T020	:	Call	: GKDataSyncStopTimer
+		100		:	Synchronize
+		T080	: 	Call	: GKDataSyncReStartTimer
+		110	:	Log:@SystemTime
+
+	
+	

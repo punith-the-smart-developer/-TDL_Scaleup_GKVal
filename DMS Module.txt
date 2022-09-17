@@ -1,0 +1,669 @@
+
+
+
+[System: Formula]
+	
+ColonLineString		: "|"
+ReplaceColonLineString 	: ""
+MyOpenFilePath : $$RepleaceStrng:$DMFS_FilePath:@@ColonLineString:@@ReplaceColonLineString
+
+[Function : RepleaceStrng]
+
+            Parameter    : StrExpression    : String
+            Parameter    : StrFindStr       : String
+            Parameter    : StrReplaceStr    : String
+            Returns      : String
+            Variable      : Counter        : Number
+            Variable      : ExpLen        : Number
+            Variable    : TmpVar        : String
+            Variable    : FindStrLen    : Number
+            Variable      : RtnVal        : String
+            10  : SET    : Counter        : 0
+            20  : SET    : ExpLen        : $$StringLength:##StrExpression
+            30  : SET  : RtnVal        : ""
+            31  : SET  : FindStrLen    : $$StringLength:##StrFindStr
+            40  : IF : NOT $$IsEmpty:##StrExpression
+            50  :    WHILE    : ##Counter <= ##ExpLen - 1
+            60  :        SET : TmpVar : $$StringPart:##StrExpression:##Counter:##FindStrLen
+            70  :        IF  :  $$Exactmatch:##TmpVar:##StrFindStr
+            777  :            SET : RtnVal : ##RtnVal + ##StrReplaceStr
+            90  :            SET : Counter : ##Counter + ##FindStrLen
+            100 :        ELSE
+            110 :            SET : RtnVal : ##RtnVal + $$StringPart:##StrExpression:##Counter:1
+            120 :            SET : Counter : ##Counter + 1
+            130 :        END IF
+            140 :    END WHILE
+            150 : END IF
+            160 : RETURN : ##RtnVal
+			
+[Function:ExecuteFileDialog]
+	
+	Variable:Fileparam:String
+	
+	01:If:$$IsCOMInterfaceInvokable:MsFileDialog
+	02:Exec COM Interface:MsFileDialog:@@CanSelectMultiDoc
+	03:Set:Fileparam:$$LastResult
+	04:List Delete Ex:MsFileName
+	05:For Token:TokenVar:##Fileparam:"|"
+	06:List Add Ex:MsFileName:##TokenVar
+	07:End For
+	08:Call:ProcessDialogResponse
+	09:Else:
+	10:Log:"Unable to invoke com interface"
+	11:End If
+	
+
+[Function:ProcessDialogResponse]
+
+	01:If:##MsFileName[0] = "OPFAILED"
+	02:Log:"Nothing Selected"
+	03:Else
+	04:if:##MsFileName[0] = "Error"
+	05:Msg Box:"Error":##MsFileName[1]
+	06:Else
+	07:Set Value:DMFS_FilePath:##Fileparam
+	08:End If
+	09:End If
+	10:Return
+	
+[System:Formulae]
+	
+	CanSelectMultiDoc:if $CanSelectMultiple then 1 else 0
+	CurrentSelectedDoc : ($$Number:#IDocumentSlno) -1
+	
+[System:Variable]
+
+	List Var:MsFileName:String
+	
+[COM Interface:MsFileDialog]
+
+	Project:DocumentLinker
+	Class:Dlinker
+	Interface:LaunchDialog
+	Parameter:p1:Integer
+	Return:String
+
+	
+;[#Form:Ledger]
+;	
+;	Add	:	Option	:	EnableSlsDCFTit	:@@EnableFullModule 
+;	
+;[!Form	:	EnableSlsDCFTit]
+;
+;	Add:Bottom Part:IDocumentConfig1
+
+;[#Part: LED Other Details]
+;
+;Add	:	Option	:	EnableSlsDCFTit	:@@EnableFullModule 
+;	
+;[!Part	:	EnableSlsDCFTit]
+;
+;Add:Lines:At End:TotNoOfDocs,IDocumentFrameTrigger
+;
+;[Part:IDocumentConfig1]
+;
+;	Line:TotNoOfDocs,IDocumentFrameTrigger
+
+[#Part:VCH Narration]
+
+	Add:Option:EnableVchrs: @@EnableDC
+
+	[!Part:EnableVchrs]
+
+		Add:Line:At End:IDocumentFrameTrigger
+
+[Part:IDocumentConfig]
+
+	Line:IDocumentFrameTrigger
+	
+[Line:IDocumentFrameTrigger]
+	
+	Field:MediumPrompt,LogicalField
+	Local:Field:MediumPrompt:Set as:$$LocaleString:"Set/Alter Document Details"
+	Local:Field:MediumPrompt:Width:25
+	Local:Field:MediumPrompt:Color:Blue
+	Local:Field:Logical Field:Color:Blue
+	Local:Field:Logical Field:Show Table:Always
+	Local:Field:Logical Field:Set as:No
+	Local:Field:Logical Field:Sub Form:DMFS_Report:$$Value
+	
+
+
+
+[Report : DMFS_Report]
+	
+	Title : "Document Attchements"
+	Form	: DMFS_Report
+
+[Form	: DMFS_Report]
+
+	Parts : DMFS_Head,DMFS_Report
+	Height:70 % Page
+	;Buttons:IDocumentBrowseBt,IDocumentShowBt,IDocumentSetMultiMode
+	;Button:RW_BrowseButton
+	
+[Button:RW_BrowseButton]
+	Title:"Browse"
+	Key:Alt + B
+	Action:Call:ExecuteFileDialog;RW_BrowseFun
+	
+;[Function:RW_BrowseFun]
+	
+
+[Part	:	DMFS_Head]
+	Line:DMFS_Note,DMFS_Tit
+[Part : DMFS_Report]
+
+	Lines : DMFS_Title,DMFS_Report
+	Repeat : DMFS_Report : DMFS_Aggr
+	Scroll : Vertical
+	Vertical:Yes
+	Break on : $$IsEndOfList:$DMFS_DocDesc
+	Border : Thin Top
+	Common Border:Yes
+
+
+
+[Line: DMFS_Tit]
+	Field: DMFS_Tit
+	Space Top:0.5 cm
+	[Field: DMFS_Tit]
+		Set as: "Please Attach the Documents Below"
+		Style: UWDocStyle
+		Skip:Yes
+[Line:DMFS_Note]
+	Field:DMFS_Note
+	[Field:DMFS_Note]
+		Set as: "Note : Once you have attached the files, Do not change your attached document file path for any reason"
+		Style: Normal Bold
+		Color:red
+		Invisible:$$InCreateMode
+		Skip:Yes
+		
+
+		
+[Style: UWDocStyle]
+	Font Name: Calibri
+	Height: 12
+	Bold: Yes
+	
+[Line		:DMFS_Title]
+		Border:Thin Box
+	
+Fields : DMFS_SrNoTit, DMFS_LocalOtherTit,DMFS_DocDescTit, DMFS_FilePathTit;, DMFS_Browse, DMFS_Open, DMFS_Delete
+[Field:DMFS_SrNoTit]
+	Use:Name Field
+	Set as:"Sl No"
+	Width : 15
+	[Field:DMFS_LocalOtherTit]
+		Use:Name Field
+		Set as:"Link"
+		Width:10
+		[Field:DMFS_DocDescTit]
+			Use:Name Field
+			Set as:"Document Type"
+			Width : 25
+			[Field:DMFS_FilePathTit]
+				Use:Name Field
+				Set as:"File Path"
+				Width : 40 % Page
+		
+	
+[Line	: DMFS_Report]
+	Fields : DMFS_SrNo, DMFS_LocalOther,DMFS_DocDesc, DMFS_FilePath, DMFS_Browse, DMFS_Open, DMFS_Delete
+	Local : Field : Default : Style : Small Bold
+	removeif:$$IsEmpty:$DMFS_FilePath ;and $$IsEmpty:$DMFS_FilePath
+	
+	
+	[Field : DMFS_Srno]
+		
+		Set As : "DOCUMENT NAME : " + $$String:$$Line
+		Set Always : Yes
+		Skip : Yes
+		Border : Thin Box
+		Width : 15
+		
+[Field	:	DMFS_LocalOther]
+	Use:Name Field
+	Storage:DMFS_LocalOtherudf
+	Width:10
+	Table:DriveTable
+	Show Table:Always
+	Border : Thin Box
+	
+[Collection:DriveTable]
+	List Name:"Local","Online"
+
+	[Field : DMFS_DocDesc]
+		Use 	: Name Field
+		Storage : DMFS_DocDesc
+		Set Always : Yes
+		;Table: "Birth Certificate,Photo,PAN,AADHAR",End of List
+		;Inactive : $$IsEmpty:$DMFS_DocDesc
+		Border : Thin Box
+		Width : 25
+		Table:List Of docs,End of List;,New Number
+		Show Table:Always
+	;	Skip:$DMFS_LocalOtherudf=Yes
+	
+		Key         : Create New Number
+        Show Table  : Always
+        Dynamic     : ""
+        Trigger     : New Number 				: $$IsSysNameEqual:NewNumber:$$EditData 
+		CommonTable : Yes
+
+
+
+
+	[Field : DMFS_FilePath]
+		Use : Name Field
+		Storage : DMFS_FilePath
+		Set As : ##Fileparam
+		Set Always : Yes
+		Inactive : $$IsEmpty:$DMFS_DocDesc
+		;Skip : $DMFS_LocalOtherudf="Local"
+;		Read Only: $$InAlterMode
+		Full Width : Yes
+		Width	: 40% Page
+		Border : Thin Box
+		Skip:$$IsEndOfList:$DMFS_DocDesc or (NOT $$IsEmpty:$DMFS_FilePath and $$InAlterMode)
+
+
+
+
+	[Field : DMFS_Browse]
+		Use : Name Field
+		Set As : "BROWSE"
+		Set Always : Yes
+		Inactive : $$IsEmpty:$DMFS_DocDesc and $$IsEmpty:$DMFS_FilePath
+		Key : IDocumentBrowseBt
+		Read Only : Yes
+		On : Focus : ($$IsEmpty:$DMFS_FilePath and $DMFS_LocalOtherudf="Local") : Call:ExecuteFileDialog
+		Skip on : $$IsEmpty:$DMFS_DocDesc ;or $$InAlterMode ;or $DMFS_LocalOtherudf="Local"
+;		Skip : $DMFS_LocalOtherudf="Local"
+		Border : Thin Box
+		Width : 8
+		Space Left : 2
+		Space Right : 1
+		
+
+
+	[Field : DMFS_Open]
+		Use : Name Field
+		Set As : "VIEW"
+		Set Always : Yes
+		Key	: IDocumentOpenDocbt
+		Inactive : $$IsEmpty:$DMFS_DocDesc
+		Read Only : Yes
+		Skip on: $$IsEmpty:$DMFS_DocDesc
+		Border : Thin Box
+		Width : 6
+
+		Space Left : 1
+		Space Right : 1
+
+
+	[Field : DMFS_Delete]
+		Use : Name Field
+		Set As : "DELETE"
+		Set Always : Yes
+		Key	: DMFS_DelVchFile
+		Inactive : $$IsEmpty:$DMFS_DocDesc
+		Read Only : Yes
+		Skip on : $$IsEmpty:$DMFS_DocDesc
+		Border : Thin Box
+		Width : 8
+		Space Left : 1
+		;Space Right : 1
+	
+
+[Report:IDocumentReportFrame]
+	Form:IDocumentReportFrame
+	Title:$$LocaleString:"Add Documents"
+	
+[Form:IDocumentReportFrame]
+	Part:IDocumentReportFrame
+	Buttons:IDocumentBrowseBt,IDocumentShowBt,IDocumentSetMultiMode
+	
+[Part:IDocumentReportFrame]
+	Line:IDocumentReportTitle
+	Line:IDocumentFrame1
+	Line:IDocumentFrame2
+	Line:IDocumentFrame3
+	Line:IDocumentFrame4
+	Bottom Lines:IDocumentHelptext1,IDocumentHelptext2
+	Width:50% page
+	Space Left:1
+	Space Bottom:1
+	Space Right:1
+	Space Top:1
+	
+[Line:IDocumentReportTitle]
+	Field:Name Field
+	Local:Field:Name Field:Info:"Configure Document's Path"
+	Local:Field:Name Field:Align:Center
+	Local:Field:Name Field:Border:thinbottom
+	Local:Field:Name Field:Full Width:Yes
+		
+[Line:IDocumentFrame1]
+	Fields:MediumPrompt,IDocumentPath
+	Local:Field:MediumPrompt:Info:"Path"
+	Local:Field:MediumPrompt:Width:25
+	Local:Field:MediumPrompt:Style:Normal Bold
+	Space Top:3
+	Border:thinbottom
+	
+[Line:IDocumentFrame2]
+	Fields:MediumPrompt,IDocumentSelectionMode
+	Local:Field:MediumPrompt:Info:"Select Muiltiple Documents"
+	Local:Field:MediumPrompt:Width:25
+	Local:Field:MediumPrompt:Style:Normal Bold
+	Space Top:2
+	Space Bottom:1
+	Border:thinbottom
+	
+[Field:IDocumentSelectionMode]
+	Use:LogicalField
+	Show Table:Always
+	Set as:No
+	Storage:CanSelectMultiple
+
+[Line:IDocumentFrame3]
+	Field:MediumPrompt,IDocumentDesc
+	Local:Field:MediumPrompt:Style:Normal Bold
+	Local:Field:MediumPrompt:Info:"Description"
+	Local:Field:MediumPrompt:Width:25
+	Space Top:2
+	Border:thinbottom
+	
+[Line:IDocumentFrame4]
+	Field:MediumPrompt,IDocumentUserName
+	Local:Field:MediumPrompt:Style:Normal Bold
+	Local:Field:MediumPrompt:Info:"Linked By"
+	Local:Field:MediumPrompt:Width:25
+	Space Top:2
+	
+[Field:IDocumentUserName]
+	Storage:IDocumentUser
+	Use:Name Field
+	Read Only:Yes
+	Set as:if $$InCreateMode then $$CmpUserName else $$Value
+	Skip Forward:Yes
+	Full Width:Yes
+	
+[Line:IDocumentHelptext1]
+	Field:SimpleField
+	Local:Field:SimpleField:Info:"* Click Alt+ B to browse the file"
+	Local:Field:SimpleField:Align:Center
+	Local:Field:SimpleField:Full Width:Yes
+
+[Line:IDocumentHelptext2]
+	Field:SimpleField
+	Local:Field:SimpleField:Info:"* Click Alt+ D to show attached documents"
+	Local:Field:SimpleField:Align:Center
+	Local:Field:SimpleField:Full Width:Yes
+	Space Top:0.5
+	
+[Field:IDocumentPath]
+	Storage:IDocumentPath
+	Use:Name Field
+	Read Only:Yes
+	Skip Forward:Yes
+	Full Width:Yes
+	Lines:4
+	
+	
+[Field:IDocumentDesc]
+	Use:Name Field
+	Max:250
+	Full Width:Yes
+	Storage:IDocumentDesc
+	Lines:5
+	
+[Button:IDocumentBrowseBt]
+    Title:"Browse"
+	Key:Left Click ;;Alt + B
+	Action:Call:ExecuteFileDialog
+	
+[Button:IDocumentShowBt]
+   Title:"Show Documents"
+	Key:Alt + S
+	Action:Call:IDocViewHandler
+	
+
+ [Button:IDocumentSetMultiMode]
+	 Title:"Select Multiple"
+	 Key:Alt + M
+	 Action:Call:SetDocumentMode
+	 
+[Button:IDocumentOpenDocbt]
+	Title:"Open"
+	Key 	: Left Click ;;Alt+O
+	Action:Exec Command:@@MyOpenFilePath ;;;Exec Command:$$Value ;;IDocExceuteDocview
+
+[Button:DMFS_DelVchFile]
+	Title:"Delete file"
+	Key 	: Left Click ;;Alt+O
+	Action:call : DMFS_DelVchFileFunc ;;;Delete File:@@MyOpenFilePath ;;;Exec Command:$$Value ;;IDocExceuteDocview
+
+[Function : DMFS_DelVchFileFunc]
+	00    : QUERY BOX    : "Delete Document Detail"        : Yes : No
+    	01    : Do IF  : not $$LastResult : Return : ""
+	;00 : Delete File:@@MyOpenFilePath
+	01a : Set Value:DMFS_DocDesc: ""
+	02 : Set Value:DMFS_FilePath: ""
+	;03 : Delete Object
+	;04 : Return : #DMFS_DocDesc
+
+	 
+[Function:SetDocumentMode]
+	01:Set Value:CanSelectMultiple:NOT $CanSelectMultiple
+	
+
+[Function:IDocViewHandler]
+	01:If:$$IsEmpty:$IDocumentPath
+	02:Msg Box:"No documents found":"Click browse button to select documents "
+	03:Else
+	04:List Delete Ex:MsFileName
+	05:For Token:TokenVar:$IDocumentPath:"|"
+	06:List Add Ex:MsFileName:##TokenVar
+	07:End For
+	08:Display:IDocumentViewer
+	09:End If
+
+	
+[Function:IDocExceuteDocview]
+	Variable:FileNameParam:String
+
+	04:Set:FileNameParam:$DMFS_FilePath 
+	05:Exec Command:##FileNameParam
+	07:Return
+
+[Collection:IDocumentPathColl]
+
+	Data Source:Variable:MsFileName
+	
+
+[Collection:IDocumentViewReportSelected]
+	Data Source:Report:Current ;;Selected
+
+;;;;;;; Report to display Doc;;;;;;;;;;
+
+[Report:IDocumentViewer]
+	Title:"List of Documents"
+	Form:IDocumentViewer
+	
+[Form:IDocumentViewer]
+	Part:IDocumentFrame	
+	Button:IDocumentOpenDocbt
+	
+[Part:IDocumentFrame]
+	Parts:IDocumentFrame1,IDocumentFrame2
+	Height:100% page
+	Width:50% page
+    Vertical:Yes
+	
+[Part:IDocumentFrame1]
+	Line:IDocumentViewNote
+	Space Bottom:2
+	
+[Line:IDocumentViewNote]
+	Field:Simple Field
+	Local:Field:Simple Field:Set as:"**Select the file path by hitting space bar and click open button to view the document"
+	Local:Field:Simple Field:Full Width:Yes
+	Local:Field:Simple Field:Style:IDocViewHeaders
+	
+
+
+[Part:IDocumentFrame2]
+	Scroll:Vertical
+	Common Border:Yes
+	Lines:IDocumentViewHeader,IDocumentViewBody
+	Repeat:IDocumentViewBody:IDocumentPathColl
+	
+[Line:IDocumentViewHeader]
+	Fields:IDocumentSlno,IDocumentCPath,IDocumetFileSize
+	Border:thintopbottom
+	Local:Field:IDocumentSlno:Set as:"Slno"
+	Local:Field:IDocumentCPath:Set as:"Path"
+	Local:Field:IDocumetFileSize:Set as:"Size(bytes)"
+	Local:Field:default:Align:Left
+	Local:Field:default:Style:IDocViewHeaders
+	
+[Line:IDocumentViewBody]
+	Fields:IDocumentSlno,IDocumentCpath,IDocumetFileSize
+	Local:Field:default:Align:Left
+	Local:Field:default:Style:IDocViewBody
+	
+[Field:IDocumentSlno]
+	Use:SimpleField
+	Set as:$$Line
+	Width:8
+	Border:thinright
+	
+[Field:IDocumentCPath]
+	Use:SimpleField
+	Set as:##MsFileName[$$Line]
+	Width:80
+	Storage:IDocumentCPath
+	Border:thinright
+	
+[Field:IDocumetFileSize]
+	Use:SimpleField
+	Set as:($$FileSize:##MsFileName[$$Line])
+	Full Width:Yes
+	
+;; Styles
+
+[Style:IDocViewHeaders]
+	Height:12
+	Font:Sans-serif
+	Bold:Yes
+	
+[Style:IDocViewBody]
+	Height:12
+	Font:Sans-serif
+	Bold:No
+	
+
+
+[#Part	:	VTYP Behaviour Main]
+	
+Add	:	Option	:	EnableGKModu1le	:	@@GKIsTDLEnable
+	
+[!Part	:	EnableGKModu1le]
+	
+	Add	:	Line	:	After	:	VTYP Print Save	:	VTYP Enable DC
+	
+[Line:VTYP Enable DC]
+	
+	Space Top:0.2 cm
+	Field:Long Prompt,VTYP Enable DC
+	Local:Field:Long Prompt:Set as:"Enable Document Management System:"
+	Local:Field:Long Prompt:Width:30
+	Local:Field:Long Prompt:Color:Blue
+
+	
+[Field	:	VTYP Enable DC]
+	
+		Use			:	Logical Field
+		Storage		:	VTYPEnableDMSUDF
+		Width		:	10
+		Table		:	YesNoTable
+		Show Table	:	Always
+		Color		:   Blue
+
+		
+[System	:	Formulae]
+	
+		EnableDC	:	$VTYPEnableDMSUDF:VoucherType:$VoucherTypeName
+		
+
+
+[Line	:	GK Accounts Documents]
+	
+			Field	:Medium Prompt,GK Accounts Documents
+			Local : Field : Medium Prompt : Info : "List of Documents:"
+			 Local       : Field : Medium Prompt : Width	: 25
+			
+			[Field : GK Accounts Documents]
+				
+				Use   	   : Logical Field
+				Table	   : yesnotable
+				Show Table : Always
+			    Width 	   : 30
+				Style	   : normal bold
+				Storage	   : ListOfDocuUDF
+				Sub Form   : ListOfDocumentsColl	:	$$Value
+				
+[Report	:	ListOfDocumentsColl]
+	
+		Form	:	ListOfDocumentsColl
+		
+[Form	:	ListOfDocumentsColl]
+	
+		Part	:	ListOfDocumentsColl
+		
+[Part	:	ListOfDocumentsColl]
+	
+		Line	:	ListOfDocumentsTit,ListOfDocumentsColl
+		Repeat	:	ListOfDocumentsColl:ListOfDocntsAggr
+		Scroll	:	Vertical
+		Vertical:	Yes
+		Break	:	$$IsEmpty:$ListOfDocumntsUDF
+		
+[Line	:	ListOfDocumentsTit]
+	
+		Field	:	ListOfDocumentsTit
+		
+[Field	:	ListOfDocumentsTit]
+	
+		Use		:	Name Field
+		Info	:	"List Of Documents"
+		Align	:	Center
+		Width	:	50
+		
+[Line	:	ListOfDocumentsColl]
+	
+		Field	:	ListOfDocumentsColl
+		
+[Field	:	ListOfDocumentsColl]
+	
+		Use		:	Name Field
+		Storage	:	ListOfDocumntsUDF
+		Width	:	50
+		Align	:	Left
+		Space Left:1 cm
+		
+[Collection	:	ListOfDocs]
+	
+		Title		:	"List Of Documents"
+		Type		:	ListOfDocntsAggr	:	Company
+		Child Of	:	##SVCurrentCompany
+		Belongs To	:	Yes
+		Fetch		:	ListOfDocumntsUDF
+		Format		:	$ListOfDocumntsUDF,30
+		
+;;;select $ListOfDocumntsUDF from ListOfDocs
+
+				

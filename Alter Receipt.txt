@@ -1,0 +1,719 @@
+
+
+
+
+
+
+
+
+[Report	:	GKAlterRcptRep]
+	
+		Form	:	GKAlterRcptRep
+		
+[Form	:	GKAlterRcptRep]
+	
+		Height	:	60 % Page
+		Width	:	100 % Page
+		Part	:	GKAlterRcptHead,GKAlterRcptRep
+		On		:	Form Accept	:	Yes	:	Form Accept
+		On		:	Form Accept	:	Yes	:	Call		:	GKAlterRcptFun	
+		
+
+[Part	:	GKAlterRcptHead]
+	
+		Line	:	GKAlterRcptHead
+		
+[Line	:	GKAlterRcptHead]
+	
+		Field	:	GKAlterRcptHead
+		
+[Field	:	GKAlterRcptHead]
+	
+			Use			:	Name Field
+			Set as		:	"Alter Receipt"
+			Full Width	: 	Yes
+			Align		:	Center
+			Skip		:	Yes
+			Style		:	Normal Bold	
+
+[Part	:	GKAlterRcptRep]
+	
+		Line	:	GKAlterRcptPartyNm,GKAlterRcptBillType,GKAlterRcptBillNo,GKAlterRcptBillAmt
+		Line	:	GKAlterRcptBillCash,GKAlterRcptBillCard,GKAlterRcptBillOnline,GKAlterRcptBillCheque,GKAlterRcptBillCoupons	
+		
+[Line	:	GKAlterRcptPartyNm]
+	
+		Space Bottom	:	0.25
+		Space Top		:	0.25
+		Border			: 	Thin left right
+		Field	:	Medium Prompt,GKAlterRcptPartyNm
+		Local	:	Field	:	Medium Prompt	:	Set as	:	"Party Name:"
+		Local	:	Field	:	Medium Prompt	:	Style	:	Normal Bold
+		
+[Field	:	GKAlterRcptPartyNm]
+	
+		Use			:	Name Field
+		Storage		:	GKAlterRcptPartyNm
+		Table		:	ListOfLedgers
+		Show Table	:	Always
+		Width		:	30
+		Align		:	Left
+		Style		:	Normal Bold
+		Background	:	Very Light Grey
+		
+[Line	:	GKAlterRcptBillType]
+	
+		Space Bottom	:	0.25
+		Space Top		:	0.25
+		Border			: 	Thin top left right
+		Field	:	Medium Prompt,GKAlterRcptBillType
+		Local	:	Field	:	Medium Prompt	:	Set as	:	"Bill Type:"
+		Local	:	Field	:	Medium Prompt	:	Style	:	Normal Bold
+		
+[Field	:	GKAlterRcptBillType]
+	
+		Use			:	Name Field
+		Storage		:	GKAlterRcptBillType
+		Table		:	ListOfBillTypes
+		Show Table	:	Always
+		Width		:	30
+		Align		:	Left
+		Style		:	Normal Bold
+		Background	:	Very Light Grey
+		
+[Collection	:	ListOfBillTypes]
+	
+		Title		:	"Bill Types"
+		List Name	:	"Order","Invoice"
+		
+[Line	:	GKAlterRcptBillNo]
+	
+		Space Bottom	:	0.25
+		Space Top		:	0.25
+		Border			: 	Thin top left right
+		Field	:	Medium Prompt,GKAlterRcptBillNo
+		Local	:	Field	:	Medium Prompt	:	Set as	:	"Bill No:"
+		Local	:	Field	:	Medium Prompt	:	Style	:	Normal Bold
+		
+[Field	:	GKAlterRcptBillNo]
+	
+		Use			:	Name Field
+		Storage		:	GKAlterRcptBillNo
+		Width		:	30
+		Align		:	Left
+		Style		:	Normal Bold
+		Background	:	Very Light Grey
+		Control		:	GKCheckCond	:	($GKAlterRcptBillType="Invoice" and ($GKAlterRcptBillNo NOT Starting with "SI") ) or ($GKAlterRcptBillType="Order" and ($GKAlterRcptBillNo NOT Starting with $GKOrderNoSeries:VoucherType:@@GKSaOrdVchType) )
+		Control		:	GKPartyBill	:	$GKAlterRcptPartyNm!=$$CollectionFieldByKey:$PartyLedgerName:$$Value:GKVAltrRcptMainColl
+		
+
+[System	:	Formulae]
+	
+		GKCheckCond	:	"This bill no is not related to "+$$LocaleString:$GKAlterRcptBillType
+		GKPartyBill	:	"This bill does not belongs to selected party"
+		
+
+[Line	:	GKAlterRcptBillAmt]
+	
+		Space Bottom	:	0.25
+		Space Top		:	0.25
+		Border	: 	Thin top left right
+		Field	:	Medium Prompt,GKAlterRcptBillAmt
+		Local	:	Field	:	Medium Prompt	:	Set as	:	"Bill Amt:"
+		Local	:	Field	:	Medium Prompt	:	Style	:	Normal Bold
+		
+[Field	:	GKAlterRcptBillAmt]
+	
+		Use			:	Number Field
+		Storage		:	GKAlterRcptPartyAmt
+		Set as		:	$$FilterValue:$Amount:GKVAltrRcptMainColl:First:IsBillNoFltr
+		Set Always	:	Yes
+		Width		:	15
+		Align		:	Right
+		Style		:	Normal Bold
+		Format		:	"Decimals:2, No Zero"
+		Read Only	:	Yes
+		Background	:	Very Light Grey
+
+	[Line	:	GKAlterRcptBillCash]
+		
+		Border			: 	Thin top left right
+		Field			:	GKAlterRcptBillCashTit,GKAlterRcptBillCash
+		Space Bottom	:	0.25
+		Space Top		:	0.25
+	
+		[Field:GKAlterRcptBillCashTit]
+		
+			Use			:	Name field
+			Set as		:	"Cash :"
+			Width		:	20
+			Align		:	Prompt
+			Color		:	Black
+			Skip		:	Yes
+			
+		[Field:GKAlterRcptBillCash]
+		
+			Use			:	Number field
+			Storage		:	GKARBillCashAmt
+			Set as		:	$$FilterAmtTotal:GKVAltrRcptCashColl:IsBillNrtnFltrr:$Amount
+			Set Always	:	Yes
+			Width		:	15
+			Align		:	Right
+			Background	:	Very Light Grey
+			Format		:	"Decimals:2"
+			
+	[Line:GKAlterRcptBillCard]
+	
+		Field			:	GKAlterRcptBillCardNoTit,GKAlterRcptBillCardNo,GKAlterRcptBillCardRefNoTit,GKAlterRcptBillCardRefNo
+		Field			:	GKAlterRcptBillCardAmtTit,GKAlterRcptBillCardAmt
+		Space Bottom	:	0.25
+		Space Top		:	0.25
+	
+		Border: Thin top left right
+
+		[Field:GKAlterRcptBillCardAmtTit]
+		
+			Use			:	Name field
+			Set as		:	"Card Amt.:"
+			Width		:	20
+			Align		:	Prompt
+			Color		:	Black
+			Skip		:	Yes
+			
+	
+		[Field:GKAlterRcptBillCardAmt]
+		
+			Use			:	Number field
+			Storage		:	GKAlterRcptBillCardAmt
+			Set as		:	$$FilterAmtTotal:GKVAltrRcptCardColl:IsBillNrtnFltr:$Amount
+			Set Always	:	Yes
+			Width		:	15
+			Align		:	Right
+			Background	:	Very Light Grey
+			Format		:	"Decimals:2"
+
+		[Field:GKAlterRcptBillCardNoTit]
+		
+			Use			:	Name field
+			Info		:	"Card No.:"
+			Align		:	Prompt
+			Width		:	20
+			Color		:	Black
+			
+		
+		[Field:GKAlterRcptBillCardNo]
+		
+			Use			:	Name field
+			Storage		:	GKAlterRcptBillCardNo
+			Width		:	15
+			Align		:	Left
+			Background	:	Very Light Grey
+			
+
+	[Field:GKAlterRcptBillCardRefNoTit]
+		
+			Use			:	Name field
+			Info		:	"Trans. Ref No.:"
+			Align		:	Prompt
+			Width		:	15
+			Color		:	Black
+			
+
+		[Field:GKAlterRcptBillCardRefNo]
+		
+			Use			:	Name field
+			Storage		:	GKAlterRcptBillCardRefNo
+			Set as		:	$$FilterValue:$GKInstNo:GKVAltrRcptBankColl:First:IsBillNrtnFltr
+			Width		:	25
+			Align		:	Left
+			Background	:	Very Light Grey
+			
+		
+[Line:GKAlterRcptBillOnline]
+
+		Border			: 	Thin top left right
+	
+		Field			:	GKAlterRcptOnlinePayDetails,GKAlterRcptOnlinePayDetailsUDF,GKAlterRcptOnlineTransRefNoTit,GKAlterRcptOnlineTransRefNo
+		Field			:	GKAlterRcptOnlinePaymntModeTit,GKAlterRcptOnlineAmtUdf
+		Space Bottom	:	0.25
+		Space Top		:	0.25
+	
+	[Field:GKAlterRcptOnlinePaymntModeTit]
+		
+			Use			:	Name field
+			Set as		:	"Online Amt.:"
+			Width		:	20
+			Align		:	Prompt
+			Color		:	Black
+			Skip		:	Yes
+		
+	[Field:GKAlterRcptOnlineAmtUdf]
+		
+			Use			:	Number field
+			Storage		:	GKAlterRcptOnlineAmtUdf
+			Set as		:	$$FilterAmtTotal:GKVAltrRcptCardColl:IsBillNrtnFltr1:$Amount
+			Set Always	:	Yes
+			Width		:	15
+			Align		:	Right
+			Background	:	Very Light Grey
+			Format		:	"Decimals:2"	
+	
+		
+		[Field:GKAlterRcptOnlinePayDetails]
+		
+			Use			:	Name field
+			Info		:	"Online Type:"
+			Color		:	Black
+			Width		:	20
+			Align		:	Prompt
+		
+		[Field:GKAlterRcptOnlinePayDetailsUDF]
+		
+			Use			:	Name field
+			Storage		:	GKAlterRcptOnlineTypeUDF
+			Table		:	GK_ListOfTransactions,End of List
+			Show Table	:	Always
+			Background	:	Very Light Grey
+			Width		:	15
+			Align		:	Left
+		
+	[Field	:	GKAlterRcptOnlineTransRefNoTit]
+			
+			Use			:	Name field
+			Info		:	"Trans. Ref No.:"
+			Color		:	Black
+			Width		:	15
+			Align		:	Prompt
+		
+	[Field	:	GKAlterRcptOnlineTransRefNo]
+
+			Use			:	Name field
+			Type		:	String
+			Storage		:	GKAlterRcptOnlineTransRefNo
+			Set as		:	$$FilterValue:$GKInstNo:GKVAltrRcptBankColl:First:IsBillNrtnFltr1
+			Set Always	:	Yes
+			Background	:	Very Light Grey
+			Width		:	25
+			Align		:	Left
+
+		
+[Line:GKAlterRcptBillCheque]
+	
+		Field			:	GKAlterRcptChqNum,GKAlterRcptChqNumudf,GKAlterRcptChqDte,GKAlterRcptChqDteudf
+		Field			:	GKAlterRcptPaymntModeCheque,GKAlterRcptChqAmtUDF
+		Space Bottom	:	0.25
+		Space Top		:	0.25
+	
+		Border			: 	Thin top left right
+	
+		[Field:GKAlterRcptPaymntModeCheque]
+		
+			Use			:	Name field
+			Set as		:	"Cheque Amt.:"
+			Width		:	20
+			Align		:	Prompt
+			Color		:	Black
+			Skip		:	Yes
+		
+			
+	[Field:GKAlterRcptChqAmtudf]
+		
+			Use			:	Number field
+			Storage		:	GKAlterRcptChqAmtudf
+			Set as		:	$$FilterAmtTotal:GKVAltrRcptCardColl:IsBillNrtnFltr2:$Amount
+			Set Always	:	Yes
+			Width		:	15
+			Align		:	Right
+			Background	:	Very Light Grey
+			Format		:	"Decimals:2"
+
+
+		[Field:GKAlterRcptChqNum]
+		
+			Use			:	Name field
+			Info		:	"Cheque No:"
+			Align		:	Prompt
+			Width		:	20
+			Color		:	Black
+		
+		[Field:GKAlterRcptChqNumUdf]
+		
+			Use			:	Name field
+			Storage		:	GKAlterRcptChqNumUdf
+			Set as		:	$$FilterValue:$GKInstNo:GKVAltrRcptBankColl:First:IsBillNrtnFltr2
+			Set Always	:	Yes
+			Width		:	15
+			Align		:	Left
+			Background	:	Very Light Grey
+			
+
+		[Field:GKAlterRcptChqDte]
+		
+			Use			:	Name field
+			Info		:	"Cheque Date:"
+			Align		:	Prompt
+			Width		:	15
+			Color		:	Black
+			
+
+		[Field:GKAlterRcptChqDteudf]
+		
+			Use			:	Uni Date field
+			Storage		:	GKAlterRcptChqDteudf
+			Set as		:	$$FilterValue:$GKInstDt:GKVAltrRcptBankColl:First:IsBillNrtnFltr2
+			Set Always	:	Yes
+			Width		:	25
+			Background	:	Very Light Grey
+			Align		:	Left
+			
+[Line	:	GKAlterRcptBillCoupons]
+	
+		Border			: 	Thin top left right
+		Field			:	GKAlterRcptGiftCouponsTit,GKAlterRcptGiftCoupons
+		Space Bottom	:	0.25
+		Space Top		:	0.25
+	
+		[Field:GKAlterRcptGiftCouponsTit]
+		
+			Use			:	Name field
+			Set as		:	"Gift Coupons:"
+			Width		:	20
+			Align		:	Prompt
+			Color		:	Black
+			Skip		:	Yes
+		
+			
+		[Field:GKAlterRcptGiftCoupons]
+		
+			Use			:	Number field
+			Type		:	Number
+			Storage		:	GKAlterRcptGiftAmt
+			Set as		:	$$FilterAmtTotal:GKVAltrRcptCashColl:IsBillNrtnFltr3:$Amount
+			Set Always	:	Yes
+			Width		:	15
+			Align		:	Right
+			Background	:	Very Light Grey
+			Format		:	"Decimals:2"
+			
+		
+
+[Collection	:	GKVAltrRcptSubColl]
+	
+		Type		:	Vouchers	:	VoucherType
+		Child Of	:	$$VchTypeReceipt
+		Belongs To	:	Yes
+		Fetch		:	Date,Reference,VoucherNumber,VoucherTypeName,IsCancelled,GKCSTriggeBlack,PartyLedgerName,Amount,IsOptional,MasterId
+		Filter		:	NOTIsOptionalVoucher,GKRcptVchType,GKCancelledVchrs
+		
+
+[Collection	:	GKVAltrRcptMainColl]
+		
+		Source Collection	:	GKVAltrRcptSubColl
+		Walk				:	All Ledger Entries
+		Fetch				:	Amount,LedgerName,Name,BillDate,BillType
+		Fetch				:	Date,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount,Narration
+		Compute				:	GKBillName	:	$Ledgerentries[1,@@GKAltrLed].BillAllocations[1].Name
+		Search Key			:	$GKBillName
+		
+
+;;;;Select $VoucherNumber,$Amount,$LedgeRName,$GKBillName,$PartyLedgerName from GKVAltrRcptMainColl
+	
+[Collection	:	GKVAltrRcptCashColl]
+		
+		Source Collection	:	GKVAltrRcptSubColl
+		Walk				:	All Ledger Entries
+		Fetch				:	Amount,LedgerName,Name,BillDate,BillType
+		Fetch				:	Date,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount,Narration
+		Compute				:	GKBillName	:	$Ledgerentries[1,@@GKAltrLed].BillAllocations[1].Name
+		Compute				:	GKInstNo	:	$InstrumentNumber
+		Compute				:	GKInstDt	:	$InstrumentDate
+		Search Key			:	$GKBillName
+		Filter				:	GKCashLedFltr;,GKNarrtnCash
+		
+
+;;;;;Select $LedgerName,$Narration,$GKBillName,$Amount,$GKInstNo,$GKInstDt from GKVAltrRcptBankColl
+
+[Collection	:	GKVAltrRcptCardColl]
+		
+		Source Collection	:	GKVAltrRcptSubColl
+		Walk				:	All Ledger Entries
+		Fetch				:	Amount,LedgerName,Name,BillDate,BillType
+		Fetch				:	Date,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount,Narration
+		Compute				:	GKBillName	:	$Ledgerentries[1,@@GKAltrLed].BillAllocations[1].Name
+		Compute				:	GKNarrtn	:	If ($$IsEmpty:$Narration or $Narration="") then "Online" else $Narration
+		Compute				:	GKInstNo	:	$InstrumentNumber
+		Compute				:	GKInstDt	:	$InstrumentDate
+		Filter				:	GKAltrBankLed
+		
+
+[Collection	:	GKVAltrRcptBankColl]
+		
+		Source Collection	:	GKVAltrRcptSubColl
+		Walk				:	All Ledger Entries,Bank Allocations
+		Fetch				:	Amount,LedgerName,Name,BillDate,BillType
+		Fetch				:	Date,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount,Narration
+		Compute				:	GKBillName	:	$Ledgerentries[1,@@GKAltrLed].BillAllocations[1].Name
+		Compute				:	GKNarrtn	:	$$Owner:$Narration;If ($$IsEmpty:$Narration or $Narration="") then "Online" else $Narration
+		Compute				:	GKInstNo	:	$InstrumentNumber
+		Compute				:	GKInstDt	:	$InstrumentDate
+		Search Key			:	$GKBillName
+		Filter				:	GKAltrBankLed
+		
+;;;;Select $VoucherNumber,$LedgerName,$GKInstNo,$GKNarrtn from GKVAltrRcptBankColl
+		
+
+[System	:	Formulae]
+	
+		GKNarrtnCash	:	$Narration="Cash"
+		GKNarrtnCard	:	$Narration="Card"
+		GKNarrtnOnline	:	$Narration="Online"
+		GKNarrtnCheque	:	$Narration="Cheque/DD"
+		GKNarrtnCoupons	:	$Narration="Gift Coupons"
+		IsBillNoFltr	:	$GKBillName=#GKAlterRcptBillNo and $PartyLedgerName=#GKAlterRcptPartyNm
+		IsBillNrtnFltrr	:	$GKBillName=#GKAlterRcptBillNo and $Narration="Cash" and $PartyLedgerName=#GKAlterRcptPartyNm
+		IsBillNrtnFltr	:	$GKBillName=#GKAlterRcptBillNo and $GKNarrtn="Card" and $PartyLedgerName=#GKAlterRcptPartyNm
+		IsBillNrtnFltr1	:	$GKBillName=#GKAlterRcptBillNo and $GKNarrtn="Online" and $PartyLedgerName=#GKAlterRcptPartyNm
+		IsBillNrtnFltr2	:	$GKBillName=#GKAlterRcptBillNo and $GKNarrtn="Cheque/DD" and $PartyLedgerName=#GKAlterRcptPartyNm
+		IsBillNrtnFltr3	:	$GKBillName=#GKAlterRcptBillNo and $Narration="Gift Coupons" and $PartyLedgerName=#GKAlterRcptPartyNm
+		GKAltrLed		:	$$IsLedOfGrp:$LedgerName:$$GroupSundryDebtors
+		GKCashLedFltr	:	$$IsLedOfGrp:$LedgerName:$$GroupCash
+		GKAltrBankLed	:	$$IsLedOfGrp:$LedgerName:$$GroupBank or $$IsLedOfGrp:$LedgerName:$$GroupBankod; or  $$IsLedOfGrp:$LedgerName:$$GroupCash
+		GKAltrBankLed1	:	$LedgerName="Canara Bank"
+		GKIsBillNoFltr	:	$Name=#GKAlterRcptBillNo
+		
+
+[Collection	:	GKVAltrRcptMainCollL]
+		
+		Source Collection	:	GKVAltrRcptSubColl
+		Walk				:	All Ledger Entries,BillAllocations
+		Fetch				:	Amount,LedgerName,Name,BillDate,BillType
+		Fetch				:	Date,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount,Narration,MasterId
+		Filter				:	GKIsBillNoFltr
+		
+
+[Function	:	GKAlterRcptFun]
+	
+	Variable	:	GKVarAlterMId	:	String
+			
+	010	:	Walk Collection	:	GKVAltrRcptMainCollL
+	
+	020	:	Set	:	GKVarAlterMId	:	$$String:"Id:"+$$LocaleString:$MasterId
+	
+	030 :	New Object:Voucher:##GKVarAlterMId
+	040	:	Set Object
+	050	:	delete collection object:LedgerEntries:"*":Yes
+	060 :   Call:AlterRecptInsertNewValues
+	070 :   Accept Alter
+	
+	080	:	End Walk
+	
+[Function	:	AlterRecptInsertNewValues]
+	
+	Variable	:	GKVSalesMID						:   String
+	Variable	:	VarRcptLedName					:	String
+	Variable	:	VarRcptVchNo					:	String
+	Variable	:	VarPaymentModeCash				:	String
+	Variable	:	VarPaymentModeCard				:	String
+	Variable	:	VarPaymentModeOnline			:	String
+	Variable	:	VarPaymentModeOnlineAmount		:	Number
+	Variable	:	VarPaymentModeCardAmount		:	Number
+	Variable	:	VarPaymentModeCashAmount		:	Number
+	Variable	:	VarPaymentModeCardNumber		:	String
+	Variable	:	VarPaymentModeCardRefNumber		:	String
+	Variable	:	VarPaymentModeCardBank			:	String
+	Variable	:	VarPaymentModeCheque			:	String
+	Variable	:	VarPaymentModeChequeAmount		:	String
+	Variable	:	VarPaymentModeChequeDate		:	Date
+	Variable	:	VarPaymentModeChequeBank		:	String
+	Variable	:	VarPaymentModeChequeNumber		:	String
+	Variable	:	VarTotalReceptAmount			:	Number
+	Variable	:	Var_InstruMenNo					: 	String
+	Variable	:	VarBranchName					:	String
+	Variable	:   Var_InstrDate					: 	Date
+	Variable	:   Var_PaymentMode					: 	String
+	Variable	:   Var_CmpyBankName				: 	String
+	Variable	:   Var_CusBankName					: 	String
+	Variable	:	VarBranchName					:	String
+	Variable	:	VarBillPatntOnlinecmpnyBank		:	String
+	Variable	:	VarPaymentModeOnlineRefNo		:	String
+	Variable	:	VarPaymentModeGiftCopnAmount	:	Number
+
+	000	  :  Set  : SVSingleEntry 					: No
+	160   :	 Set  : VarRcptLedName 					: #GKAlterRcptPartyNm
+	170   :	 Set  : VarRcptVchNo 					: #GKAlterRcptBillNo
+	180	  :	 Set  : VarPaymentModeCash				: "CASH"
+	190   :	 Set  : VarPaymentModeCashAmount		: $$Number:#GKAlterRcptBillCash
+	200   :	 Set  : VarPaymentModeCard				: "CARD"
+	210   :	 Set  : VarPaymentModeCardAmount		: $$Number:#GKAlterRcptBillCardAmt
+	220   :	 Set  : VarPaymentModeCardRefNumber		: #GKAlterRcptBillCardRefNo
+	225   :	 Set  : VarPaymentModeCardNumber		: #GKAlterRcptBillCardNo
+	230	  :	 Set  : VarPaymentModeCardBank			: @@GKCMPCardBankName
+	240	  :	 Set  : VarPaymentModeCheque			: "CHEQUE"
+	250	  :	 Set  : VarPaymentModeChequeAmount		: $$Number:#GKAlterRcptChqAmtUDF
+	260	  :	 Set  : VarPaymentModeChequeNumber		: #GKAlterRcptChqNumUdf
+	270	  :	 Set  : VarPaymentModeChequeDate		: #GKAlterRcptChqDteudf
+	280	  :	 Set  : VarPaymentModeChequeBank		: @@GKCMPChequeBankName
+	290	  :	 Set  :	VarPaymentModeOnline		    : #GKAlterRcptOnlinePayDetailsUDF
+	300	  :	 Set  :	VarPaymentModeOnlineAmount		: $$Number:#GKAlterRcptOnlineAmtUdf
+	310	  :	 Set  : VarBillPatntOnlinecmpnyBank		: @@GKCMPOnlineBankName
+	312	  :  Set  :	VarPaymentModeOnlineRefNo		: #GKAlterRcptOnlineTransRefNo
+	314	  :  Set  : VarPaymentModeGiftCopnAmount	: $$Number:#GKAlterRcptGiftCoupons
+	
+	320   :	 Set  : VarTotalReceptAmount		:($$Number:##VarPaymentModeCashAmount+$$Number:##VarPaymentModeCardAmount+$$Number:##VarPaymentModeChequeAmount+$$Number:##VarPaymentModeOnlineAmount+$$Number:##VarPaymentModeGiftCopnAmount)
+
+			
+
+/* Party Loop Starts*/
+
+	400    :     INSERTCOLLECTION OBJECT    	: AllLedgerEntries
+    402    :     SET TARGET        				: AllLedgerEntries
+    404    :     SET VALUE       				: LedgerName        	:   ##VarRcptLedName
+    406    :     SET VALUE        				: Amount        		:   $$TgtObject:$$asAmount:##VarTotalReceptAmount
+	407	   :	 Set Value						: VATEXPAMOUNT			:	$$TgtObject:$$asAmount:##VarTotalReceptAmount
+    408    :     SET VALUE        				: Is Deemed Positive	:	No
+	410    :     SET VALUE        				: ISPARTYLEDGER			:	Yes
+	412    :     SET VALUE        				: ISLASTDEEMEDPOSITIVE	:	No
+	
+/* Party's Bill Allocations Loop */
+
+	416	  : INSERTCOLLECTION OBJECT	: BillAllocations
+	418	  :	SET VALUE		: BILLTYPE		: $$SysName:NewRef  
+	420	  : Set Value		: AMOUNT		: ##VarTotalReceptAmount 
+	422	  :	SET VALUE		: Name			: ##VarRcptVchNo
+	424   : SET TARGET      : ..
+	426   : SET TARGET      : ..
+	
+
+/* If Payment Mode is Cash */	
+		
+	500		:	If	:	 ##VarPaymentModeCash="Cash" AND $$Number:##VarPaymentModeCashAmount>0
+	
+	502    :     INSERTCOLLECTION OBJECT : ALlLedgerEntries
+    504    :     SET TARGET        		 : ALlLedgerEntries
+    506    :     SET VALUE         		 : LedgerName        : "Cash"
+	508	   :	 Set Value				 : Narration		 : "Cash"
+    510    :     SET VALUE         		 : Amount        	 : $$AsAmount:##VarPaymentModeCashAmount
+    512    :     SET VALUE         		 : Is Deemed Positive:	Yes
+	514	   : 	 SET TARGET : ..
+
+	520	   :     End If
+
+/* If Payment Mode is Gift Vouchers */	
+		
+	570		:	If	:	  $$Number:##VarPaymentModeGiftCopnAmount>0
+
+	572    :     INSERTCOLLECTION OBJECT : ALlLedgerEntries
+    574    :     SET TARGET        		 : ALlLedgerEntries
+    576    :     SET VALUE         		 : LedgerName        : "Cash"
+	578	   :	 Set Value				 : Narration		 : "Gift Coupons"
+    580    :     SET VALUE         		 : Amount        	 : $$AsAmount:##VarPaymentModeGiftCopnAmount;*-1
+    582    :     SET VALUE         		 : Is Deemed Positive:	Yes
+	584	   : 	 SET TARGET : ..
+
+	590	   :     End If
+
+/* If Payment Mode is Card */	
+
+	600			:	If	:	 ##VarPaymentModeCard="Card" AND $$Number:##VarPaymentModeCardAmount>0
+
+	602    :     INSERTCOLLECTION OBJECT : ALlLedgerEntries
+    604    :     SET TARGET        		 : ALlLedgerEntries
+    606    :     SET VALUE         		 : LedgerName        : ##VarPaymentModeCardBank
+	608	   :	 Set Value				 : Narration		 : "Card"
+    610    :     SET VALUE         		 : Amount        	 : $$AsAmount:##VarPaymentModeCardAmount;*-1
+    612    :     SET VALUE         		 : Is Deemed Positive:	Yes
+
+
+	614	:	INSERTCOLLECTION OBJECT : BankAllocations 	
+	616	: 			   SET TARGET: BankAllocations
+	618	:			   SET VALUE  : Date 					:	$$Owner:$$Date:$Date
+ 	620	:			   SET VALUE  : InstrumentDate			:	""
+	622	:			   SET VALUE  : InstrumentNumber		:   ##VarPaymentModeCardRefNumber
+	624	:			   Set Value  : BranchName				:	""
+ 	626	:			   SET VALUE  : TransactionType 		:   "e-Fund Transfer"
+ 	628	:			   SET VALUE  : UniqueReferenceNumber	:   $$MakeTallyUniqueID
+	630 :			   SET VALUE  : Narration				: 	$$LocaleString:##VarPaymentModeCardNumber
+ 	632	:			   SET VALUE  : ChequePrinted 			:   0
+	634	:			   SET VALUE  : BankName				: 	##VarPaymentModeCardBank
+ 	636	:	  		   SET VALUE  : PaymentFavouring		: 	##VarRcptLedName
+	638	:			   Set Value  : BANKPARTYNAME			:	##VarRcptLedName
+ 	640	:			   SET VALUE  : Amount					:  -1*$$AsAmount:$$Number:##VarPaymentModeCardAmount
+	642	:			   SET VALUE  : PaymentMode    			:  $$SysName:Transacted
+	644	:			   SET VALUE  : Name           			:  $$MakeUniqueID	
+	646	:			   SET TARGET : ..
+	648	: 			   SET TARGET : ..
+
+	650 :  End If
+
+;/* If Payment Mode is Online */	
+
+
+	700			:	If	:	  $$Number:##VarPaymentModeOnlineAmount>0
+
+
+	702    :     INSERTCOLLECTION OBJECT : ALlLedgerEntries
+    704    :     SET TARGET        		 : ALlLedgerEntries
+    706    :     SET VALUE         		 : LedgerName           :  ##VarBillPatntOnlinecmpnyBank
+	708    :	 Set Value				 : Narration			:  "Online";##VarPaymentModeOnline
+    710    :     SET VALUE         		 : Amount        	    :  $$AsAmount:##VarPaymentModeOnlineAmount;*-1
+    712    :     SET VALUE         		 : Is Deemed Positive   :  Yes
+
+
+	714	:			INSERTCOLLECTION OBJECT : BankAllocations 	
+	716	: 			   SET TARGET: BankAllocations
+	718 :			   SET VALUE  : Date 					:	$$Owner:$$Date:$Date
+ 	720	:			   SET VALUE  : InstrumentDate			:	""
+	722	:			   SET VALUE  : InstrumentNumber		:   $$LocaleString:##VarPaymentModeOnlineRefNo
+	724 :			   Set Value  : BranchName				:	""
+ 	726	:			   SET VALUE  : TransactionType 		:   "Others"
+ 	728 :			   SET VALUE  : UniqueReferenceNumber	:   $$MakeTallyUniqueID
+	730 :			   SET VALUE  : Narration				: 	$$LocaleString:##VarPaymentModeOnline
+ 	732	:			   SET VALUE  : ChequePrinted 			:   0
+	734	:			   SET VALUE  : BankName				: 	##VarBillPatntOnlinecmpnyBank
+ 	736	:	  		   SET VALUE  : PaymentFavouring		: 	##VarRcptLedName
+	738	:			   Set Value  : BANKPARTYNAME			:	##VarRcptLedName
+ 	740	:			   SET VALUE  : Amount					:  -1*$$AsAmount:$$Number:##VarPaymentModeOnlineAmount
+	742	:			   SET VALUE  : PaymentMode    			:  $$SysName:Transacted
+	744	:			   SET VALUE  : Name           			:  $$MakeUniqueID	
+
+	746	:			   SET TARGET : ..
+	748	: 			   SET TARGET : ..
+
+	750 :		  End If
+
+
+;/* If Payment Mode is Cheque */	
+
+
+	800	   :	If	:	 ##VarPaymentModeCheque="Cheque" AND $$Number:##VarPaymentModeChequeAmount>0
+
+	802    :     INSERTCOLLECTION OBJECT : ALlLedgerEntries
+    804    :     SET TARGET        		 : ALlLedgerEntries
+    806    :     SET VALUE         		 : LedgerName        : ##VarPaymentModeChequeBank
+	808	   :	 Set Value				 : Narration		 : "Cheque/DD"
+    810    :     SET VALUE         		 : Amount        	 : $$AsAmount:##VarPaymentModeChequeAmount;*-1
+    812    :     SET VALUE         		 : Is Deemed Positive:	Yes
+
+
+	814	:	INSERTCOLLECTION OBJECT : BankAllocations 	
+	816	: 			   SET TARGET: BankAllocations
+	818	:			   SET VALUE  : Date 					:	$$Owner:$$Date:$Date
+ 	820	:			   SET VALUE  : InstrumentDate			:	##VarPaymentModeChequeDate
+	822	:			   SET VALUE  : InstrumentNumber		:   ##VarPaymentModeChequeNumber
+	824	:			   Set Value  : BranchName				:	""
+ 	826	:			   SET VALUE  : TransactionType 		:   "Cheque/DD"
+ 	828	:			   SET VALUE  : UniqueReferenceNumber	:   $$MakeTallyUniqueID
+	830 :			   SET VALUE  : Narration				: 	$$LocaleString:"Cheque/DD"
+ 	832	:			   SET VALUE  : ChequePrinted 			:   0
+	834	:			   SET VALUE  : BankName				: 	##VarPaymentModeChequeBank
+ 	836	:	  		   SET VALUE  : PaymentFavouring		: 	##VarRcptLedName
+	838	:			   Set Value  : BANKPARTYNAME			:	##VarRcptLedName
+ 	840	:			   SET VALUE  : Amount					:  -1*$$AsAmount:$$Number:##VarPaymentModeChequeAmount
+	842	:			   SET VALUE  : PaymentMode    			:  $$SysName:Transacted
+	844	:			   SET VALUE  : Name           			:  $$MakeUniqueID	
+	846	:			   SET TARGET : ..
+	848	: 			   SET TARGET : ..
+	850	:		End If
+
+   900 :    SET TARGET        		: ..
+

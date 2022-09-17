@@ -1,0 +1,1856 @@
+
+[#Field:PlainVchDate]
+		Add:Option:OnlyInSalesVchr:@@GKSalesVchType
+		[!Field:OnlyInSalesVchr]
+		On:Accept:Yes:Field Accept
+		On:Accept:(($$InAlterMode and @@IsSalesOrder) or @@IsSales):Call:toremvalues
+		On:Accept:((@@IsSales and $$InCreateMode) and !$$IsNotApplicable:$$FullList:InvoiceOrderList:$BasicPurchaseOrderNo):Call:toremoveotherval
+	
+[#Field:EI consignee]
+		Add:Option:OnlyInSalesVch:@@GKSalesVchType
+		[!Field:OnlyInSalesVch]
+		On:Accept:Yes:Field Accept
+		On:Accept:(($$InAlterMode and @@IsSalesOrder) or @@IsSales):Call:toremvalues
+		On:Accept:((@@IsSales and $$InCreateMode) and !$$IsNotApplicable:$$FullList:InvoiceOrderList:$BasicPurchaseOrderNo):Call:toremoveotherval
+		on:Accept:(($$InCreateMode and @@IsSales) and !$$IsNotApplicable:$$FullList:InvoiceOrderList:$BasicPurchaseOrderNo):Call:ToRemCashAggrValues
+		
+		[Function:toremvalues]
+				100:Set Value:GKPMCashAmt:$$Number:0
+				110:Set Value:GKChqAmtudf:$$Number:0
+                120:Set Value:GKChqNumudf:""			
+                130:Set Value:GKChqDteudf:""
+                140:Setvalue:GKChqBankUdf:""
+                150:Setvalue:GKChqCompyBankUdf:""
+                160:Setvalue:GKCarAmtUdf:$$Number:0			
+                170:Setvalue:GKCarNumudf:""
+                180:Setvalue:GKCarNumBankUdf:""
+                190:Setvalue:GKcmpnyBankUdf:""
+                200:Setvalue:GKOnlineAmtUdf:$$Number:0		
+                210:Setvalue:GKOnlineudf:""
+                220:Setvalue:GKOnlineBankUdf:""
+                230:Setvalue:GKOnlinecmpnyBankUdf:""
+				;240:Set Value:GKAdvRcptAmt:$$Number:0
+                250:Set Value:GKPMGiftAmt:$$Number:0
+				252:Set Value:GKOnlineRefNo:""
+				253:Set Value:GKPMTotAmtColtd:$$Number:0
+				254:Set Value:GKFinanceAmtUDF:$$Number:0
+				
+[Function:toremoveotherval]
+				254:Set Value:GKPMRcptCreatedNot:""
+				255:Set Value:GKPMRcptCrAltrMode:""
+				
+
+	
+[#Part:VCH NARRATION]
+	
+	Add	:Option	:	OnlyLinesInSales:@@GKEnablePMAlloc=Yes
+	
+[!Part	:	OnlyLinesInSales]
+	
+		Add	:	Line	:	At End	:	GKPaymode
+	
+[Line	:	GKPaymode]
+		
+	Field	:	Medium Prompt,GKPaymode
+	Local	:	Field	:	Medium Prompt	:	Set as	:	"Payment Allocations:"
+	Local	:	Field	:	Medium Prompt	:	Color	:	Blue
+	
+	[Field	:	GKPaymode]
+		
+		Use			:	Name Field
+		Storage		:	GKPaymode
+		Width		:	10
+		;Table		:	YesNoTable
+		;Show Table	:	Always
+		Color		:	Blue
+		Set as		:	"Yes"
+		Set Always	:	Yes
+		Control		:	GKNoError	:	$$Value!=Yes
+		Sub Form	:	GKPaymentModeRep:$$Value 
+		On:Accept:Yes:Field Accept
+		
+/* commented on 26-08-2022 due to master id is not fetching */
+
+		;On:Accept:((@@IsSales and $$InCreateMode) and !$$IsNotApplicable:$$FullList:InvoiceOrderList:$BasicPurchaseOrderNo):Call:toremoveotherval
+		On:Accept:Yes:Call:toremvalues
+		;on:Accept:(($$InCreateMode and @@IsSales) and !$$IsNotApplicable:$$FullList:InvoiceOrderList:$BasicPurchaseOrderNo):Call:ToRemCashAggrValues
+			
+		
+[System:Formulae]
+	GKNoError:"You cannot proceed further"
+
+[Report	:	GKPaymentModeRep]
+			
+			Form	:	GKPaymentModeRep
+			
+			[Form	:	GKPaymentModeRep]
+				
+				Width	:	100 % Page
+				Height	:	50 % Page
+				On		:	Form Accept	:	Yes	:	Form Accept
+
+				On		:	Form Accept	:	($$IncreateMode and (@@GKSalesVchType or @@GKSaOrdVchType))	:	Call	:	GKSettingsValuesForVar
+				On		:	Form Accept	:	($$InCreateMode and @@GKSaOrdVchType and (##VarAdvAmtRcvd!=0) and $$IsEmpty:$GKPMRcptCreatedNot): Call	:	To_Create_Adv_RcptEntryFrmSO
+;				On		:	Form Accept	:	($$IncreateMode and @@GKSaOrdVchType and (##VarAdvAmtRcvd!=0 and $$IsEmpty:$GKPMRcptCreatedNot)):Call:GKSetMIDFunNew
+				On		:	Form Accept	:	($$IncreateMode and @@GKSaOrdVchType and (##VarAdvAmtRcvd!=0 and $$IsEmpty:$GKPMRcptCreatedNot)):Call:GKSetMIDFun
+				On		:	Form Accept	:	($$IncreateMode and @@GKSaOrdVchType and ($GKPMRcptCrAltrMode="Alter Mode")):Call:GKToCreateRcptFrmSalesOrder:$GKPMRcptCreatedNot
+				On		:	Form Accept	:	($$InCreateMode and @@GKSaOrdVchType and (##VarAdvAmtRcvd!=0)):Call:GKModifyMode
+				On		:	Form Accept	:	($$InAlterMode and @@GKSaOrdVchType):Call	:	GKModifyValues
+				Add		:	Control		:	SaleseErrInfo	:	($$InCreateMode and @@GKSaOrdVchType and ($GKAdvRcptAmt=0))
+				
+				On		:	Form Accept	:	($$IncreateMode and @@GKSalesVchType and $$Number:$GKBalnceAmntudf!=$$Number:0 and $$IsEmpty:$GKPMRcptCreatedNot)	:	Call	:	To_Create_Adv_RcptEntryFrmSI
+				On		:	Form Accept	:	($$IncreateMode and @@GKSalesVchType and $$IsNotApplicable:$$FullList:InvoiceOrderList:$BasicPurchaseOrderNo and (@@PymtAmtNotEqaulToZero) and $$IsEmpty:$GKPMRcptCreatedNot)	:	Call	:	To_Create_Adv_RcptEntryFrmSI
+				
+				On		:	Form Accept	:	($$IncreateMode and @@GKSalesVchType and ($GKPMTotAmtColtd!=0 and $$IsEmpty:$GKPMRcptCreatedNot)):Call:GKSetMIDFun
+;				On		:	Form Accept	:	($$IncreateMode and @@GKSalesVchType and ($GKPMTotAmtColtd!=0)):Call:GKSetMIDFun
+				On		:	Form Accept	:	($$IncreateMode and @@GKSalesVchType and  ($GKPMRcptCrAltrMode="Alter Mode")):Call:GKToCreateRcptFrmSales:$GKPMRcptCreatedNot
+				On		:	Form Accept	:	($$InCreateMode and @@GKSalesVchType ):Call:GKModifyMode
+				On		:	Form Accept	:	($$InAlterMode and @@GKSalesVchType):Call	:	GKModifyValues
+				
+				On		:	Form Accept	:	($$InAlterMode and @@GKSalesVchType and ($GKAdvRcptAmt!=0 and $GKPMTotAmtColtd!=0 and ($$Number:$GKBalnceSalesAmntudf>$$Number:0 )))	:	Call	:	To_CreateRcptEntryFrmSI
+				On		:	Form Accept	:	($$InAlterMode and @@GKSalesVchType and ($GKPMTotAmtColtd!=0 and $$IsEmpty:$GKPMRcptAltredNot)):Call:GKSetMIDFunAltr
+				On		:	Form Accept	:	($$InAlterMode and @@GKSalesVchType and  ($GKPMRcptCrAltrMode="Alter Mode" and $GKBalnceSalesAmntudf>0 and $GKPMTotAmtColtd!=0)):Call:GKToCreateRcptFrmSales1:$GKPMRcptAltredNot
+				On		:	Form Accept	:	($$InAlterMode and @@GKSalesVchType ):Call:GKModifyMode
+
+				Add		:	Control		:	SaleseErrInfo1	:	($$InCreateMode and @@GKSalesVchType and !$$IsNotApplicable:$$FullList:InvoiceOrderList:$BasicPurchaseOrderNo and ($GKPMTotAmtColtd=0) and $GKBalnceAmntudf!=0)
+				Add		:	Control		:	SaleseErrInfo1	:	($$InCreateMode and @@GKSalesVchType and $$IsNotApplicable:$$FullList:InvoiceOrderList:$BasicPurchaseOrderNo and ($GKPMTotAmtColtd=0) and $GKBalnceAmntudf=0)
+				
+				Part	:	GKPaymentModeRep
+
+					
+				
+				[Function:GKSettingsValuesForVar]
+					100:Set:VarCashAmt:$GKPMCashAmt
+					110:Set:VarCardAmt:$GKCarAmtUdf
+					120:Set:VarCheqAmt:$GKChqAmtudf
+					130:Set:VarOnlnAmt:$GKOnlineAmtUdf
+					140:Set:VarGiftAmt:$GKPMGiftAmt
+					150:Set:VarBalAmt:$GKBalnceAmntudf
+					160:Set:VarTotlCltdAmt:$GKPMTotAmtColtd
+					170:Set:VarAdvAmtRcvd:$GKAdvRcptAmt
+					180:Set:VarInvamt:$GKVchBillAmt
+					190:Set:VarBalSalAmt:$GKBalnceSalesAmntudf
+					200:Set:VarFinAmt:$GKFinanceAmtUDF
+					
+					
+[Variable:VarCashAmt]
+	Type:Number
+	
+[Variable:VarFinAmt]
+	Type:Number
+	
+[Variable:VarBalSalAmt]
+	Type:Number
+	
+[Variable:VarCardAmt]
+	Type:Number
+	
+[Variable:VarCheqAmt]
+	Type:Number
+	
+[Variable:VarOnlnAmt]
+	Type:Number
+	
+[Variable:VarGiftAmt]
+	Type:Number
+	
+[Variable:VarBalAmt]
+	Type:Number
+	
+[Variable:VarTotlCltdAmt]
+	Type:Number
+	
+[Variable:VarAdvAmtRcvd]
+	Type:Number
+	
+[Variable:VarInvamt]
+	Type:Number
+	
+	[System:Variable]
+		VarCashAmt:""
+		VarCardAmt:""
+		VarCheqAmt:""
+		VarOnlnAmt:""
+		VarGiftAmt:""
+		VarBalAmt:""
+		VarBalSalAmt:""
+		VarTotlCltdAmt:""
+		VarAdvAmtRcvd:""
+		VarInvamt:""
+		VarFinAmt:""
+		
+[Function	:	GKInfoMessage]
+	
+		100	:	MSG BOX:"Status":@@PaidInfo
+
+[System	:	Formulae]
+	
+		PaidInfo				:($$LocaleString:"The Customer has Paid the full amount against the Order No  "+$$LocaleString:$BasicPurchaseOrderNo);+$$NewLine+$$LocaleString:"Balance : NIL";"Total Order Amount:"+$$LocaleString:@@SalestotAmnt+$$NewLine+$$LocaleString:"Balance:"+$$LocaleString:(@@SalestotAmnt-@@SalesAmnt)
+		SaleseErrInfo			:"Payment Collection is Compulsory. You Cannot Proceed Further. Fill Atleast Any One of the Payment Mode"
+		SaleseErrInfo1			:"Payment Collection is Compulsory. You Cannot Proceed Further. Fill Atleast Any One of the Payment Mode"
+		
+		PymtAmtEqaulToZero		: $$Number:$GKPMCashAmt=$$Number:0 and $$Number:$GKChqAmtudf=$$Number:0  and $$Number:$GKCarAmtUdf=$$Number:0  and $$Number:$GKOnlineAmtUdf=$$Number:0  and $$Number:$GKPMGiftAmt=$$Number:0   or $$Number:$GKFinanceAmtUDF!=0
+		PymtAmtNotEqaulToZero	: $$Number:$GKPMCashAmt!=$$Number:0 or $$Number:$GKChqAmtudf!=$$Number:0  or $$Number:$GKCarAmtUdf!=$$Number:0  or $$Number:$GKOnlineAmtUdf!=$$Number:0  or $$Number:$GKPMGiftAmt!=$$Number:0  or $$Number:$GKFinanceAmtUDF!=0
+
+
+				[Part	:	GKPaymentModeRep]
+					
+					Add		:	Option	:	IFSales		:@@GKSalesVchType
+					Add		:	Option	:	IFSalesOrder:@@GKSaOrdVchType
+					
+				[!Part	:	IFSalesOrder]
+					
+					Line	:	GK_PayMentModeHead,GKPaymntModeDetails,GKPaymntOrderAmt,GKPaymntModeCash,GKCardDetails
+					Line	:	GKOnlineDetails,GKChqDetails,GKFinanceDetails,GKGiftCoupons
+					Line	:	GKTotalAmountRecvd,GKBalnceAmnt,GKPMExtraUDFs
+					Local	:	Field	:	Default	:	Style	:	StyTimeNew12
+		
+				[!Part	:	IFSales]
+					
+					
+					Line	:	GK_PayMentModeHead,GKPaymntModeDetails,GKBalnceAmnt,GKPaymntModeCash,GKCardDetails
+					Line	:	GKOnlineDetails,GKChqDetails,GKFinanceDetails,GKGiftCoupons
+					Line	:	GKTotalAmountRecvd,GKPMTotalAmount,GKPMExtraUDFs
+					Local	:	Field	:	Default	:	Style	:	StyTimeNew12
+		
+	
+[Line	:	GKGiftCoupons]
+	
+		Border			: 	Thin top left right
+		Field			:	GKGiftCouponsOthersTit,GKGiftCouponsOthers,GKGiftCoupons;GKGiftCouponsTit,
+		Space Bottom	:	0.25
+		Space Top		:	0.25
+	
+		[Field:GKGiftCouponsTit]
+		
+			Use			:	Name field
+			Set as		:	"Gift Vouchers:"
+			Width		:	15
+			Align		:	Prompt
+			Color		:	Red
+			Skip		:	Yes
+			Inactive	:	$$InCreateMode and ($$Number:$GKPMCashAmt=$$Number:$Amount) or (($$Number:$GKCarAmtUdf+$$Number:$GKPMCashAmt)=$$Number:$Amount) or (($$Number:$GKOnlineAmtUdf+$$Number:$GKCarAmtUdf+$$Number:$GKPMCashAmt)=$$Number:$Amount)
+
+			
+		[Field:GKGiftCoupons]
+		
+			Use			:	Number field
+			Type		:	Number
+			Storage		:	GKPMGiftAmt
+			Set Always	:	Yes
+			Width		:	15
+			Align		:	Right
+			Background	:	Very Light Grey
+			Format		:	"Decimals:2"
+			Invisible	:	Not $$InDeveloperMode
+			
+			
+		[Field	:	GKGiftCouponsOthersTit]
+			
+			Use			:	Name field
+			Set as		:	"Gift Vouchers:	 "
+			Width		:	20
+			Align		:	Prompt
+			Color		:	Red
+			Skip		:	Yes
+			;Inactive	:	$$InCreateMode and ($$Number:$GKPMCashAmt=$$Number:$Amount) or (($$Number:$GKCarAmtUdf+$$Number:$GKPMCashAmt)=$$Number:$Amount) or (($$Number:$GKOnlineAmtUdf+$$Number:$GKCarAmtUdf+$$Number:$GKPMCashAmt)=$$Number:$Amount)
+
+		
+		[Field	:	GKGiftCouponsOthers]
+			
+			Use			:	Logical field
+			Storage		:	GKGiftCouponsOthers
+			Width		:	15
+			Table		:	YesNoTable
+			Show Table	:	Always
+			Align		:	Left
+			Background	:	Very Light Grey
+			;Inactive	:	$$InCreateMode and ($$Number:$GKPMCashAmt=$$Number:$Amount) or (($$Number:$GKCarAmtUdf+$$Number:$GKPMCashAmt)=$$Number:$Amount) or (($$Number:$GKOnlineAmtUdf+$$Number:$GKCarAmtUdf+$$Number:$GKPMCashAmt)=$$Number:$Amount)
+			Sub Form	:	GKGiftCoupnsRep	:	$$Value
+			
+[Report	:	GKGiftCoupnsRep]
+	
+		Form	:	GKGiftCoupnsRep
+		
+[Form	:	GKGiftCoupnsRep]
+	
+		Part	:	GKGiftCoupnsRep
+		Height	:	40 % Page
+		Width	:	60 % Page
+		On		:	Form Accept	:	@@IsSalesOrder	or (@@IsSales and $$InCreateMode)	: 	Call	:	updatetotgiftval
+		On		:	Form Accept	:	(@@IsSalesOrder	or @@IsSales) and $$InAlterMode			:Call	:	updatetotgiftvalL
+		
+	[Function:updatetotgiftval]
+			
+			01	:	Set Value	:	GKPMGiftAmt	:	$$CollNumTotal:GKGiftDetAggrColl:$GKGiftCoupnAmt
+		
+	[Function:updatetotgiftvalL]
+			
+			01	:	Set Value	:	GKPMGiftAmt	:	$$CollNumTotal:GKGiftDetAggrCollS:$GKGiftCoupnAmt
+		
+[Collection	:	GKGiftDetAggrColl]
+	
+		Source Collection	:	..
+		Walk				:	GKGiftCoupnsAggr
+		Fetch				:	GKGiftCoupnAmt,GKGiftCoupnsVchId
+		
+		
+[Collection	:	GKGiftDetAggrCollM]
+	
+		Source Collection	:	...
+		Walk				:	GKGiftCoupnsAggr
+		Fetch				:	GKGiftCoupnAmt,GKGiftCoupnsVchId,GKGiftDetVchMode
+		;Filter				:	GKIsGiftMID
+		
+[Collection	:	GKGiftDetAggrCollS]
+	
+		Source Collection	:	...
+		Walk				:	GKGiftCoupnsAggr
+		Fetch				:	GKGiftCoupnAmt,GKGiftCoupnsVchId,GKGiftDetVchMode
+		Filter				:	GKIsGiftMID
+		
+		
+[Part	:	GKGiftCoupnsRep]
+	
+		Line	:	GKGiftCoupnsTit,GKGiftCoupnsRep
+		Repeat	:	GKGiftCoupnsRep	:	GKGiftCoupnsAggr
+		Scroll	:	Vertical
+		Break On:	$$IsEmpty:$GKGiftCoupnAmt
+		
+[Line	:	GKGiftCoupnsTit]
+	
+		Border	:	Thin Top Bottom
+		Field	:	GKGiftSlNo,GKGiftCoupnsRep,GKGiftCoupnsAmt,GKGiftDetVchMode,GKGiftCoupnsVchId
+			
+		Local	:	Field	:	Default	:	Delete	:	Storage
+		Local	:	Field	:	Default	:	Type	:	String
+		Local	:	Field	:	Default	:	Style	:	GKValePMStyle
+		
+		Local	:	Field	:	GKGiftSlNo			:	Set as	:	"Sl No"
+		Local	:	Field	:	GKGiftCoupnsRep		:	Set as	:	"Gift Vouchers"
+		Local	:	Field	:	GKGiftCoupnsAmt		:	Set as	:	"Amount"
+		Local	:	Field	:	GKGiftDetVchMode	:	Set as	:	"Mode"
+		Local	:	Field	:	GKGiftCoupnsVchId	:	Set as	:	"Mid"
+		
+
+[Line	:	GKGiftCoupnsRep]
+	
+		Field	:	GKGiftSlNo,GKGiftCoupnsRep,GKGiftCoupnsAmt,GKGiftDetVchMode,GKGiftCoupnsVchId
+
+[Field	:	GKGiftSlNo]
+	
+			Use			:	Name field
+			Storage		:	GKGiftDetSlNo
+			Set as		:	IF $GKGiftDetVchMode="Create mode" then $$line else 1;IF $$line=1 then 1 else @LineVal;$$Line
+			LineVal		:	If $$PrevLine:#GKGiftCoupnsVchId!=#GKGiftCoupnsVchId then 1 else $$PrevLine:#GKGiftCoupnsVchId+1
+			Set Always	:	Yes
+			Width		:	15
+			Align		:	Right		
+			Invisible	:	NOT $$InDeveloperMode
+
+[Field	:	GKGiftDetVchMode]
+	
+			Use			:	Name field
+			Storage		:	GKGiftDetVchMode
+			Set as		:	If $$InCreateMode then "Create Mode" else "Alter Mode"
+			Width		:	15
+			Align		:	Right
+			Invisible	:	NOT $$InDeveloperMode
+
+[Field	:	GKGiftCoupnsRep]
+	
+		Use		:	Name Field
+		Storage	:	GKGiftCoupnIDsUDF
+		Width	:	30
+		Align	:	Center
+		;Skip	:	IF ($GKGiftDetVchMode="Create Mode" and $$InAlterMode) then Yes else No
+		
+		
+[Field	:	GKGiftCoupnsAmt]
+	
+		Use		:	Number Field
+		Storage	:	GKGiftCoupnAmt
+		Width	:	30
+		Align	:	Center
+		Format	:	"Decimals:2,No Zero"
+		Skip	:	IF ($GKGiftDetVchMode="Create Mode" and $$InAlterMode) then Yes else No
+		
+[Field	:	GKGiftCoupnsVchId]
+			
+			Use			:	Name field
+			Type		:	String	:	Forced
+			Storage		:	GKGiftCoupnsVchId
+			Set as		:	IF #GKGiftDetVchMode="Create mode" then #GKPMRcptCreatedNot else #GKPMRcptAlteredNot
+			Set Always	:	Yes
+			Width		:	15
+			Align		:	Right
+			Invisible	:	NOT $$InDeveloperMode
+			
+			
+			
+[Line:GKPaymntModeDetails]
+	
+		Field			:	GK_PayMentModeTitle,GK_PayMentAmtTitle,GK_PayMentDetailsTitle
+		Space Bottom	:	0.25
+		
+[Line	:	GK_PayMentModeHead]
+	
+		Field	:	GK_PayMentModeHead
+			
+	[Field	:	GK_PayMentModeHead]
+		
+			Use			:	Name Field
+			Set as		:	"PAYMENT ALLOCATIONS SCREEN"
+			Full Width	:	Yes
+			Align		:	Center
+			Skip		:	Yes
+			
+		[Field	:	GK_PayMentModeTitle]
+			
+			Use		:	Name field
+			Info	:	"Payment Mode" 
+			Width	:	15
+			Align	:	Center
+			Color	:	Dark Red
+			
+
+		[Field	:	GK_PayMentAmtTitle]
+			
+			Use		:	Name field
+			Info	:	"Amount Received" 
+			Width	:	20
+			Align	:	Right
+			Color	:	Dark Red
+
+		[Field	:	GK_PayMentDetailsTitle]
+			
+			Use		:	Name field
+			Info	:	"Payment Details" 
+			Width	:	20
+			Align	:	Center
+			Color	:	Dark Red
+			
+[Line	:	GKPaymntOrderAmt]
+	
+		Border			: 	Thin top left right
+		Space Bottom	:	0.25
+		Space Top		:	0.25
+		Field	:	GKPaymntOrderAmtTit,GKPaymntOrderAmt
+		
+[Field	:	GKPaymntOrderAmtTit]
+	
+			Use			:	Name field
+			Set as		:	"Order Amount :"
+			Width		:	20
+			Align		:	Prompt
+			Color		:	Red
+			Skip		:	Yes
+			
+[Field	:	GKPaymntOrderAmt]
+	
+			Use			:	Number field
+			Storage		:	GKPMOrderAmt
+			Set as		:	$Amount
+			Width		:	15
+			Align		:	Right
+			Background	:	Very Light Grey
+			Format		:	"Decimals:2"
+			Read Only	:	Yes
+			
+
+/* Payment Mode - If Cash */
+
+	[Line	:	GKPaymntModeCash]
+		
+		Border			: 	Thin top left right
+		Field			:	GKPaymntModeCashTit,GKPaymntModeCashBdy,GKPaymntModeCash
+		Space Bottom	:	0.25
+		Space Top		:	0.25
+	
+		[Field:GKPaymntModeCashTit]
+		
+			Use			:	Name field
+			Set as		:	"Cash :"
+			Width		:	20
+			Align		:	Prompt
+			Color		:	Red
+			Skip		:	Yes
+			
+		[Field	:	GKPaymntModeCashBdy]
+			
+			Use			:	Logical field
+			;Storage		:	GKCashDetBdy
+			Table		:	YesNoTable
+			Show Table	:	Always
+			Width		:	15
+			Align		:	Prompt
+			Color		:	Red
+			Background	:	Very Light Grey
+			Sub Form	:	GKCashDetAggr	:	$$Value
+			
+		
+[Function	:	ToRemCashAggrValues]
+	
+		010	:	Walk Collection	:	GKCashDetAggrColl
+		012	:	delete collection object:GKCashDetAggr
+		100	:	Set Value	:	GKCashDetAggrAmt	:	$$Number:0
+		110	:	Set Value	:	GKCashDetVchMId		:	""
+		120	:	End Walk
+	
+		
+		210	:	Walk Collection	:	GKFinanceDetAggrColl
+		212	:	delete collection object:GKFinanceDetAggr
+		214	:	Set Value	:	GKFinanceAggrAmt	:	$$Number:0
+		216	:	Set Value	:	GKFinanceRefNo		:	""
+		220	:	End Walk
+		;228	:	Accept Alter
+		
+		310	:	Walk Collection	:	GKCheqDetAggrColl
+		312	:	delete collection object:GKChequeDetAggr
+		314	:	Set Value	:	GKChqAggrAmtUdf	:	$$Number:0
+		316	:	Set Value	:	GKChqNumudf		:	""
+		317	:	Set Value	:	GKChqDteudf		:	""
+		320	:	End Walk
+		;318	:	Accept Alter
+		
+		410	:	Walk Collection	:	GKCardDetAggrColl
+		412	:	delete collection object:GKCardDetAggr
+		414	:	Set Value	:	GKCarAggrAmtUdf	:	$$Number:0
+		416	:	Set Value	:	GKCarNumudf		:	""
+		417	:	Set Value	:	GKCarNumBankUdf		:	""
+		420	:	End Walk
+		
+		510	:	Walk Collection	:	GKOnlineDetAggrColl
+		512	:	delete collection object:GKOnlineDetAggr
+		514	:	Set Value	:	GKOnlineAggrAmtUdf	:	$$Number:0
+		516	:	Set Value	:	GKOnlineudf			:	""
+		517	:	Set Value	:	GKOnlineRefNo		:	""
+		520	:	End Walk
+		
+		;518	:	Accept Alter
+		
+
+		
+			
+[Report	:	GKCashDetAggr]
+	
+		Form	:	GKCashDetAggr
+		
+[Form	:	GKCashDetAggr]
+	
+		Part	:	GKCashDetAggr
+		Height	:	50 % Page
+		Width	:	30 % Page
+		
+		On		:	Form Accept	:	@@IsSalesOrder	or (@@IsSales and $$InCreateMode)	: 	Call	:	updatetotcashval
+		On		:	Form Accept	:	(@@IsSalesOrder	or @@IsSales) and $$InAlterMode			:Call	:	updatetotcashvalL
+		
+
+	[Function:updatetotcashval]
+			
+			01	:	Set Value	:	GKPMCashAmt	:	$$CollNumTotal:GKCashDetAggrColl:$GKCashDetAggrAmt
+			
+	[Function	:	updatetotcashvalL]
+		
+			01	:	Set Value	:	GKPMCashAmt	:	$$CollNumTotal:GKCashDetAggrCollS:$GKCashDetAggrAmt
+		
+[Collection	:	GKCashDetAggrColl]
+	
+		Source Collection	:	..
+		Walk				:	GKCashDetAggr
+		Fetch				:	GKCashDetAggrAmt,GKCashDetVchMId,GKCashDetVchMId,GKCashDetVchMode
+
+
+[Collection	:	GKCashDetAggrCollS]
+	
+		Source Collection	:	..
+		Walk				:	GKCashDetAggr
+		Fetch				:	GKCashDetAggrAmt,GKCashDetVchMId,GKCashDetVchMId,GKCashDetVchMode
+		Filter				:	GKIsCashMID;GKCashDetVchMId
+		
+		
+[Collection	:	GKCashDetAggrCollM]
+	
+		Source Collection	:	...
+		Walk				:	GKCashDetAggr
+		Fetch				:	GKCashDetAggrAmt,GKCashDetVchMId,GKCashDetVchMId,GKCashDetVchMode
+		;Filter				:	GKIsCashMID;GKCashDetVchMId
+		
+
+[Part	:	GKCashDetAggr]
+	
+		Line		:	GKCashDetAggrTit,GKCashDetAggrBdy
+		Repeat		:	GKCashDetAggrBdy:GKCashDetAggr
+		Scroll		:	Vertical
+		Vertical	:	Yes
+		Break On	:	$$Number:$GKCashDetAggrAmt=0
+		
+		
+[Line	:	GKCashDetAggrTit]
+	
+		Border	:	Thin top Bottom
+		Field	:	GKCashDetSlNo,GKCashDetAggrAmt,GKCashDetVchMId,GKCashDetVchMode
+		
+		Local	:	Field	:	Default	:	Delete	:	Storage
+		Local	:	Field	:	Default	:	Type	:	String
+		Local	:	Field	:	Default	:	Style	:	GKValePMSTyle
+		
+		Local	:	Field	:	GKCashDetSlNo				:	Set as	:	"Sl No"
+		Local	:	Field	:	GKCashDetAggrAmt			:	Set as	:	"Amount"
+		Local	:	Field	:	GKCashDetVchMId				:	Set as	:	"Rcpt Mid"
+		Local	:	Field	:	GKCashDetVchMode			:	Set as	:	"Mode"
+		
+[Line	:	GKCashDetAggrBdy]
+	
+		Field	:	GKCashDetSlNo,GKCashDetAggrAmt,GKCashDetVchMode,GKCashDetVchMId
+		
+
+[Field	:	GKCashDetSlNo]
+	
+			Use			:	Name field
+			Storage		:	GKCashDetSlNo
+			Set as		:	IF $GKCashDetVchMode="Create mode" then $$line else 1;IF $$line=1 then 1 else @LineVal;$$Line
+			LineVal		:	If $$PrevLine:#GKCashDetVchMId!=#GKCashDetVchMId then 1 else $$PrevLine:#GKCashDetVchMId+1
+			Width		:	15
+			Align		:	Right
+			Format		:	"Decimals:2"
+			Skip		:	IF ($GKCashDetVchMode="Create Mode" and $$InAlterMode) then Yes else No
+			Invisible	:	NOT $$InDeveloperMode
+			
+[Field	:	GKCashDetAggrAmt]
+	
+			Use			:	Number field
+;			Type		:	Number	:	Forced
+			Storage		:	GKCashDetAggrAmt
+			Set Always	:	Yes
+			Width		:	15
+			Align		:	Right
+			Format		:	"Decimals:2"
+			;Read Only	:	IF ($GKCashDetVchMode="Create Mode" and $$InAlterMode and $$Value) then Yes else No
+			
+[Field	:	GKCashDetVchMId]
+	
+			Use			:	Name field
+			Type		:	String	:	Forced
+			Storage		:	GKCashDetVchMId
+			Set as		:	IF #GKCashDetVchMode="Create mode" then #GKPMRcptCreatedNot else #GKPMRcptAlteredNot
+			Set Always	:	Yes
+			Width		:	15
+			Align		:	Right
+			Invisible	:	NOT $$InDeveloperMode
+			
+			
+[Field	:	GKCashDetVchMode]
+	
+			Use			:	Name field
+			Storage		:	GKCashDetVchMode
+			Set as		:	If $$InCreateMode then "Create Mode" else "Alter Mode"
+			Width		:	15
+			Align		:	Right
+			Invisible	:	NOT $$InDeveloperMode
+			
+			
+		[Field:GKPaymntModeCash]
+		
+			Use			:	Number field
+			Storage		:	GKPMCashAmt
+			Width		:	15
+			Align		:	Right
+			Background	:	Very Light Grey
+			Format		:	"Decimals:2"
+			Invisible	:	NOT $$InDeveloperMode
+
+
+/* Payment Mode - IF CHEQUE */
+
+
+[Line	:	GKFinanceDetails]
+	
+		Field	:	GKFinanceDetTit,GKFinanceDetBdy,GKFinanceAmtUDF
+		Space Bottom	:	0.25
+		Space Top		:	0.25
+		Border			: 	Thin top left right
+		
+[Field	:	GKFinanceDetTit]
+		
+			Use			:	Name field
+			Set as		:	"Finance:"
+			Width		:	20
+			Align		:	Prompt
+			Color		:	Red
+			Skip		:	Yes
+			
+	[Field	:	GKFinanceDetBdy]
+		
+			Use			:	Logical field
+			Storage		:	GKFinanceDetBdy
+			Table		:	YesNoTable
+			Show Table	:	Always
+			Width		:	15
+			Align		:	Prompt
+			Color		:	Red
+			Background	:	Very Light Grey
+			Sub Form	:	GKFinanceDetAggr	:	$$Value
+			
+[Field	:	GKFinanceAmtUDF]
+	
+			Use			:	Number field
+			Storage		:	GKFinanceAmtUDF
+			Width		:	15
+			Align		:	Right
+			Background	:	Very Light Grey
+			Format		:	"Decimals:2"
+			Invisible	:	NOT $$InDeveloperMode
+			
+[Report	:	GKFinanceDetAggr]
+	
+		Form	:	GKFinanceDetAggr
+		
+[Form	:	GKFinanceDetAggr]
+	
+		Part	:	GKFinanceDetAggr
+		Height	:	40 % Page
+		Width	:	60 % Page
+		
+		On		:	Form Accept	:	@@IsSalesOrder	or (@@IsSales and $$InCreateMode)	: 	Call	:	updatetotfinanceval
+		On		:	Form Accept	:	(@@IsSalesOrder	or @@IsSales) and $$InAlterMode			:Call	:	updatetotfinancevalL
+		
+	[Function:updatetotfinanceval]
+			
+			01	:	Set Value	:	GKFinanceAmtUDF	:	$$CollNumTotal:GKFinanceDetAggrColl:$GKFinanceAggrAmt
+		
+	
+	[Function:updatetotfinancevalL]
+			
+			01	:	Set Value	:	GKFinanceAmtUDF	:	$$CollNumTotal:GKFinanceDetAggrCollS:$GKFinanceAggrAmt
+	
+[Collection	:	GKFinanceDetAggrColl]
+	
+		Source Collection	:	..
+		Walk				:	GKFinanceDetAggr
+		Fetch				:	GKFinanceAggrAmt,GKFinanceRefNo,GKFiananceSlNo,GKFinanceType,GKFinanceVchMId,GKFiananceSlNo
+		
+		
+[Collection	:	GKFinanceDetAggrCollIDExists]
+	
+		Source Collection	:	..
+		Walk				:	GKFinanceDetAggr
+		Fetch				:	GKFinanceAggrAmt,GKFinanceRefNo,GKFiananceSlNo,GKFinanceType,GKFinanceVchMId,GKFiananceSlNo
+		Filter				:	GKIsFinMIDExists;GKFinanceVchMId
+		
+[Collection	:	GKFinanceDetAggrCollS]
+	
+		Source Collection	:	..
+		Walk				:	GKFinanceDetAggr
+		Fetch				:	GKFinanceAggrAmt,GKFinanceRefNo,GKFinDetVchMode
+		Filter				:	GKIsFincMID
+		
+		
+[Collection	:	GKFinanceDetAggrCollM]
+	
+		Source Collection	:	...
+		Walk				:	GKFinanceDetAggr
+		Fetch				:	GKFinanceAggrAmt,GKFinanceRefNo
+		
+[Part	:	GKFinanceDetAggr]
+	
+		Line	:	GKFinanceDetAggrTit,GKFinanceDetAggrBdy
+		Repeat	:	GKFinanceDetAggrBdy:GKFinanceDetAggr
+		Scroll	:	Vertical
+		Vertical:	Yes
+		Break On:	$$Number:$GKFinanceAggrAmt=0
+		
+[Line	:	GKFinanceDetAggrTit]
+	
+		Border	:	Thin top Bottom
+		Field	:	GKFiananceSlNo,GKFinanceType,GKFinanceRefNo,GKFinanceAmt,GKFinDetVchMode,GKFinanceVchMId
+		
+		Local	:	Field	:	Default	:	Delete	:	Storage
+		Local	:	Field	:	Default	:	Type	:	String
+		Local	:	Field	:	Default	:	Style	:	GKValePMSTyle
+		
+		Local	:	Field	:	GKFiananceSlNo			:	Set as	:	"Sl No"
+		Local	:	Field	:	GKFinanceType			:	Set as	:	"Bajaj / HDFC"
+		Local	:	Field	:	GKFinanceRefNo			:	Set as	:	"Trans. Ref No"
+		Local	:	Field	:	GKFinanceAmt			:	Set as	:	"Amount"
+		Local	:	Field	:	GKFinDetVchMode			:	Set as	:	"Mode"
+		Local	:	Field	:	GKFinanceVchMId			:	Set as	:	"Rcpt Mid"
+		
+[Line	:	GKFinanceDetAggrBdy]
+	
+		Field	:	GKFiananceSlNo,GKFinanceType,GKFinanceRefNo,GKFinanceAmt,GKFinDetVchMode,GKFinanceVchMId
+		
+
+
+
+[Field	:	GKFiananceSlNo]
+	
+			Use			:	Name field
+			Storage		:	GKFiananceSlNo
+			Set as		:	IF $GKFinDetVchMode="Create mode" then $$line else 1;=1 then 1 else @LineVal;$$Line
+			LineVal		:	$$PrevLine:#GKFiananceSlNo+$$Number:1;If $$PrevLine:#GKFinanceVchMId!=#GKFinanceVchMId then 1 else $$PrevLine:#GKFinanceVchMId+1
+			Set Always	:	Yes
+			Width		:	15
+			Align		:	Right
+			Invisible	:	NOT $$InDeveloperMode
+			
+[Field	:	GKFinDetVchMode]
+	
+			Use			:	Name field
+			Storage		:	GKFinDetVchMode
+			Set as		:	If $$InCreateMode then "Create Mode" else "Alter Mode"
+			Width		:	15
+			Align		:	Right
+			Invisible	:	NOT $$InDeveloperMode
+		
+[Field	:	GKFinanceType]
+	
+			Use			:	Name field
+			Storage		:	GKFinanceType
+			Width		:	30
+			Align		:	Left
+			
+			
+[Field	:	GKFinanceRefNo]
+	
+			Use			:	Name field
+			Storage		:	GKFinanceRefNo
+			Width		:	30
+			Align		:	Left
+			
+			
+	[Field	:	GKFinanceAmt]
+		
+			Use			:	Number field
+			Storage		:	GKFinanceAggrAmt
+			Width		:	15
+			Align		:	Right
+			Format		:	"Decimals:2"
+			Skip		:	IF ($GKFinDetVchMode="Create Mode" and $$InAlterMode) then Yes else No
+
+		[Field	:	GKFinanceVchMId]
+			
+			Use			:	Name field
+			Type		:	String	:	Forced
+			Storage		:	GKFinanceVchMId
+			Set as		:	IF #GKFinDetVchMode="Create mode" then #GKPMRcptCreatedNot else #GKPMRcptAlteredNot
+			Set Always	:	Yes
+			Width		:	15
+			Align		:	Right
+			Invisible	:	NOT $$InDeveloperMode
+
+	[Line:GKChqDetails]
+	
+		Field			:	GKChqDettit,GKChqDetBdy,GKChqAmtUDF;GKChqNum,GKChqNumudf,GKChqDte,GKChqDteudf;,GKChqBank,GKChqBankUdf,  GKCheqCompanyName,GKCheqCompanyNameUDF
+;		Field			:	GKPaymntModeCheque,GKChqAmtUDF
+		Space Bottom	:	0.25
+		Space Top		:	0.25
+	
+		Border			: 	Thin top left right
+		
+	[Field	:	GKChqDettit]
+		
+			Use			:	Name field
+			Set as		:	"Cheque:"
+			Width		:	20
+			Align		:	Prompt
+			Color		:	Red
+			Skip		:	Yes
+			
+	[Field	:	GKChqDetBdy]
+		
+			Use			:	Logical field
+			Storage		:	GKChequeDetBdy
+			Table		:	YesNoTable
+			Show Table	:	Always
+			Width		:	15
+			Align		:	Prompt
+			Color		:	Red
+			Background	:	Very Light Grey
+			Sub Form	:	GKChequeDetAggr	:	$$Value
+			
+[Report	:	GKChequeDetAggr]
+	
+		Form	:	GKChequeDetAggr
+		
+[Form	:	GKChequeDetAggr]
+	
+		Part	:	GKChequeDetAggr
+		Height	:	40 % Page
+		Width	:	60 % Page
+		
+		On		:	Form Accept	:	@@IsSalesOrder	or (@@IsSales and $$InCreateMode)	: 	Call	:	updatetotchequeval
+		On		:	Form Accept	:	(@@IsSalesOrder	or @@IsSales) and $$InAlterMode			:Call	:	updatetotchequevalL
+		
+	[Function:updatetotchequeval]
+			
+			01	:	Set Value	:	GKChqAmtudf	:	$$CollNumTotal:GKCheqDetAggrColl:$GKChqAggrAmtUdf
+		
+	[Function:updatetotchequevalL]
+			
+			01	:	Set Value	:	GKChqAmtudf	:	$$CollNumTotal:GKCheqDetAggrCollS:$GKChqAggrAmtUdf
+		
+[Collection	:	GKCheqDetAggrColl]
+	
+		Source Collection	:	..
+		Walk				:	GKChequeDetAggr
+		Fetch				:	GKChqAggrAmtUdf,GKChqNumudf,GKChqDteudf,GKChqDetVchMId,GKChqSlNo
+		
+[Collection	:	GKCheqDetAggrCollIDExists]
+	
+		Source Collection	:	..
+		Walk				:	GKChequeDetAggr
+		Fetch				:	GKChqAggrAmtUdf,GKChqNumudf,GKChqDteudf,GKChqDetVchMId,GKChqSlNo
+		Filter				:	GKIsCheqIDExists;GKIsCheqIDExists
+		
+[Collection	:	GKCheqDetAggrCollM]
+	
+		Source Collection	:	...
+		Walk				:	GKChequeDetAggr
+		Fetch				:	GKChqAggrAmtUdf,GKChqNumudf,GKChqDteudf
+		
+
+[Collection	:	GKCheqDetAggrCollS]
+	
+		Source Collection	:	..
+		Walk				:	GKChequeDetAggr
+		Fetch				:	GKChqAggrAmtUdf,GKChqNumudf,GKChqDteudf,GKChqDetVchMode
+		Filter				:	GKIsCheqMID
+		
+[Part	:	GKChequeDetAggr]
+	
+		Line	:	GKChequeDetAggrTit,GKChequeDetAggrBdy
+		Repeat	:	GKChequeDetAggrBdy:GKChequeDetAggr
+		Scroll	:	Vertical
+		Vertical:	Yes
+		Break On:	$$Number:$GKChqAggrAmtUdf=0
+		
+[Line	:	GKChequeDetAggrTit]
+	
+		Border	:	Thin Top Bottom
+		Field	:	GKChqSlNo,GKChqNumUdf,GKChqDteudf,GKChqDetAggrAmt,GKCheqDetVchMode,GKChqDetVchMId
+		
+		Local	:	Field	:	Default	:	Delete	:	Storage
+		Local	:	Field	:	Default	:	Type	:	String
+		Local	:	Field	:	Default	:	Style	:	GKValePMStyle
+		
+		Local	:	Field	:	GKChqSlNo			:	Set as	:	"Sl No"
+		Local	:	Field	:	GKChqNumUdf			:	Set as	:	"Cheque No."
+		Local	:	Field	:	GKChqDteudf			:	Set as	:	"Cheque Date"
+		Local	:	Field	:	GKChqDetAggrAmt		:	Set as	:	"Amount"
+		Local	:	Field	:	GKCheqDetVchMode	:	Set as	:	"Mode"
+		Local	:	Field	:	GKChqDetVchMId		:	Set as	:	"Rcpt Mid"
+		
+[Line	:	GKChequeDetAggrBdy]
+	
+		Field	:	GKChqSlNo,GKChqNumUdf,GKChqDteudf,GKChqDetAggrAmt,GKCheqDetVchMode,GKChqDetVchMId
+		
+
+[Field	:	GKChqSlNo]
+	
+			Use			:	Name field
+			Storage		:	GKChqSlNo
+			Set as		:	IF $GKChqDetVchMode="Create mode" then $$line else 1;IF $$line=1 then 1 else @LineVal;$$Line
+			LineVal		:	If $$PrevLine:#GKChqDetVchMId!=#GKChqDetVchMId then 1 else $$PrevLine:#GKChqDetVchMId+1
+			Set Always	:	Yes
+			Width		:	15
+			Align		:	Right
+			Invisible	:	NOT $$InDeveloperMode
+
+[Field	:	GKCheqDetVchMode]
+	
+			Use			:	Name field
+			Storage		:	GKChqDetVchMode
+			Set as		:	If $$InCreateMode then "Create Mode" else "Alter Mode"
+			Width		:	15
+			Align		:	Right
+			Invisible	:	NOT $$InDeveloperMode
+			
+[Field	:	GKChqDetVchMId]
+			
+			Use			:	Name field
+			Type		:	String	:	Forced
+			Storage		:	GKChqDetVchMId
+			Set as		:	IF #GKCheqDetVchMode="Create mode" then #GKPMRcptCreatedNot else #GKPMRcptAlteredNot
+			Set Always	:	Yes
+			Width		:	15
+			Align		:	Right
+			Invisible	:	NOT $$InDeveloperMode
+			
+	[Field	:	GKChqDetAggrAmt]
+		
+			Use			:	Number field
+			Storage		:	GKChqAggrAmtUdf
+			Width		:	15
+			Align		:	Right
+;			Background	:	Very Light Grey
+			Format		:	"Decimals:2"
+			Skip		:	IF (($GKChqDetVchMode="Create Mode" and $$InAlterMode)) then Yes else No
+		
+	
+		[Field:GKPaymntModeCheque]
+		
+			Use			:	Name field
+			Set as		:	"Cheque Amt.:"
+			Width		:	20
+			Align		:	Prompt
+			Color		:	Red
+			Skip		:	Yes
+			;Inactive	:	$$InCreateMode and ($$Number:$GKPMCashAmt=$$Number:$Amount) or (($$Number:$GKCarAmtUdf+$$Number:$GKPMCashAmt)=$$Number:$Amount) or (($$Number:$GKOnlineAmtUdf+$$Number:$GKCarAmtUdf+$$Number:$GKPMCashAmt)=$$Number:$Amount)
+			
+	[Field:GKChqAmtudf]
+		
+			Use			:	Number field
+			Storage		:	GKChqAmtudf
+			Width		:	15
+			Align		:	Right
+			Background	:	Very Light Grey
+			Format		:	"Decimals:2"
+			Invisible	:	NOT $$InDeveloperMode
+
+
+		[Field:GKChqNum]
+		
+			Use			:	Name field
+			Info		:	"Cheque No:"
+			Align		:	Prompt
+			Width		:	20
+			Color		:	Red
+			;Inactive	:	$$InCreateMode and ($$Number:$GKPMCashAmt=$$Number:$Amount) or (($$Number:$GKCarAmtUdf+$$Number:$GKPMCashAmt)=$$Number:$Amount) or (($$Number:$GKOnlineAmtUdf+$$Number:$GKCarAmtUdf+$$Number:$GKPMCashAmt)=$$Number:$Amount)
+			
+
+		[Field:GKChqNumUdf]
+		
+			Use			:	Name field
+			Storage		:	GKChqNumudf
+			Width		:	30
+			Align		:	Left
+			Skip		:	IF NOT $$IsEmpty:$GKChqNumudf then Yes else No
+
+		[Field:GKChqDte]
+		
+			Use			:	Name field
+			Info		:	"Cheque Date:"
+			Align		:	Prompt
+			Width		:	15
+			Color		:	Red
+			
+
+		[Field:GKChqDteudf]
+		
+			Use			:	Uni Date field
+			Storage		:	GKChqDteudf
+			Width		:	20
+			Align		:	Left
+			Skip		:	IF NOT $$IsEmpty:$GKChqDteudf then Yes else No
+
+		[Field:GKChqBank]
+		
+			Use			:	Name field
+			Info		:	"Customer Bank:"
+			Align		:	Prompt
+			Width		:	14
+			Color		:	Red
+			
+		[Field:GKChqBankUdf]
+		
+			Use			:	Name field
+			Storage		:	GKChqBankUdf
+			Width		:	15
+			Background	:	Very Light Grey
+			Align		:	Left
+			
+[Field:GKCheqCompanyName]
+	
+			Use			:	Name field
+			Info		:	"Company Bank:"
+			Align		:	Prompt
+			Width		:	14
+			Color		:	Red
+			;Inactive	:	$$InCreateMode and ($$Number:$GKPMCashAmt=$$Number:$Amount) or (($$Number:$GKCarAmtUdf+$$Number:$GKPMCashAmt)=$$Number:$Amount) or (($$Number:$GKOnlineAmtUdf+$$Number:$GKCarAmtUdf+$$Number:$GKPMCashAmt)=$$Number:$Amount)
+			Key			:	Create Ledger
+	
+	[Field:GKCheqCompanyNameUDF]
+		
+			Use			:	Name field
+			Storage		:	GKChqCompyBankUdf
+			Table		:	ListofBankss
+			Show Table	:	Always
+			Width		:	15
+			Background	:	Very Light Grey
+			Align		:	Left
+			;Inactive	:	$$InCreateMode and ($$Number:$GKPMCashAmt=$$Number:$Amount) or (($$Number:$GKCarAmtUdf+$$Number:$GKPMCashAmt)=$$Number:$Amount) or (($$Number:$GKOnlineAmtUdf+$$Number:$GKCarAmtUdf+$$Number:$GKPMCashAmt)=$$Number:$Amount)
+			
+/* Payment Mode - IF Card */
+
+	[Line:GKCardDetails]
+	
+		Field			:	GKCardDetTit,GKCardDetBdy,GKCardAmtUdf;,GKCardNumTit,GKCardNumUdf,GKCardNumBank,GKCardNumBankudf;,GKCompanyBank,GKCompanyBankUdf
+		;Field			:	GKCardPaymntModeTit,GKCardAmtUdf
+		Space Bottom	:	0.25
+		Space Top		:	0.25
+	
+		Border: Thin top left right
+		
+[Field	:	GKCardDetTit]
+	
+			Use			:	Name field
+			Set as		:	"Card :"
+			Width		:	20
+			Align		:	Prompt
+			Color		:	Red
+			Skip		:	Yes
+			
+[Field	:	GKCardDetBdy]
+	
+			Use			:	Logical field
+			Storage		:	GKCardDetBdy
+			Table		:	YesNoTable
+			Show Table	:	Always
+			Width		:	15
+			Align		:	Prompt
+			Color		:	Red
+			Background	:	Very Light Grey
+			Sub Form	:	GKCardDetAggr	:	$$Value
+			
+[Report	:	GKCardDetAggr]
+	
+		Form	:	GKCardDetAggr
+		
+[Form	:	GKCardDetAggr]
+	
+		Part	:	GKCardDetAggr
+		Height	:	40 % Page
+		Width	:	60 % Page
+		On		:	Form Accept	:	@@IsSalesOrder	or (@@IsSales and $$InCreateMode)	: 	Call	:	updatetotcardval
+		On		:	Form Accept	:	(@@IsSalesOrder	or @@IsSales) and $$InAlterMode			:Call	:	updatetotcardvalL
+		
+	[Function:updatetotcardval]
+			
+			01	:	Set Value	:	GKCarAmtUdf	:	$$CollNumTotal:GKCardDetAggrColl:$GKCarAggrAmtUdf
+			
+[Function	:	updatetotcardvalL]
+	
+			01	:	Set Value	:	GKCarAmtUdf	:	$$CollNumTotal:GKCardDetAggrCollS:$GKCarAggrAmtUdf
+				
+		
+[Part	:	GKCardDetAggr]
+	
+		Line	:	GKCardDetAggrTit,GKCardDetAggrBdy
+		Repeat	:	GKCardDetAggrBdy:GKCardDetAggr
+		Scroll	:	Vertical
+		Vertical:	Yes
+		Break On:	$$Number:$GKCarAggrAmtUdf=0
+		
+[Line	:	GKCardDetAggrTit]
+	
+		Border	:	Thin Top Bottom
+		Field	:	GKCardSlNo,GKCardNumUdf,GKCardNumBankudf,GKCardDetAggrAmt,GKCardDetVchMode,GKCardDetVchMId
+		
+		Local	:	Field	:	Default	:	Delete	:	Storage
+		Local	:	Field	:	Default	:	Type	:	String
+		Local	:	Field	:	Default	:	Style	:	GKValePMStyle
+		
+		Local	:	Field	:	GKCardSlNo			:	Set as	:	"Sl No"
+		Local	:	Field	:	GKCardNumUdf		:	Set as	:	"Card No."
+		Local	:	Field	:	GKCardNumBankudf	:	Set as	:	"Trans. Ref No"
+		Local	:	Field	:	GKCardDetAggrAmt	:	Set as	:	"Amount"
+		Local	:	Field	:	GKCardDetVchMode	:	Set as	:	"Mode"
+		Local	:	Field	:	GKCardDetVchMId		:	Set as	:	"Rcpt Mid"
+
+[Style	:	GKValePMStyle]
+	
+		Font	:	"CAlibri"
+		Height	:	11
+		Bold	:	Yes
+		
+[Line	:	GKCardDetAggrBdy]
+	
+		Field	:	GKCardSlNo,GKCardNumUdf,GKCardNumBankudf,GKCardDetAggrAmt,GKCardDetVchMode,GKCardDetVchMId
+		
+
+[Field	:	GKCardSlNo]
+	
+			Use			:	Name field
+			Storage		:	GKCardSlNo
+			Set as		:	IF $GKCardDetVchMode="Create mode" then $$line else 1;IF $$line=1 then 1 else @LineVal;$$Line
+			LineVal		:	If $$PrevLine:#GKCardDetVchMId!=#GKCardDetVchMId then 1 else $$PrevLine:#GKCardDetVchMId+1
+			Set Always	:	Yes
+			Width		:	15
+			Align		:	Right
+			Invisible	:	NOT $$InDeveloperMode
+			
+[Field	:	GKCardDetVchMode]
+	
+			Use			:	Name field
+			Storage		:	GKCardDetVchMode
+			Set as		:	If $$InCreateMode then "Create Mode" else "Alter Mode"
+			Width		:	15
+			Align		:	Right
+			Invisible	:	NOT $$InDeveloperMode
+			
+
+[Field	:	GKCardDetVchMId]
+			
+			Use			:	Name field
+			Type		:	String	:	Forced
+			Storage		:	GKCardDetVchMId
+			Set as		:	IF #GKCardDetVchMode="Create mode" then #GKPMRcptCreatedNot else #GKPMRcptAlteredNot
+			Set Always	:	Yes
+			Width		:	15
+			Align		:	Right
+			Invisible	:	NOT $$InDeveloperMode
+			
+[Field	:	GKCardDetAggrAmt]
+	
+			Use			:	Number field
+			Storage		:	GKCarAggrAmtUdf
+			Width		:	15
+			Align		:	Right
+;			Background	:	Very Light Grey
+			Format		:	"Decimals:2"
+			;Skip		:	IF ($GKCardDetVchMode="Create Mode" and $$InAlterMode) then Yes else No
+			Read Only	:	IF ($GKCardDetVchMode="Create Mode" and $$InAlterMode and #GKCardDetAggrAmt!=0) then Yes else No
+
+		[Field:GKCardPaymntModeTit]
+		
+			Use			:	Name field
+			Set as		:	"Card Amt.:"
+			Width		:	20
+			Align		:	Prompt
+			Color		:	Red
+			Skip		:	Yes
+			;Inactive	:	$$InCreateMode and $$Number:$GKPMCashAmt=$$Number:$Amount
+	
+		[Field:GKCardAmtUdf]
+		
+			Use			:	Number field
+			Storage		:	GKCarAmtUdf
+			Set Always	:	Yes
+			Width		:	15
+			Align		:	Right
+			Background	:	Very Light Grey
+			Format		:	"Decimals:2"
+			Invisible	:	NOT $$InDeveloperMode
+				
+
+
+[Collection	:	GKCardDetAggrColl]
+	
+		Source Collection	:	..
+		Walk				:	GKCardDetAggr
+		Fetch				:	GKCarAggrAmtUdf,GKCarNumudf,GKCarNumBankUdf,GKCardDetVchMId,GKCardSlNo
+		
+
+[Collection	:	GKCardDetAggrCollIDExists]
+	
+		Source Collection	:	..
+		Walk				:	GKCardDetAggr
+		Fetch				:	GKCarAggrAmtUdf,GKCarNumudf,GKCarNumBankUdf,GKCardDetVchMId,GKCardSlNo
+		Filter				:	GKIsCardIDExists;GKCardDetVchMId
+		
+		
+[Collection	:	GKCardDetAggrCollM]
+	
+		Source Collection	:	...
+		Walk				:	GKCardDetAggr
+		Fetch				:	GKCarAggrAmtUdf,GKCarNumudf,GKCarNumBankUdf,GKCardDetVchMId
+		
+		
+;;;;Select $GKCarAggrAmtUdf,$GKCarNumudf,$GKCarNumBankUdf from GKCardDetAggrCollM
+		
+
+[Collection	:	GKCardDetAggrCollS]
+	
+		Source Collection	:	..
+		Walk				:	GKCardDetAggr
+		Fetch				:	GKCarAggrAmtUdf,GKCarNumudf,GKCarNumBankUdf,GKCardDetVchMId,GKCardDetVchMode
+		Filter				:	GKIsCardMID
+		
+;;;;Select $GKCarAggrAmtUdf,$GKCarNumudf from GKCardDetAggrColl
+
+		[Field:GKCardNumTit]
+		
+			Use			:	Name field
+			Info		:	"Card No.:"
+			Align		:	Prompt
+			Width		:	20
+			Color		:	Red
+			;Inactive	:	$$InCreateMode and $$Number:$GKPMCashAmt=$$Number:$Amount
+		
+		[Field:GKCardNumUdf]
+		
+			Use			:	Name field
+			Storage		:	GKCarNumudf
+			Width		:	30
+			Align		:	Left
+			;Read Only	:	IF ($GKCardDetVchMode="Create Mode" and $$InAlterMode and NOT $$IsEmpty:#GKCardNumUdf) then Yes else No
+			
+
+	[Field:GKCardNumBank]
+		
+			Use			:	Name field
+			Info		:	"Trans. Ref No.:"
+			Align		:	Prompt
+			Width		:	15
+			Color		:	Red
+			;Inactive	:	$$InCreateMode and $$Number:$GKPMCashAmt=$$Number:$Amount
+			
+
+		[Field:GKCardNumBankudf]
+		
+			Use			:	Name field
+			Storage		:	GKCarNumBankUdf
+			Width		:	30
+			Align		:	Left
+			Read Only	:	IF ($GKCardDetVchMode="Create Mode" and $$InAlterMode and NOT $$IsEmpty:#GKCardNumBankudf) then Yes else No
+			
+		[Field:GKCompanyBank]
+			
+			Use			:	Name field
+			Info		:	"Company Bank:"
+			Align		:	Prompt
+			Width		:	14
+			Color		:	Red
+			;Inactive	:	$$InCreateMode and $$Number:$GKPMCashAmt=$$Number:$Amount
+			
+		[Field:GKCompanyBankUDF]
+		
+			Use			:	Name field
+			Storage		:	GKcmpnyBankUdf
+			Table		:	ListofBankss
+			Show Table	:	Always
+			Width		:	15
+			Align		:	Left
+			Background	:	Very Light Grey
+			;Inactive	:	 $$InCreateMode and $$Number:$GKPMCashAmt=$$Number:$Amount
+			Key			:	Create Ledger
+
+			
+[Collection:ListofBankss]
+	
+		Title		:	"List of Bank's"
+		Type		:	Ledger
+		Child Of	:	$$GroupBank
+		Belongs To	:	Yes
+		Fetch		:	NAme
+		Format		:	$Name, 20
+
+/* Payment Mode - IF ONLINE */
+
+[Line:GKOnlineDetails]
+
+		Border			: 	Thin top left right
+	
+		Field			:	GKOnlinePayDetTit,GKOnlinePayDetBdy,GKOnlineAmtUdf;,GKOnlinePayDetails,GKOnlinePayDetailsUDF,GKOnlineTransRefNoTit,GKOnlineTransRefNo;,GKOnlineCarNumBank,GKOnlineCarNumBankUdf,GKOnlineCompanyBank,GKOnlineCompanyBankUDF
+;		Field			:	GKOnlinePaymntModeTit,GKOnlineAmtUdf
+		Space Bottom	:	0.25
+		Space Top		:	0.25
+		
+	[Field	:	GKOnlinePayDetTit]
+		
+			Use			:	Name field
+			Set as		:	"Online:"
+			Width		:	20
+			Align		:	Prompt
+			Color		:	Red
+			Skip		:	Yes
+			
+	[Field	:	GKOnlinePayDetBdy]
+			
+			Use			:	Logical field
+			Storage		:	GKOnlineDetBdy
+			Table		:	YesNoTable
+			Show Table	:	Always
+			Width		:	15
+			Align		:	Prompt
+			Color		:	Red
+			Background	:	Very Light Grey
+			Sub Form	:	GKOnlineDetAggr	:	$$Value
+			
+[Report	:	GKOnlineDetAggr]
+	
+		Form	:	GKOnlineDetAggr
+		
+[Form	:	GKOnlineDetAggr]
+	
+		Part	:	GKOnlineDetAggr
+		Height	:	40 % Page
+		Width	:	60 % Page
+		
+		On		:	Form Accept	:	@@IsSalesOrder	or (@@IsSales and $$InCreateMode)	: 	Call	:	updatetotonlineval
+		On		:	Form Accept	:	(@@IsSalesOrder	or @@IsSales) and $$InAlterMode			:Call	:	updatetotonlinevalL
+		
+		
+	[Function:updatetotonlineval]
+			
+			01	:	Set Value	:	GKOnlineAmtUdf	:	$$CollNumTotal:GKOnlineDetAggrColl:$GKOnlineAggrAmtUdf
+		
+
+	[Function:updatetotonlinevalL]
+			
+			01	:	Set Value	:	GKOnlineAmtUdf	:	$$CollNumTotal:GKOnlineDetAggrCollS:$GKOnlineAggrAmtUdf
+		
+		
+[Collection	:	GKOnlineDetAggrColl]
+	
+		Source Collection	:	..
+		Walk				:	GKOnlineDetAggr
+		Fetch				:	GKOnlineSlNo,GKOnlineAggrAmtUdf,GKOnlineudf,GKOnlineRefNo,GKOnlineDetVchMId
+		
+
+[Collection	:	GKOnlineDetAggrCollIDExists]
+	
+		Source Collection	:	..
+		Walk				:	GKOnlineDetAggr
+		Fetch				:	GKOnlineSlNo,GKOnlineAggrAmtUdf,GKOnlineudf,GKOnlineRefNo,GKOnlineDetVchMId
+		Filter				:	GKIsOnlineIDExists;GKOnlineDetVchMId
+		
+[Collection	:	GKOnlineDetAggrCollS]
+	
+		Source Collection	:	..
+		Walk				:	GKOnlineDetAggr
+		Fetch				:	GKOnlineAggrAmtUdf,GKOnlineudf,GKOnlineRefNo,GKOnlineDetVchMode
+		Filter				:	GKIsOnlineMID
+		
+[Collection	:	GKOnlineDetAggrCollM]
+	
+		Source Collection	:	...
+		Walk				:	GKOnlineDetAggr
+		Fetch				:	GKOnlineAggrAmtUdf,GKOnlineudf,GKOnlineRefNo
+		
+[Part	:	GKOnlineDetAggr]
+	
+		Line	:	GKOnlineDetAggrTit,GKOnlineDetAggrBdy
+		Repeat	:	GKOnlineDetAggrBdy:GKOnlineDetAggr
+		Scroll	:	Vertical
+		Vertical:	Yes
+		Break On:	$GKOnlineAggrAmtUdf=0
+		
+[Line	:	GKOnlineDetAggrTit]
+	
+		Border	:	Thin Top Bottom
+		Field	:	GKOnlineSlNo,GKOnlinePayDetailsUDF,GKOnlineTransRefNo,GKOnlineDetAggrAmt,GKOnlineDetVchMode,GKOnlineDetVchMId
+		
+		Local	:	Field	:	Default	:	Delete	:	Storage
+		Local	:	Field	:	Default	:	Type	:	String
+		Local	:	Field	:	Default	:	Style	:	GKValePMStyle
+		
+		Local	:	Field	:	GKOnlineSlNo			:	Info	:	"Sl No"
+		Local	:	Field	:	GKOnlinePayDetailsUDF	:	Info	:	"Online Type"
+		Local	:	Field	:	GKOnlineTransRefNo		:	Info	:	"Trans. Ref No"
+		Local	:	Field	:	GKOnlineDetAggrAmt		:	Info	:	"Amount"
+		Local	:	Field	:	GKOnlineDetVchMId		:	Set as	:	"Rcpt Mid"
+		Local	:	Field	:	GKOnlineDetVchMode		:	Info	:	"Mode"
+		
+[Line	:	GKOnlineDetAggrBdy]
+	
+		Field	:	GKOnlineSlNo,GKOnlinePayDetailsUDF,GKOnlineTransRefNo,GKOnlineDetAggrAmt,GKOnlineDetVchMode,GKOnlineDetVchMId
+
+
+[Field	:	GKOnlineSlNo]
+	
+			Use			:	Name field
+			Storage		:	GKOnlineSlNo
+			Set as		:	IF $GKOnlineDetVchMode="Create mode" then $$line else 1;IF $$line=1 then 1 else @LineVal;$$Line
+			LineVal		:	If $$PrevLine:#GKOnlineDetVchMId!=#GKOnlineDetVchMId then 1 else $$PrevLine:#GKOnlineDetVchMId+1
+			Set Always	:	Yes
+			Width		:	15
+			Align		:	Right
+			Invisible	:	NOT $$InDeveloperMode
+
+[Field	:	GKOnlineDetVchMode]
+	
+			Use			:	Name field
+			Storage		:	GKOnlineDetVchMode
+			Set as		:	If $$InCreateMode then "Create Mode" else "Alter Mode"
+			Width		:	15
+			Align		:	Right
+			Invisible	:	NOT $$InDeveloperMode
+
+[Field	:	GKOnlineDetVchMId]
+			
+			Use			:	Name field
+			Type		:	String	:	Forced
+			Storage		:	GKOnlineDetVchMId
+			Set as		:	IF #GKOnlineDetVchMode="Create mode" then #GKPMRcptCreatedNot else #GKPMRcptAlteredNot
+			Set Always	:	Yes
+			Width		:	15
+			Align		:	Right
+			Invisible	:	NOT $$InDeveloperMode
+	
+				[Field	:	GKOnlineDetAggrAmt]
+					
+					Use			:	Number field
+					Storage		:	GKOnlineAggrAmtUdf
+					Width		:	15
+					Align		:	Right
+;					Background	:	Very Light Grey
+					Format		:	"Decimals:2"
+					Skip		:	IF (($GKOnlineDetVchMode="Create Mode" and $$InAlterMode)) then Yes else No
+					
+	
+		[Field:GKOnlinePaymntModeTit]
+		
+			Use			:	Name field
+			Set as		:	"Online Amt.:"
+			Width		:	20
+			Align		:	Prompt
+			Color		:	Red
+			Skip		:	Yes
+			;Inactive	:	$$InCreateMode and ($$Number:$GKPMCashAmt=$$Number:$Amount) or (($$Number:$GKCarAmtUdf+$$Number:$GKPMCashAmt)=$$Number:$Amount)
+
+		[Field:GKOnlineAmtUdf]
+		
+			Use			:	Number field
+			Storage		:	GKOnlineAmtUdf
+			Width		:	15
+			Align		:	Right
+			Background	:	Very Light Grey
+			Format		:	"Decimals:2"	
+			Invisible	:	NOT $$InDeveloperMode
+	
+		
+		[Field:GKOnlinePayDetails]
+		
+			Use			:	Name field
+			Info		:	"Online Type:"
+			Color		:	Red
+			Width		:	20
+			Align		:	Prompt
+			;Inactive	:	$$InCreateMode and ($$Number:$GKPMCashAmt=$$Number:$Amount) or (($$Number:$GKCarAmtUdf+$$Number:$GKPMCashAmt)=$$Number:$Amount)
+		
+		[Field:GKOnlinePayDetailsUDF]
+		
+			Use			:	Name field
+			Storage		:	GKOnlineudf
+			Table		:	GK_ListOfTransactions,End of List
+			Show Table	:	Always
+			Width		:	20
+			Align		:	Left
+			Skip		:	IF NOT $$IsEmpty:$GKOnlineudf then Yes else No
+			;Inactive	:	$$InCreateMode and ($$Number:$GKPMCashAmt=$$Number:$Amount) or (($$Number:$GKCarAmtUdf+$$Number:$GKPMCashAmt)=$$Number:$Amount)
+	
+	[Field	:	GKOnlineTransRefNoTit]
+			
+			Use			:	Name field
+			Info		:	"Trans. Ref No.:"
+			Color		:	Red
+			Width		:	15
+			Align		:	Prompt
+			;Inactive	:	$$InCreateMode and ($$Number:$GKPMCashAmt=$$Number:$Amount) or (($$Number:$GKCarAmtUdf+$$Number:$GKPMCashAmt)=$$Number:$Amount)
+		
+	[Field	:	GKOnlineTransRefNo]
+
+			Use			:	Name field
+			Type		:	String
+			Storage		:	GKOnlineRefNo
+			Set Always	:	Yes
+			Width		:	30
+			Align		:	Left
+			Skip		:	IF NOT $$IsEmpty:$GKOnlineRefNo then Yes else No
+			
+
+	[Field:GKOnlineCarNumBank]
+		
+			Use			:	Name field
+			Info		:	"Customer Bank:"
+			Align		:	Prompt
+			Width		:	14
+			Color		:	Red
+			;Inactive	:	$$InCreateMode and $$Number:$GKPMCashAmt=$$Number:$Amount
+
+		[Field:GKOnlineCarNumBankUdf]
+		
+			Use			:	Name field
+			Storage		:	GKOnlineBankUdf
+			Width		:	15
+			Align		:	Left
+			Background	:	Very Light Grey
+			;Inactive	:	$$InCreateMode and $$Number:$GKPMCashAmt=$$Number:$Amount
+			
+		[Field:GKOnlineCompanyBank]
+			
+			Use			:	Name field
+			Info		:	"Company Bank:"
+			Align		:	Prompt
+			Width		:	14
+			Color		:	Red
+			;Inactive	:	$$InCreateMode and $$Number:$GKPMCashAmt=$$Number:$Amount
+			
+		[Field:GKOnlineCompanyBankUDF]
+		
+			Use			:	Name field
+			Storage		:	GKOnlinecmpnyBankUdf
+			Table		:	ListofBankss
+			Show Table	:	Always
+			Width		:	15
+			Align		:	Left
+			Background	:	Very Light Grey
+			;Inactive	:	 $$InCreateMode and $$Number:$GKPMCashAmt=$$Number:$Amount
+			Key			:	Create Ledger
+		
+	[Line	:	GKBalnceAmnt]
+		
+		Space Bottom	:	0.25
+		Space Top		:	0.25
+	
+		Field       : Long Prompt, GKBalnceAmntudf,GKBalnceSalesAmntudf,GKVchBillAmtTit,GKVchBillAmt,GKBalnceAmntudfyes, Modyobjfld
+		Local       : Field : Long Prompt 	: Setas   	: $$LocaleString:"Balance Amount"
+		Local       : Field : Long Prompt 	: Color		:	red
+		Local       : Field : Long Prompt 	: Width		: 20	
+		Border		: Thin top left right
+		
+		[Field	:	GKBalnceAmntudf]
+			
+			Use			:	Number Field
+			Type		:	Number	:	Forced
+			Storage		:	GKBalnceAmntudf
+			Set as		:	IF @@GKSaOrdVchType then @SalesOrdrAmt else if $$Number:@BillClVal!=$$Number:0 then ($$Number:@SalestotAmnt-$$Number:@BillClVal) else $$Number:0;SalesAmnt)
+			SalesOrdrAmt:	$$Number:$Amount-($$Number:$GKPMCashAmt+$$Number:$GKChqAmtudf+$$Number:$GKCarAmtUdf+$$Number:$GKOnlineAmtUdf+$$Number:$GKPMGiftAmt+$$Number:$GKFinanceAmtUDF)
+			SalesAmnt	:	$$CollectionFieldByKey:$GKAdvRcptAmt:$BasicPurchaseOrderNo:GKToGetSalesOrderAdvAmnt
+			SalestotAmnt:	$$CollectionFieldByKey:$Amount:$BasicPurchaseOrderNo:GKToGetSalesOrderAdvAmnt
+			BillClVal	:	$$Number:$$CollectionFieldByKey:$ClosingBalance:$BasicPurchaseOrderNo:GKValePartyClBal
+			Set Always	:	Yes
+			Width		:	15
+			Format		:	"No Zero, Decimals:2"
+			Skip		:	Yes
+			Align		:	Right
+			Background	:   Very Light Grey
+			Invisible	:	$$IsNotApplicable:$$FullList:InvoiceOrderList:$BasicPurchaseOrderNo
+			
+[Collection	:	GKValePartyClBal]
+	
+		Type		:	Bills
+		Child Of	:	#EIConsignee
+		Belongs To	:	Yes
+		Fetch		:	Name,LedgerName,ClosingBalance
+		Search Key	:	$Name
+		
+;;;;Select $Name,$LedgerName,$ClosingBalance from GKValePartyClBal
+			
+[Field	:	GKBalnceSalesAmntudf]
+	
+			Use			:	Number Field
+			Type		:	Number:Forced
+			Storage		:	GKBalnceSalesAmntudf
+			Set as		:	IF (@AdvAmt!=0 and @AdvAmtA=0) then $Amount-@AdvAmt else if (@AdvAmt!=0 and @AdvAmtA!=0) then $Amount-@AdvAmt-@AdvAmtA else  ""
+			AdvAmt		:	($$Number:$$CollectionFieldByKey:$Amount:@SearchKey1:ToGetSalesPendAmtT)
+			AdvAmtA		:	(($$Number:$$CollectionFieldByKey:$Amount:@SearchKey2:ToGetSalesPendAmtT))
+			AdvAmtB		:	(($$Number:$$CollectionFieldByKey:$Amount:@SearchKey3:ToGetSalesPendAmtT))
+			SearchKey1	:	$$LocaleString:"SI"+$$LocaleString:@@GKBranchCode+$$LocaleString:#VCHNumber
+			SearchKey2	:	$$LocaleString:"SI"+$$LocaleString:@@GKBranchCode+$$LocaleString:#VCHNumber+$$LocaleString:"A"
+			SearchKey3	:	$$LocaleString:"SI"+$$LocaleString:@@GKBranchCode+$$LocaleString:#VCHNumber
+			CheckCond	:	If @AdvAmt!=0 then ($Amount-@AdvAmt) else $Amount
+			Set Always	:	Yes
+			Width		:	15
+			Format		:	"No Zero, Decimals:2"
+			Read Only	:	Yes	
+			Align		:	Right
+			Background	:   Very Light Grey
+			Invisible	:	@@GKSaOrdVchType or NOT $$IsNotApplicable:$$FullList:InvoiceOrderList:$BasicPurchaseOrderNo
+			
+			
+[Collection	:	ToGetSalesPendAmt]
+	
+		Type		:	Vouchers	:	VoucherType
+		Child Of	:	$$VchTypeReceipt
+		Belongs To	:	Yes
+		Fetch		:	VoucherNumber,VoucherTypeName,Amount,PArtyLedgeRName
+		
+[Collection	:	ToGetSalesPendAmtT]
+	
+		Source Collection:ToGetSalesPendAmt
+		Walk	:	Ledger Entries,BillAllocations
+		Fetch	:	VoucherNumber,Name,BillDAte,Amount
+		Search Key:$Name
+;		Sort:Default:$Name
+;;;Select $VoucherNumber,$Name from ToGetSalesPendAmtT
+			
+[Field	:	GKVchBillAmtTit]
+	
+			Use			:	Name field
+			Info		:	"Invoice Amount:"
+			Color		:	Red
+			Width		:	15
+			Align		:	Prompt
+			Inactive	:	NOT $$IsNotApplicable:$$FullList:InvoiceOrderList:$BasicPurchaseOrderNo or @@GKSaOrdVchType
+	
+[Field	:	GKVchBillAmt]
+			
+			Use			:	Number field
+			Storage		:	GKVchBillAmt
+			Set as		:	$Amount
+			Width		:	15
+			Align		:	Right
+			Skip		:	Yes
+			Background	:	Very Light Grey
+			Format		:	"Decimals:2"	
+			Inactive	:	NOT $$IsNotApplicable:$$FullList:InvoiceOrderList:$BasicPurchaseOrderNo or @@GKSaOrdVchType
+	
+[Collection	:	GKToGetSalesOrderAdvAmnt]
+	
+		Type		:	Vouchers	:	Vouchertype
+		Child Of	:	$$VchTypeSalesOrder
+		Belongs To	:	Yes
+		Fetch		:	VoucherNumber,VoucherTypeName,PartyLedgerName,Amount,GKAdvRcptAmt,Reference
+		Search Key	:	$Reference
+		Parm Var	:	SVFromDate	:	Date	:	##SVFromdate
+		Parm Var	:	SVToDate	:	Date	:	##SVToDate
+		
+		;;;;Select $VoucherNumber,$GKAdvRcptAmt from GKToGetSalesOrderAdvAmnt
+	
+		[Field	:	GKBalnceAmntudfYes]
+			
+			Use			:	Name Field
+			Storage		:	GKBalnceAmntudfYes
+			Set as		:	if $$Number:$GKBalnceAmntudf>0 then "Y" else "N"
+			Set Always	:	Yes
+			Width		:	20
+			Format		:	"No Zero"
+			Invisible	:   Yes
+			
+		[Field:Modyobjfld]
+			
+			Use			:	Name Field
+			Storage		:	ModifyobjUDF
+			Set as		:	Yes
+			Invisible	:   Yes
+	
+	[Line	:	GKTotalAmountRecvd]
+		
+		Space Bottom	:	0.25
+		Space Top		:	0.25
+	
+		Field       : Long Prompt, GKTotalAmountRecvd
+		Local       : Field : Long Prompt 	: Setas   	: $$LocaleString:"Adv Amount Recd."
+		Local       : Field : Long Prompt 	: Color		:	red
+		Local       : Field : Long Prompt 	:Width	:	20
+		Border		: Thin top left right
+
+		[Field	:	GKTotalAmountRecvd]
+			
+			Use			:	Number Field
+			Type		:	Number	:	Forced
+			Storage		:	GKAdvRcptAmt
+			Set as		:	IF (@@GKSaOrdVchType or (@@GKSalesVchType and $$InCreateMode and $$IsNotApplicable:$$FullList:InvoiceOrderList:$BasicPurchaseOrderNo)) then @SalesOrderVl else if ((@@GKSalesVchType and $$InCreateMode and !$$IsNotApplicable:$$FullList:InvoiceOrderList:$BasicPurchaseOrderNo)) then @SalestotAmnt else If (@@GKSalesVchType and $$InAlterMode and $GKBalnceSalesAmntudf=0) then @SalesOrderVl else if (@@GKSalesVchType and $$InAlterMode and $GKBalnceSalesAmntudf!=0) then ($$Number:@SalesVal) else $$Number:@SalestotAmnt
+			SalesOrderVl:   $$Number:$GKPMCashAmt+$$Number:$GKChqAmtudf+$$Number:$GKCarAmtUdf+$$Number:$GKOnlineAmtUdf+$$Number:$GKPMGiftAmt+$$Number:$GKFinanceAmtUDF
+			SalesVal	:	$$CollectionFieldByKey:$Amount:($$LocaleString:"SI"+$$LocaleString:@@GKBranchCode+$$LocaleString:#VCHNumber):GKPOSRegRcptMnCollAdv
+			SalestotAmnt:	$$CollectionFieldByKey:$GKAdvRcptAmt:$BasicPurchaseOrderNo:GKToGetSalesOrderAdvAmnt
+;			Control		:	ExceedBillAmount:$$Number:$Amount<$$Number:$GKAdvRcptAmt;IF ($$InAlterMode and $GKBalnceSalesAmntudf!=0) then $$Number:0 else 
+			Read Only	: 	Yes
+			Set Always	:	Yes
+			Width		:	15
+			Format		:	"No Zero, Decimals:2"
+			Background	:   Very Light Grey
+			Align		:	Right
+			
+[Collection	:	GKPOSRegRcptMnCollAdv]
+	
+			Source Collection	:	GKPOSRegRcptSubColl
+			Walk				:	All Ledger Entries,Bill Allocations
+			Fetch				:	VoucherNumber,Narration,VoucherTypeName,PartyLedgerName,LedgerName,Amount,Date,MasterId,IsCancelled
+			Compute				:	VchBillName:$LedgerEntries[1].Billallocations[1].Name
+			Fetch				:	Name,BillDate
+			Search Key			:	$VchBillName
+			Filter				:	GKFltrNotCashBankLed
+
+[Line	:	GKPMExtraUDFs]
+	
+		Field	:	GKPMRcptCreatedNot,GKPMRcptAlteredNot,GKPMRcptCreatedMode
+
+[Line	:	GKPMTotalAmount]
+	
+		Space Top:0.2 cm
+		Field       : Long Prompt, GKPMTotalAmount
+		Local       : Field : Long Prompt 	: Setas   	: $$LocaleString:"Total Amount Collected."
+		Local       : Field : Long Prompt 	: Color		:	red
+		Local       : Field : Long Prompt 	:Width		:	20
+		Border		: Thin top left right
+
+	[Field	:	GKPMTotalAmount]
+			
+			Use			:	Number Field
+			Storage		:	GKPMTotAmtColtd
+			Set as		:	$$Number:#GKPaymntModeCash+$$Number:#GKChqAmtUDF+$$Number:#GKCardAmtUdf+$$Number:#GKOnlineAmtUdf+$$Number:#GKGiftCoupons+$$Number:#GKFinanceAmtUDF
+			Set Always	:	Yes
+			Width		:	15
+			Format		:	"No Zero, Decimals:2"
+			Background	:   Very Light Grey
+			Align		:	Right
+			Read Only	:	Yes
+				
+
+[Field	:	GKPMRcptCreatedNot]
+	
+		Use		:	Name Field
+		Storage	:	GKPMRcptCreatedNot
+		Set Always: Yes
+		Width	:	10
+		Invisible:NOT $$InDeveloperMode
+		
+[Field	:	GKPMRcptAlteredNot]
+	
+		Use		:	Name Field
+		Storage	:	GKPMRcptAltredNot
+		Set Always: Yes
+		Width	:	10
+		Invisible:NOT $$InDeveloperMode
+		
+
+[Field:GKPMRcptCreatedMode]
+	
+		Use		:	Name Field
+		Storage	:	GKPMRcptCrAltrMode
+		Set as	:	"Create Mode"
+		Set Always: Yes
+		Width	:	10
+		Invisible:NOT $$InDeveloperMode
+		
+		
+;
+;[#Menu	:	Gatewayoftally]
+;	
+;	Add:Key Item:updted mid:u:Call:updatedmid
+;	[Function:updatedmid]
+;		Variable:vmid:String
+;		10:set:vmid:$$String:"Id:"+$$String:"1525";$MasterId
+;		Variable:stk:String:"Karthick";"0773 RUNNER JEALIOT BAG1";
+;		d:Log:##stk
+;		100:Modify Object:(Voucher,##vmid).PartyLedgerName:##stk;"0773 RUNNER JEALIOT BAG1";GKCardDetAggr[1].GKCashDetVchMId[1].GKCashDetVchMId:"hi";##vmid
+;;	
+
+
+	
+[#Form:sales color]
+	
+	
+	On:Form Accept:$$InAlterMode:Call:funtest
+	On:Form Accept:Yes:Form Accept
+	
+[Function:funtest]
+	
+	Local Formula	:	vchmid		:	($$Sprintf:@@VchMasterID:$MasterID)
+	Variable		:	vmid		:	String
+	Variable		:	stk			:	String	:	$$LocaleString:"Karthick"
+	
+	
+	10	:	set				:	vmid	:	$$String:"Id:"+$$LocaleString:@vchmid
+	12	:	Log				:	##vmid
+	13:Log:$GKCashDetAggr[1].GKCashDetAggrAmt
+		
+	;100	:	Modify Object	:	(Voucher,##vmid).PartyLedgerName:##stk
+	
+
+[Function:testfun]
+	;Parameter:String
+	
+	100:New Object:Voucher:@@vchMSTID:Yes
+	102:Log:@@vchMSTID
+	120:Set Object
+	130:Set Value:PartyLedgeRName:$$TgtObject:$$String:"Karthick"
+	140:Save Target
+	
+[System :Formula]
+	vchMSTID	:	($$Sprintf:@@VchMasterID:$MasterID)
+			

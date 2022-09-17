@@ -1,0 +1,326 @@
+
+[Report	:	GKConsRecptAlterRep]
+	
+		Form	:	GKConsRecptAlterRep
+		
+[Form	:	GKConsRecptAlterRep]
+	
+	On		:	Form Accept	:	Yes	:	Form Accept
+	On		:	Form Accept	:	Yes	:	Call	:	GKVConsolidatedRcpt
+	On		:	Form Accept	:	Yes	:	Call	:	GKVIndividualRcpt
+	Part	:	GKConsRecptAlterRep
+	Height	:	10 % Page
+	Width	:	17 % Page
+	
+[Part	:	GKConsRecptAlterRep]
+	
+		Space Top:0.2 cm
+		Line	:	GKConsRecptAlterRep
+		
+[Line	:	GKConsRecptAlterRep]
+	
+		Field	:	Medium Prompt,GKConsRecptAlterRep
+		Local	:	Field	:	Medium Prompt	:	Set as	:	"Date:"
+		
+[Field	:	GKConsRecptAlterRep]
+	
+		Use		:	Uni Date Field
+		Set as	:	$$MachineDate
+		Validate:	NOT $$IsEmpty:$$Value
+		Width	:	18
+		Align	:	Left
+		
+[Function	:	GKVConsolidatedRcpt]
+
+	Variable	:	VarRcptBillType 	:	String
+    Variable	:	VarRcptBillNo		:	String
+	Variable	:	VarRcptBillAmnt		:	Number
+	Variable	:	VarRcptBankName		:	String
+	Variable	:	VarRcptBankAmt		:	Number
+	Variable	:	VarCSReceptAmount	:	Number
+	Variable	:	VarMID				:	String
+	
+	;010		: 	Do If	:	($$NumItems:GKVConsoltdRcptSubCollL>0):MSg Box:"Error":"Consolidated Receipt Entry Triggered Already"
+	;020		:	Do If	:	($$NumItems:GKVConsoltdRcptSubCollL>0):Continue	
+			
+	100   :     NEW OBJECT     : Voucher
+	
+	110   :     SET VALUE     	: Date                     : $$Date:#GKConsRecptAlterRep
+	120   :     SET VALUE     	: VoucherTypeName          : @@GKConRcptVchType
+    130   : 	SET 	        : SVViewName			   : $$SysName:AcctgVchView
+	140   :     Set Value		: RecptCMPUserNameUDF	   : $$CmpUserName
+	142	  :		Set Value		: VCHENTRYMODE			   : $$SysName:DoubleEntry
+	144	  :     Set Value		: IsOptional			   : Yes
+
+	320   :	 	Set  : VarCSReceptAmount		:	$$CollAmtTotal:GKVConsoltdRcptAll:$Amount
+
+		
+/* Party Loop Starts*/
+
+	400    :     INSERTCOLLECTION OBJECT    	: AllLedgerEntries
+    402    :     SET TARGET        				: AllLedgerEntries
+    404    :     SET VALUE       				: LedgerName        	:	@@CommonPartyName
+    406    :     SET VALUE        				: Amount        		:	$$AsAmount:##VarCSReceptAmount
+    408    :     SET VALUE        				: Is Deemed Positive	:	No
+	410    :     SET VALUE        				: ISPARTYLEDGER			:	Yes
+	412    :     SET VALUE        				: ISLASTDEEMEDPOSITIVE	:	No
+	
+/* Party's Bill Allocations Loop */
+
+	415	  :	Walk Collection	:	GKVConsolidatedRcptBillColl
+	
+	41A	  : Set				:	VarRcptBillType : $BillType
+	41B	  : Set				:	VarRcptBillNo	: $Name
+	41C	  : Set				:	VarRcptBillAmnt	: $Amount
+
+	416	  : INSERTCOLLECTION OBJECT	: BillAllocations
+	418	  :	SET VALUE		: BILLTYPE		: $$SysName:##VarRcptBillType
+	420	  : Set Value		: AMOUNT		: ##VarRcptBillAmnt 
+	422	  :	SET VALUE		: Name			: ##VarRcptBillNo
+	424   : SET TARGET      : ..
+	425	  : End Walk
+	
+	426   : SET TARGET      : ..
+
+		
+	
+	500		:	Walk Collection	:	GKVConsoltdRcptLedColl
+	
+	50A		:	Set	:	VarRcptBankName	:	$RcptBankName
+	50B		:	Set	:	VarRcptBankAmt	:	$RcptBankAmt
+
+	502    :     INSERTCOLLECTION OBJECT : ALlLedgerEntries
+    504    :     SET TARGET        		 : ALlLedgerEntries
+    506    :     SET VALUE         		 : LedgerName        : ##VarRcptBankName
+	508	   :	 Set Value				 : Narration		 : ""
+    510    :     SET VALUE         		 : Amount        	 : $$AsAmount:##VarRcptBankAmt*-1
+    512    :     SET VALUE         		 : Is Deemed Positive:	No
+	514	   : 	 SET TARGET : ..
+	
+	530	   :	End Walk	
+
+
+
+	910    :	Set Value	:	PersistedView	:	##SVViewName
+	920    :	CREATE TARGET
+	
+	1110	: Walk Collection	:	GKVConsoltdRcptSubColl
+	1111	: Set	:	VarMID:$$String:"Id:"+$$LocaleString:$MasterId
+	1112	: Modify Object:(Voucher,##VarMID).GKCSTriggered[1].GKCSTriggered:Yes
+	1114	: End Walk
+			
+
+
+[Collection	:	GKVConsoltdRcptSubCollL]
+	
+		Type		:	Vouchers	:	VoucherType
+		Child Of	:	$$VchTypeReceipt
+		Belongs To	:	Yes
+		Fetch		:	Date,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount,IsOptional,MasterId
+		Filter		:	NOTIsOptionalVoucher,CSTriggeredYes,CounterCustFltr,GKRcptVchType
+		Parm Var	:	SVFromDate	:	Date	:	$$Date:#GKConsRecptAlterRep
+		Parm Var	:	SVToDate	:	Date	:	$$Date:#GKConsRecptAlterRep
+		
+[Collection	:	GKVConsoltdRcptSubColl]
+	
+		Type		:	Vouchers	:	VoucherType
+		Child Of	:	$$VchTypeReceipt
+		Belongs To	:	Yes
+		Fetch		:	Date,Reference,VoucherNumber,VoucherTypeName,GKCSTriggered,PartyLedgerName,Amount,IsOptional,MasterId
+		Filter		:	NOTIsOptionalVoucher,CSTriggered,CounterCustFltr,GKRcptVchType
+		Parm Var	:	SVFromDate	:	Date	:	$$Date:#GKConsRecptAlterRep
+		Parm Var	:	SVToDate	:	Date	:	$$Date:#GKConsRecptAlterRep
+		
+[Collection	:	GKVConsoltdRcptAll]
+	
+		Type		:	Vouchers	:	VoucherType
+		Child Of	:	$$VchTypeReceipt
+		Belongs To	:	Yes
+		Fetch		:	Date,Reference,VoucherNumber,VoucherTypeName,GKCSTriggered,PartyLedgerName,Amount,IsOptional,MasterId
+		Filter		:	NOTIsOptionalVoucher,CSTriggered,CounterCustFltr,GKRcptVchType
+		Parm Var	:	SVFromDate	:	Date	:	$$Date:#GKConsRecptAlterRep
+		Parm Var	:	SVToDate	:	Date	:	$$Date:#GKConsRecptAlterRep
+		
+[Collection	:	GKVConsoltdRcptLedColl]
+
+		Source Collection	:	GKVConsoltdRcptAll
+		Walk				:	Ledger Entries
+		Fetch				:	LedgerName
+		Fetch				:	Date,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount
+		By					:	RcptBankName	:	$LedgerName
+		Aggr Compute		:	RcptBankAmt 	:	Sum	:	$Amount
+		Filter				:	FilBankAccts
+		
+;;;Select $RcptBankName,$RcptBankAmt from GKVConsoltdRcptLedColl
+		
+[Collection	:	GKVConsolidatedRcptBillColl]
+		
+		Source Collection	:	GKVConsoltdRcptAll
+		Walk				:	All Ledger Entries,Bill Allocations
+		Fetch				:	StockItem,Billedqty,Rate,Amount,LedgerName,Name,BillDate,BillType
+		Fetch				:	Date,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount
+		
+		
+		
+;;;Select $VoucherNumber,$Date,$LedgeRName,$Name,$BillDate,$Amount,$BillType from GKVConsolidatedRcptBillColl
+			
+
+
+
+[Function	:	GKVIndividualRcpt]
+	
+	Variable	:	VarRcptBillType 	:	String
+    Variable	:	VarRcptBillNo		:	String
+	Variable	:	VarRcptBillAmnt		:	Number
+	Variable	:	VarRcptBankName		:	String
+	Variable	:	VarRcptBankAmt		:	Number
+	Variable	:	VarCSReceptAmount	:	Number
+	Variable	:	VarMID				:	String
+	
+	;010		: 	Do If	:	($$NumItems:GKVIndvdlRcptSubCollL>0):MSg Box:"Error":"Consolidated Receipt Entry Triggered Already"
+	;020		:	Do If	:	($$NumItems:GKVIndvdlRcptSubCollL>0):Continue	
+			
+	030	  :		Walk Collection	:	GKVIndvdlRcptAllMn
+	
+	040   :	 	Set  : VarCSReceptAmount		:	$Amount
+	
+	100   :     NEW OBJECT     : Voucher
+	
+	110   :     SET VALUE     	: Date                     : $$Date:#GKConsRecptAlterRep
+	120   :     SET VALUE     	: VoucherTypeName          : @@GKConRcptVchType
+    130   : 	SET 	        : SVViewName			   : $$SysName:AcctgVchView
+	140   :     Set Value		: RecptCMPUserNameUDF	   : $$CmpUserName
+	142	  :		Set Value		: VCHENTRYMODE			   : $$SysName:DoubleEntry
+	144	  :     Set Value		: IsOptional			   : Yes
+
+	
+		
+/* Party Loop Starts*/
+
+	400    :     INSERTCOLLECTION OBJECT    	: AllLedgerEntries
+    402    :     SET TARGET        				: AllLedgerEntries
+    404    :     SET VALUE       				: LedgerName        	:	$PartyLedgerName
+    406    :     SET VALUE        				: Amount        		:	$$AsAmount:##VarCSReceptAmount
+    408    :     SET VALUE        				: Is Deemed Positive	:	No
+	410    :     SET VALUE        				: ISPARTYLEDGER			:	Yes
+	412    :     SET VALUE        				: ISLASTDEEMEDPOSITIVE	:	No
+	
+			asdfaS:Log:$PartyLedgerName
+			dddddd:Log:##VarCSReceptAmount
+	
+/* Party's Bill Allocations Loop */
+
+	415	  :	Walk Collection	:	GKVIndvdlRcptBillColl
+	
+	41A	  : Set				:	VarRcptBillType : $BillType
+	41B	  : Set				:	VarRcptBillNo	: $Name
+	41C	  : Set				:	VarRcptBillAmnt	: $Amount
+
+	416	  : INSERTCOLLECTION OBJECT	: BillAllocations
+	418	  :	SET VALUE		: BILLTYPE		: $$SysName:##VarRcptBillType
+	420	  : Set Value		: AMOUNT		: ##VarRcptBillAmnt 
+	422	  :	SET VALUE		: Name			: ##VarRcptBillNo
+	424   : SET TARGET      : ..
+	425	  : End Walk
+	
+	426   : SET TARGET      : ..
+
+		
+	
+	500		:	Walk Collection	:	GKVIndvdlRcptLedColl
+	
+	50A		:	Set	:	VarRcptBankName	:	$RcptBankName
+	50B		:	Set	:	VarRcptBankAmt	:	$RcptBankAmt
+	
+	502    :     INSERTCOLLECTION OBJECT : ALlLedgerEntries
+    504    :     SET TARGET        		 : ALlLedgerEntries
+    506    :     SET VALUE         		 : LedgerName        : ##VarRcptBankName
+	508	   :	 Set Value				 : Narration		 : ""
+    510    :     SET VALUE         		 : Amount        	 : $$AsAmount:##VarRcptBankAmt*-1
+    512    :     SET VALUE         		 : Is Deemed Positive:	No
+	514	   : 	 SET TARGET : ..
+	
+	530	   :	End Walk	
+
+	910    :	Set Value	:	PersistedView	:	##SVViewName
+	920    :	CREATE TARGET
+	
+	1120	: End Walk
+	
+	1110	: Walk Collection	:	GKVIndvdlRcptSubColl
+	1111	: Set	:	VarMID:$$String:"Id:"+$$LocaleString:$MasterId
+	1112	: Modify Object:(Voucher,##VarMID).GKCSTriggered[1].GKCSTriggered:Yes
+	1114	: End Walk
+	
+			
+
+[Collection	:	GKVIndvdlRcptAll]
+	
+		Type		:	Vouchers	:	VoucherType
+		Child Of	:	$$VchTypeReceipt
+		Belongs To	:	Yes
+		Fetch		:	Date,Reference,VoucherNumber,VoucherTypeName,GKCSTriggered,PartyLedgerName,Amount,IsOptional,MasterId
+		Filter		:	NOTIsOptionalVoucher,CSTriggered,IndivdlCustFltr,GKRcptVchType
+		Parm Var	:	SVFromDate	:	Date	:	$$Date:#GKConsRecptAlterRep
+		Parm Var	:	SVToDate	:	Date	:	$$Date:#GKConsRecptAlterRep
+		
+;;;;Select $PartyLedgerName,$VoucherNumber,$Vouchertypename,$amount from GKVIndvdlRcptAll
+
+
+[Collection	:	GKVIndvdlRcptAllMn]
+	
+		Source Collection	:	GKVIndvdlRcptAll
+		Fetch		:	Date,Reference,VoucherNumber,VoucherTypeName,GKCSTriggered,PartyLedgerName,Amount,IsOptional,MasterId
+		By	:	PartyLedgerName:$PartyLedgerName
+		Aggr Compute:Amount:Sum:$Amount
+		
+		
+;;;;Select $PartyLedgerName,$VoucherNumber,$Vouchertypename,$amount from GKVIndvdlRcptAllMn
+
+[Collection	:	GKVIndvdlRcptSubColl]
+	
+		Type		:	Vouchers	:	VoucherType
+		Child Of	:	$$VchTypeReceipt
+		Belongs To	:	Yes
+		Fetch		:	Date,Reference,VoucherNumber,VoucherTypeName,GKCSTriggered,PartyLedgerName,Amount,IsOptional,MasterId
+		Filter		:	NOTIsOptionalVoucher,CSTriggered,IndivdlCustFltr,GKRcptVchType
+		Parm Var	:	SVFromDate	:	Date	:	$$Date:#GKConsRecptAlterRep
+		Parm Var	:	SVToDate	:	Date	:	$$Date:#GKConsRecptAlterRep
+		
+[Collection	:	GKVIndvdlRcptSubCollL]
+	
+		Type		:	Vouchers	:	VoucherType
+		Child Of	:	$$VchTypeReceipt
+		Belongs To	:	Yes
+		Fetch		:	Date,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount,IsOptional,MasterId
+		Filter		:	NOTIsOptionalVoucher,CSTriggeredYes,IndivdlCustFltr,GKRcptVchType
+		Parm Var	:	SVFromDate	:	Date	:	$$Date:#GKConsRecptAlterRep
+		Parm Var	:	SVToDate	:	Date	:	$$Date:#GKConsRecptAlterRep
+		
+		
+		
+
+[Collection	:	GKVIndvdlRcptBillColl]
+		
+		Source Collection	:	GKVIndvdlRcptAll
+		Walk				:	All Ledger Entries,Bill Allocations
+		Fetch				:	StockItem,Billedqty,Rate,Amount,LedgerName,Name,BillDate,BillType
+		Fetch				:	Date,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount
+		Compute				:	VchNo			:	$VoucherNumber	
+		By					:	Name:$Name
+		Aggr Compute		:	Amount:Sum:$Amount
+		Filter				:	GKPartyVchFltr;FilSOVchNo
+		
+
+[Collection	:	GKVIndvdlRcptLedColl]
+
+		Source Collection	:	GKVIndvdlRcptAll
+		Walk				:	All Ledger Entries
+		Fetch				:	LedgerName
+		Fetch				:	Date,VoucherNumber,VoucherTypeName,PartyLedgerName,Amount,LedgerName
+		By					:	RcptBankName	:	$LedgerName
+		By					:	VchNo			:	$VoucherNumber		
+		Aggr Compute		:	RcptBankAmt 	:	Sum	:	$Amount
+		Filter				:	FilBankAccts,GKPartyVchFltr;,FilSOVchNo
+		
+;;;;Select $PartyLedgerName,$LedgerName,$VoucherNumber,$Vouchertypename,$amount from GKVIndvdlRcptLedColl

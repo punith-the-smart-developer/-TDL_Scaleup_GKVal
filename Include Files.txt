@@ -1,0 +1,103 @@
+[Include	:	Sales Order Screen.txt]
+[Include	:	UDF.txt]
+[Include	:	List Of Transactions Aggr.txt]
+[Include	:	Sales Screen.txt]
+[Include	:	Paymode Voucher Screen.txt]	
+[Include	:	DMS Module.txt]
+[Include	:	Voucher Screen UDF.txt]
+[Include	:	Consolidated Sales  Order.txt]
+[Include	:	Consolidated Sales.txt]
+[Include	:	Consolidated Receipt.txt]
+[Include	:	Auto Create Vouchers.txt]
+[Include	:	Timer.txt]
+[Include	:	Auto Fill Bill Allocations in Sales.txt]
+[Include	:	Sync.txt]
+[Include	:	Delete Insert Voucher.txt]
+[Include	:	Default Sales Print Screen.txt]
+[Include	:	POS Register.txt]
+[Include	:	Invoice Bill Print.txt]
+[Include	:	Order Bill Print.txt]
+[Include	:	Alter Receipt.txt]
+[Include	:	Dash Board Report.txt]
+[Include	:	Dash Board SO Report.txt]
+
+
+;;;TLY 14 june2022 00202
+
+
+
+[Style	: StyTimeNew12]
+	
+	Font	: "Verdana"
+	Height	: 8.5
+	Bold	: Yes
+	
+[Style	: StyTimeNew11]
+
+	Font	: "Verdana"
+	Height	: 9.5
+	
+[Style	: StyTimeNew13]
+	
+	Font	: "Verdana"
+	Height	: 8.5
+
+
+[#Menu:Gatewayoftally]
+	
+		Add	:	Option	:	EnableeGKModu1le	:	@@GKIsTDLEnable
+;Add	:	Option	:	EnableOptIntoReg	:	$GKOptnToReglar:Company:##SVCurrentCompany
+
+[!Menu	:	EnableOptIntoReg]
+	
+	Add	:	Key Item	:	Optional Into Regular	:	O	:	Call	:	ToModifyOptnVcrs
+	
+[!Menu	:	EnableeGKModu1le]	
+	
+	Add	:	Key Item		:	GK Vale					:	G	:	Menu	:	GKValeCustomMenu
+	
+[Menu	:	GKValeCustomMenu]
+	
+	;Add	:	Key Item	:	Consolidated Entries		:	C	:	Menu	:	GKConsEntriesMenu
+	Title:Menu
+	Add	:	Key Item	:	Alter Receipt				:	A	:	Alter	:	GKAlterRcptRep
+	Add	:	Key Item	:	PayMode Register			:	P	:	Display	:	GKPOSRegister
+	Add	:	Key Item	:	Dash Board Report			:	D	:	Menu	:	GKDashBoardMenu
+	
+[Menu	:	GKDashBoardMenu]
+	
+		Title	:	"Dash Board Reports"
+		Add	:	Key Item	:	Order 	:	O	:	Display	:	GKDashBoardSORep
+		Add	:	Key Item	:	Sales 	:	S	:	Display	:	GKDashBoardRep
+		
+[Menu	:	GKConsEntriesMenu]
+	
+	Add	:	Key Item	:	Consolidated SI Entry		:	I	:	Alter	:	GKConsSIAlterRep
+	Add	:	Key Item	:	Consolidated SO Entry		:	S	:	Alter	:	GKConsSOAlterRep
+	Add	:	Key Item	:	Consolidated Receipt Entry	:	R	:	Alter	:	GKConsRecptAlterRep
+
+
+
+[#Part: Company Details]
+	
+	Add	:	Part	:	At End	:	GKIsTDLEnable
+	
+[Part	:	GKIsTDLEnable]
+	
+	Bottom Lines	:	GKIsTDLEnable,GK_BranchName,GK_BranchCode
+	
+[Line	:	GKIsTDLEnable]
+	
+	Field	:	Medium Prompt,GKIsTDLEnable
+	Local	:	Field	:	Medium Prompt	:	Set as	:	"Enable TDL Module:"
+	Local	:	Field	:	Medium Prompt	:	Color	:	Blue
+	
+	
+[Field	:	GKIsTDLEnable]
+	Use	:	Logical Field
+	Style	:	Small Bold
+	Show Table	:	Always
+	Storage	:	GKIsTDLEnable
+	Set Always	:	Yes
+	Color	:	Blue
+	

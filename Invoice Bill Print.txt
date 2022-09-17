@@ -1,0 +1,838 @@
+
+[Line	:	GK_EnablePrintFormat]
+	
+		Fields	: Long Prompt, GK_EnablePrintFormat
+		Local   : Field : Long Prompt : Info        : $$LocaleString:"Enable Customized Print:"
+		Local   : Field : Long Prompt : Color		: Blue
+		Local	: Field	: Long Prompt :	Inactive	: NOT $$IsSales:$Parent and NOT $$IsSalesOrder:$Parent
+		
+[Field	:	GK_EnablePrintFormat]
+	
+		Use			:	Logical Field
+		Storage		:	GKEnablePrint
+		Width		:	10
+		Table		:	YesNoTable
+		Show Table	:	Always
+		Style		:	Normal
+		Color		:	Blue
+		Inactive	:   NOT $$IsSales:$Parent and NOT $$IsSalesOrder:$Parent
+	
+	
+[#Report	:	Printed Invoice]  
+	
+		Option	:	GKValesSalesPrint	:	$GKEnablePrint:VoucherType:##SVVoucherType=Yes and @@IsSales
+		Option	:	GKValesSOPrint		:	$GKEnablePrint:VoucherType:##SVVoucherType=Yes and @@IsSalesOrder
+		
+[!Report	:	GKValesSOPrint]
+		
+		Delete	:	Form		:	Printed Invoice
+		Add		:	Form		:	GKSOPrintFormat
+
+[!Report	:	GKValesSalesPrint]
+	
+		Delete	:	Form		:	Printed Invoice
+		Add		:	Form		:	GKPrintFormat
+		
+[Form	: GKPrintFormat]
+	
+		Option		:	GKInvItemsMore	:	($$NumItems:InventoryEntries)>5;##vItemAnalysisCount > 5;$$NumItems:InventoryEntries>$$Number:5
+		Option		:	GKInvItemsLess	:	($$NumItems:InventoryEntries)<5;##vItemAnalysisCount < 5;$$NumItems:InventoryEntries<$$Number:5
+		
+[!Form	:	GKInvItemsMore]
+	
+		Use			:   GSTInvoiceAnalysis
+		Height		:	100 % Page
+		Width		:	100 % Page
+		Space Bottom:	0.5 cm
+		Space Left	:	0.5 cm
+		Space Right	:	0.5 cm
+		Space Top	:	0.5 cm
+		Part		:	GKInvCmpDetails,GKInvOtherDetails,GKInvInventory,GKInvInventoryBdy
+		Bottom Part	:	GKInvTaxLedger,GKInvTotROff,GKInvVchTot,GKInvGSTAnalysis,GKInvJurisdctn
+		Page Break	:	GKInvProdRegClBrk,GKInvProdRegOpBrk
+		
+[!Form	:	GKInvItemsLess]
+	
+		Use			:   GSTInvoiceAnalysis
+		Height		:	100 % Page
+		Width		:	100 % Page
+		Space Bottom:	0.5 cm
+		Space Left	:	0.5 cm
+		Space Right	:	0.5 cm
+		Space Top	:	0.5 cm
+		Part		:	GKInvCmpDetails,GKInvOtherDetails,GKInvInventoryTit1,GKInvInventoryBdy1
+		Part		:	GKInvTaxLedger,GKInvTotROff,GKInvVchTot,GKInvGSTAnalysis,GKInvJurisdctn
+		
+	[Part	:	GKInvProdRegClBrk]
+	
+		Border	:	Thin Box
+		Line	:	GKInvProdRegClBrk
+        
+		[Line	:	GKInvProdRegClBrk]
+			
+			Right Field	:	GKInvProdRegClBrk
+            
+			[Field	:	GKInvProdRegClBrk]
+				
+				Set as	:	"Continued....................."
+	
+	[Part: GKInvProdRegOpBrk]
+	
+		Parts 		  : GKInvCmpDetails,GKInvOtherDetails,GKInvInventory
+		Vertical      : Yes
+		
+[Part	:	GKInvCmpDetails]
+	
+			Line	:	GKInvTitle,GKInvCmpName,GKInvCmpAddr,GKInvCmpPh,GKInvCmpGSTIN
+			Repeat	:	GKInvCmpAddr:GK Company Address
+			
+
+[Line	:	GKInvTitle]
+	
+		Field	:	GKInvTitle
+			
+				[Field	:	GKInvTitle]
+					
+						Use			:	Name Field
+						Set as		:	$VchPrintTitle:VoucherType:$VoucherTypeName
+						Full Width	:	Yes
+						Align		:	Center
+						Style		:	Small Bold
+						Case		:	Upper Case
+			
+[Collection: GK Company Address]
+	
+    Type        : Address   : Company
+    Child of    : ##SVCurrentCompany
+	Compute		: IsNumber	  	: No
+	Compute		: FixedDirection: No 
+
+			
+[Line	:	GKInvCmpName]
+	
+			Field	:	GKInvCmpName
+			
+				[Field	:	GKInvCmpName]
+					
+						Use			:	Name Field
+						Set as		:	$$Upper:@@CmpMailName
+						Full Width	:	Yes
+						Align		:	Center
+						Style		:	Small Bold
+						Case		:	Upper Case
+						
+[Line	:	GKInvCmpAddr]
+		
+			Field		:	GKInvCmpAddr
+			
+				[Field	:	GKInvCmpAddr]
+					
+						Use			:	Name Field
+						Set as		:	$Address
+						Full Width	:	Yes
+						Align		:	Center
+						Style		:	Small Bold
+						
+[Line	:	GKInvCmpPh]
+	
+			Field		:	GKInvCmpPh
+			
+				[Field	:	GKInvCmpPh]
+					
+						Use			:	Name Field
+						Set as		:	$$LocaleString:"Phone : "+$$LocaleString:$PhoneNumber:Company:##SVCurrentCompany
+						Full Width	:	Yes
+						Align		:	Center
+						Style		:	Small Bold
+						
+[Line	:	GKInvCmpGSTIN]
+						
+				Field		:	GKInvCmpGSTIN
+			
+				[Field	:	GKInvCmpGSTIN]
+					
+						Use			:	Name Field
+						Set as		:	$$LocaleString:"GST NO. : "+$$LocaleString:@@CMPGSTaxNumber
+						Full Width	:	Yes
+						Align		:	Center
+						Style		:	Small Bold
+						
+[Part	:	GKInvOtherDetails]
+	
+			Line	:	GKInvOtherInvNo,GKInvOtherInvDate,GKInvOtherParty,GKInvOtherPartyPh,GKInvOtherPartyEmail,GKInvOtherPartyAddr,GKInvOtherPartyGSTIN
+			Repeat	:	GKInvOtherPartyAddr	:	PartyAddress
+			
+[Line	:	GKInvOtherInvNo]
+	
+			Space Top:0.2 cm
+			Field	:	GKInvOtherInvNo
+			
+				[Field	:	GKInvOtherInvNo]
+					
+						Use			:	Name Field
+						Set as		:	$$LocaleString:"INVOICE NO. : "+$$LocaleString:$VoucherNumber
+						Full Width	:	Yes
+						Align		:	Left
+						Style		:	Small Bold
+						
+[Line	:	GKInvOtherInvDate]
+	
+			Field	:	GKInvOtherInvDate
+			
+				[Field	:	GKInvOtherInvDate]
+					
+						Use			:	Name Field
+						Set as		:	$$LocaleString:"DATE : "+$$LocaleString:$Date
+						Full Width	:	Yes
+						Align		:	Left
+						Style		:	Small Bold
+						
+[Line	:	GKInvOtherParty]
+	
+		Space Top:0.2 cm
+		Field	:	GKInvOtherParty
+			
+				[Field	:	GKInvOtherParty]
+					
+						Use			:	Name Field
+						Set as		:	$$LocaleString:"CUSTOMER  : "+$$LocaleString:@PartyCond
+						PartyCond	:	IF @@CounterCustFltr then $GKVchPartyNm else $PartyLedgerName
+						Full Width	:	Yes
+						Align		:	Left
+						Style		:	Small Bold
+						
+[Line	:	GKInvOtherPartyPh]
+	
+		Field	:	GKInvOtherPartyPh
+			
+				[Field	:	GKInvOtherPartyPh]
+					
+						Use			:	Number Field
+						Set as		:	$$LocaleString:@PartyCond
+						PartyCond	:	IF @@CounterCustFltr then $GKVchPartyPh else $LedgerMobile:Ledger:$PartyLedgerName
+						Full Width	:	Yes
+						Align		:	Left
+						Style		:	Small Bold
+						Format		:	"No Zero"
+						
+[Line	:	GKInvOtherPartyEmail]
+	
+			Field	:	GKInvOtherPartyEmail
+			
+			
+				[Field	:	GKInvOtherPartyEmail]
+					
+						Use			:	Name Field
+						Set as		:	$$LocaleString:@PartyCond
+						PartyCond	:	IF @@CounterCustFltr then $GKVchPartyEmail else ""
+						Full Width	:	Yes
+						Align		:	Left
+						Style		:	Small Bold
+						Invisible	:	@@IndivdlCustFltr
+						
+						
+[Line	:	GKInvOtherPartyAddr]
+	
+		Field	:	GKInvOtherPartyAddr
+			
+				[Field	:	GKInvOtherPartyAddr]
+					
+						Use			:	Name Field
+						Set as		:	$$LocaleString:$Address
+						Full Width	:	Yes
+						Align		:	Left
+						Style		:	Small Bold
+						
+[Line	:	GKInvOtherPartyGSTIN]
+	
+		Field	:	GKInvOtherPartyGSTIN
+			
+				[Field	:	GKInvOtherPartyGSTIN]
+					
+						Use			:	Name Field
+						Set as		:	$$LocaleString:"GST NO. : "+$$LocaleString:$PartyGSTIN:Ledger:$PartyLedgerName
+						Full Width	:	Yes
+						Align		:	Left
+						Style		:	Small Bold
+						
+
+[Part	:	GKInvInventory]
+	
+			Line			:	GKInvInventoryTitBrdr,GKInvInventoryTit,GKInvInventoryTitBrdr1;,GKInvInventoryBdy,GKInvInventoryTitBrdr2
+			Vertical		:	Yes
+			
+[Part	:	GKInvInventoryBdy]
+			
+			Line			:	GKInvInventoryBdy,GKInvInventoryTitBrdr2
+			Repeat			:	GKInvInventoryBdy	:	Inventory Entries
+			Scroll			:	Vertical
+			Vertical		:	Yes
+			
+[Part	:	GKInvInventoryTit1]
+	
+			Line			:	GKInvInventoryTitBrdr,GKInvInventoryTit,GKInvInventoryTitBrdr1;,GKInvInventoryBdy,GKInvInventoryTitBrdr2
+			Vertical		:	Yes
+			
+[Part	:	GKInvInventoryBdy1]
+			
+			Line			:	GKInvInventoryBdy,GKInvInventoryTitBrdr2
+			Repeat			:	GKInvInventoryBdy	:	Inventory Entries
+			;Scroll			:	Vertical
+			Vertical		:	Yes
+
+[Collection	:	GK Inventory Entries]
+	
+			Source Collection	:	..
+			Walk				:	Inventory Entries,BasicUserDescription
+			Fetch				:	StockItemName,BasicUserDescription
+			Search Key			:	$StockItemName
+			
+[Line	:	GKInvInventoryTitBrdr1]
+	
+		Use	:	GKInvInventoryTitBrdr
+		
+
+[Line	:	GKInvInventoryTitBrdr2]
+	
+		Use	:	GKInvInventoryTitBrdr
+			
+[Line	:	GKInvInventoryTitBrdr]
+		
+			Field		:	GKInvInventoryTitBrdr
+			
+[Field	:	GKInvInventoryTitBrdr]
+	
+						Use			:	Name Field
+						Set as		:	"-------------------------------------------------------------------------------"
+						Full Width	:	Yes
+						Align		:	Right
+						Style		:	Small Bold
+						
+		
+			
+[Line	:	GKInvInventoryTit]
+	
+			Field		:	GKInvInvtryCoverNo,GKInvInvtryItem
+			Field		:	GKInvInvtryGST,GKInvInvtryQty,GKInvInvtryRate,GKInvInvtryAmt
+				
+			Local	:	Field	:	Default		:	Delete	:	Storage
+			Local	:	Field	:	Default		:	Type	:	String
+			
+			Local	:	Field	:	GKInvInvtryCoverNo	:	Set as	:	"COVER NO"
+			Local	:	Field	:	GKInvInvtryItem		:	Set as	:	"HSN/SAC/ITEMS"
+			Local	:	Field	:	GKInvInvtryGST		:	Set as	:	"GST %"
+			Local	:	Field	:	GKInvInvtryQty		:	Set as	:	"QTY"
+			Local	:	Field	:	GKInvInvtryRate		:	Set as	:	"RATE"
+			Local	:	Field	:	GKInvInvtryAmt		:	Set as	:	"AMOUNT"
+			
+
+[Line	:	GKInvInventoryBdy]
+	
+			Field		:	GKInvInvtryCoverNo,GKInvInvtryItem
+			Field		:	GKInvInvtryGST,GKInvInvtryQty,GKInvInvtryRate,GKInvInvtryAmt
+			
+			
+[Field	:	GKInvInvtryCoverNo]
+	
+				Use		:	Name Field
+				Set as	:	$$CollectionFieldByKey:$BasicUserDescription:$StockItemName:GKInventoryEntries
+				Width	:	20
+				Align	:	Left
+				Style	:	Small Bold
+				
+[Field	:	GKInvInvtryItem]
+	
+				Use		:	Name Field
+				Set as	:	$$LocaleString:@StkHSN+$$LocaleString:" / "+$$LocaleString:$StockItemName
+				StkHSN	:	$$getinfofromhierarchy:$StockItemName:"StockItem":"HSNCode":$Date:"GST"
+;				Width	:	40
+				Full Width:Yes
+				Lines:0
+				Align	:	Left
+				Style	:	Small Bold
+
+[Field	:	GKInvInvtryGST]
+	
+				Use		:	Number Field
+				Set as	:	$$GetCMPGstRate:$StockItemName
+				Width	:	10
+				Align	:	Left
+				Format	:	"Percentage"
+				Style	:	Small Bold
+				
+[Function    : GetCMPGstRate]
+
+    Parameter   : CmpGSTRate      : String
+    Variable    : VarGSTRate   	  : Number: 0
+   
+    Object      : StockItem	: ##CmpGSTRate 
+   
+    10    : Walk Collection    : GSTDetails
+    20    : Set		: VarGSTRate    : $GSTDetails[Last].StatewiseDetails[1, @@IsAnyState].RateDetails[1, @@IsIGST].GSTRate
+    30    : End Walk
+    40    : Return    : ##VarGSTRate 
+
+				
+[Field	:	GKInvInvtryQty]
+	
+				Use		:	Name Field
+				Set as	:	$BilledQty
+				Width	:	10
+				Align	:	Left
+				Style	:	Small Bold
+				
+[Field	:	GKInvInvtryRate]
+	
+				Use		:	Number Field
+				Set as	:	$Rate
+				Width	:	20
+				Align	:	Left
+				Style	:	Small Bold
+				
+[Field	:	GKInvInvtryAmt]
+	
+				Use		:	Amount Field
+				Set as	:	$Amount
+				Width	:	20
+				Align	:	Left
+				Style	:	Small Bold
+				
+[Collection	:	GK_Ledger_Entries]
+	
+		Source Collection	:	..
+		Walk				:	Ledger Entries
+		Fetch				:	LedgerName,Amount
+		Filter				:	GLLedFltrr
+		
+[System	:	Formulae]
+	
+			GLLedFltrr	:	$LedgerName!=$PartyLedgerName and $LedgerName not contains "Round"
+		
+[Part	:	GKInvTaxLedger]
+	
+			Line		:	GKInvTaxSubTot,GKInvTaxLedger,GKInvInventoryTitBrdr3
+			Repeat		:	GKInvTaxLedger	:	GK_Ledger_Entries
+			
+[Line	:	GKInvInventoryTitBrdr3]
+		
+	Use	:	GKInvInventoryTitBrdr
+			
+[Line	:	GKInvTaxSubTot]
+	
+			Field		:	GKInvInvtryCoverNo,GKInvInvtryItem
+			Right Field	:	GKInvInvtryGST,GKInvInvtryQty,GKInvInvtryRate,GKInvInvtryAmt
+				
+			Local	:	Field	:	Default		:	Delete	:	Storage
+			Local	:	Field	:	Default		:	Type	:	String
+			Local	:	Field	:	Default		:	Align	:	Right
+			
+			Local	:	Field	:	GKInvInvtryCoverNo	:	Set as	:	""
+			Local	:	Field	:	GKInvInvtryItem		:	Set as	:	""
+			Local	:	Field	:	GKInvInvtryGST		:	Set as	:	""
+			Local	:	Field	:	GKInvInvtryQty		:	Set as	:	""
+			Local	:	Field	:	GKInvInvtryRate		:	Width	:	40
+			Local	:	Field	:	GKInvInvtryRate		:	Set as	:	"SUB TOTAL"
+			Local	:	Field	:	GKInvInvtryAmt		:	Set as	:	$$CollAmtTotal:InventoryEntries:$Amount
+			
+[Line	:	GKInvTaxLedger]
+	
+			Field		:	GKInvInvtryCoverNo,GKInvInvtryItem
+			Right Field	:	GKInvInvtryGST,GKInvInvtryQty,GKInvInvtryRate,GKInvInvtryAmt
+				
+			Local	:	Field	:	Default		:	Delete	:	Storage
+			Local	:	Field	:	Default		:	Type	:	String
+			Local	:	Field	:	Default		:	Align	:	Right
+			
+			Local	:	Field	:	GKInvInvtryCoverNo	:	Set as	:	""
+			Local	:	Field	:	GKInvInvtryItem		:	Set as	:	""
+			Local	:	Field	:	GKInvInvtryGST		:	Set as	:	""
+			Local	:	Field	:	GKInvInvtryQty		:	Set as	:	""
+			Local	:	Field	:	GKInvInvtryRate		:	Set as	:	$LedgerName
+			Local	:	Field	:	GKInvInvtryAmt		:	Set as	:	$Amount
+			
+[Part	:	GKInvTotROff]
+	
+			Line	:	GKInvTotLine,GKInvROffLine,GKInvInventoryTitBrdr4
+			
+[Line	:	GKInvInventoryTitBrdr4]
+	
+		Use	:	GKInvInventoryTitBrdr
+			
+[Line	:	GKInvTotLine]
+	
+			Field		:	GKInvInvtryCoverNo,GKInvInvtryItem
+			Right Field	:	GKInvInvtryGST,GKInvInvtryQty,GKInvInvtryRate,GKInvInvtryAmt
+				
+			Local	:	Field	:	Default		:	Delete	:	Storage
+			Local	:	Field	:	Default		:	Type	:	String
+			Local	:	Field	:	Default		:	Align	:	Right
+			
+			Local	:	Field	:	GKInvInvtryCoverNo	:	Set as	:	""
+			Local	:	Field	:	GKInvInvtryItem		:	Set as	:	""
+			Local	:	Field	:	GKInvInvtryGST		:	Set as	:	""
+			Local	:	Field	:	GKInvInvtryQty		:	Set as	:	""
+			Local	:	Field	:	GKInvInvtryRate		:	Set as	:	"TOTAL"
+			Local	:	Field	:	GKInvInvtryAmt		:	Set as	:	$Amount-$$CollAmtTotal:GKROffLedgerEntries:$Amount
+			
+[Line	:	GKInvROffLine]
+	
+			Field		:	GKInvInvtryCoverNo,GKInvInvtryItem
+			Right Field	:	GKInvInvtryGST,GKInvInvtryQty,GKInvInvtryRate,GKInvInvtryAmt
+				
+			Local	:	Field	:	Default		:	Delete	:	Storage
+			Local	:	Field	:	Default		:	Type	:	String
+			Local	:	Field	:	Default		:	Align	:	Right
+			
+			Local	:	Field	:	GKInvInvtryCoverNo	:	Set as	:	""
+			Local	:	Field	:	GKInvInvtryItem		:	Set as	:	""
+			Local	:	Field	:	GKInvInvtryGST		:	Set as	:	""
+			Local	:	Field	:	GKInvInvtryQty		:	Set as	:	""
+			Local	:	Field	:	GKInvInvtryRate		:	Set as	:	"ROUND OFF"
+			Local	:	Field	:	GKInvInvtryAmt		:	Set as	:	$$CollAmtTotal:GKROffLedgerEntries:$Amount
+			
+[Collection	:	GKROffLedgerEntries]
+	
+			Source Collection	:	..
+			Walk				:	Ledger Entries
+			Fetch				:	LedgerName,Amount
+			Filter				:	GKROffLedFltr
+			
+[System	:	Formulae]
+	GKROffLedFltr	:	$LedgerName contains "Round"
+	
+[Part	:	GKInvVchTot]
+	
+		Line	:	GKInvVchTot,GKInvAdvColltd,GKInvInventoryTitBrdr5,GKInvNettAmt,GKInvInventoryTitBrdr6
+		
+[Line	:	GKInvInventoryTitBrdr5]
+	
+		Use	:	GKInvInventoryTitBrdr
+		
+[Line	:	GKInvInventoryTitBrdr6]
+	
+		Use	:	GKInvInventoryTitBrdr
+		
+[Line	:	GKInvVchTot]
+	
+			Field		:	GKInvInvtryCoverNo,GKInvInvtryItem
+			Right Field	:	GKInvInvtryGST,GKInvInvtryQty,GKInvInvtryRate,GKInvInvtryAmt
+				
+			Local	:	Field	:	Default		:	Delete	:	Storage
+			Local	:	Field	:	Default		:	Type	:	String
+			Local	:	Field	:	Default		:	Align	:	Right
+			
+			Local	:	Field	:	GKInvInvtryCoverNo	:	Set as	:	""
+			Local	:	Field	:	GKInvInvtryItem		:	Set as	:	""
+			Local	:	Field	:	GKInvInvtryGST		:	Set as	:	""
+			Local	:	Field	:	GKInvInvtryQty		:	Set as	:	""
+			Local	:	Field	:	GKInvInvtryRate		:	Set as	:	"TOTAL"
+			Local	:	Field	:	GKInvInvtryAmt		:	Set as	:	$Amount
+			
+[Line	:	GKInvAdvColltd]
+		
+			Field		:	GKInvInvtryCoverNo,GKInvInvtryItem
+			Right Field	:	GKInvInvtryGST,GKInvInvtryQty,GKInvInvtryRate,GKInvInvtryAmt
+				
+			Local	:	Field	:	Default		:	Delete	:	Storage
+			Local	:	Field	:	Default		:	Type	:	String
+			Local	:	Field	:	Default		:	Align	:	Right
+			
+			Local	:	Field	:	GKInvInvtryCoverNo	:	Set as	:	""
+			Local	:	Field	:	GKInvInvtryItem		:	Set as	:	""
+			Local	:	Field	:	GKInvInvtryGST		:	Set as	:	""
+			Local	:	Field	:	GKInvInvtryQty		:	Set as	:	""
+			Local	:	Field	:	GKInvInvtryRate		:	Width	:	40
+			Local	:	Field	:	GKInvInvtryRate		:	Set as	:	"ADVANCE COLLECTED"
+			Local	:	Field	:	GKInvInvtryAmt		:	Set as	:	$GKAdvRcptAmt
+		
+			
+[Line	:	GKInvNettAmt]
+	
+			Field		:	GKInvInvtryCoverNo,GKInvInvtryItem
+			Right Field	:	GKInvInvtryGST,GKInvInvtryQty,GKInvInvtryRate,GKInvInvtryAmt
+				
+			Local	:	Field	:	Default		:	Delete	:	Storage
+			Local	:	Field	:	Default		:	Type	:	String
+			Local	:	Field	:	Default		:	Align	:	Right
+			
+			Local	:	Field	:	GKInvInvtryCoverNo	:	Set as	:	"E & O E"
+			Local	:	Field	:	GKInvInvtryItem		:	Set as	:	""
+			Local	:	Field	:	GKInvInvtryGST		:	Set as	:	""
+			Local	:	Field	:	GKInvInvtryQty		:	Set as	:	""
+			Local	:	Field	:	GKInvInvtryRate		:	Width	:	40
+			Local	:	Field	:	GKInvInvtryRate		:	Set as	:	"NET AMOUNT"
+			Local	:	Field	:	GKInvInvtryAmt		:	Set as	:	$Amount - $GKAdvRcptAmt
+		
+		
+[Part	:	GKInvJurisdctn]
+	
+		Line	:	GKInvJurisdctn,GKInvThankYou
+		
+[Line	:	GKInvJurisdctn]
+	
+		Field	:	GKInvJurisdctn
+		
+[Field	:	GKInvJurisdctn]
+	
+				Use			:	Name Field
+				Set as      :   $$Upper:@JurisStr
+                JurisStr    :   $$SPrintf:@@SubjectToJurisdictionFormat:@@Jurisdiction+$$LocaleString:" ONLY"
+				Full Width  :   Yes
+				Align		:	Left
+				Style		:	Small Bold
+				
+[Line	:	GKInvThankYou]
+
+	Field	:	GKInvThankYou
+		
+			[Field	:	GKInvThankYou]
+	
+				Use			:	Name Field
+				Set as      :   "* Thank You & Visit Us Again * "
+                Full Width  :   Yes
+				Align		:	Center
+				Style		:	Small Bold
+				
+[Part	:	GKInvGSTAnalysis]
+	
+		Line		:	GKValeGSTAnlsTit,GKInvInventoryTitBrdr7,GKValeGSTAnls,GKInvInventoryTitBrdr8
+		Repeat		:	GKValeGSTAnls:FPGSTAnalysisPrintSummary
+;		Bottom Line	:	GKValeGSTAnlsEmp
+		Vertical	:	Yes
+;		Border		:	Thin Left Right Bottom
+
+[Line	:	GKInvInventoryTitBrdr7]
+	
+		Use	:	GKInvInventoryTitBrdr
+		
+
+[Line	:	GKInvInventoryTitBrdr8]
+	
+		Use	:	GKInvInventoryTitBrdr
+		
+[Line	:	GKValeGSTAnlsEmp]
+		
+		Border	:	Thin Top
+		Field	:	GKValeHSNCode,GKValeTaxble;,GKValeIGSTRate,GKValeIGST
+		Field	:	GKValeCGSTRate,GKValeCGST,GKValeSGSTRate,GKValeSGST;,GKValeTotTax
+		
+		Local	:	Field	:	Default			:	Delete	:	Storage
+		Local	:	Field	:	Default			:	Type	:	String
+		Local	:	Field	:	Default			:	Style	:	Small Bold
+		
+		Local	:	Field	:	GKValeHSNCode	:	Set as	:	""
+		Local	:	Field	:	GKValeTaxble	:	Set as	:	""
+		Local	:	Field	:	GKValeIGSTRate	:	Set as	:	""
+		Local	:	Field	:	GKValeIGST		:	Set as	:	""
+		Local	:	Field	:	GKValeCGSTRate	:	Set as	:	""
+		Local	:	Field	:	GKValeCGST		:	Set as	:	""
+		Local	:	Field	:	GKValeSGSTRate	:	Set as	:	""
+		Local	:	Field	:	GKValeSGST		:	Set as	:	""
+		Local	:	Field	:	GKValeTotTax	:	Set as	:	""
+		
+
+[Line	:	GKValeGSTAnlsTit]
+	
+;		Border	:	Thin Bottom
+		Field	:	GKValeHSNCode,GKValeTaxble;,GKValeIGSTRate,GKValeIGST
+		Field	:	GKValeCGSTRate,GKValeCGST,GKValeSGSTRate,GKValeSGST;,GKValeTotTax
+		
+		Local	:	Field	:	Default				:	Delete	:	Storage
+		Local	:	Field	:	Default				:	Type	:	String
+		Local	:	Field	:	Default				:	Style	:	Small Bold
+		
+		Local	:	Field	:	GKValeHSNCode		:	Set as	:	"HSN Code"
+		Local	:	Field	:	GKValeTaxble		:	Set as	:	"Taxable Value"
+		Local	:	Field	:	GKValeIGSTRate		:	Set as	:	"IGST %"
+		Local	:	Field	:	GKValeIGST			:	Set as	:	"IGST"
+		Local	:	Field	:	GKValeCGSTRate		:	Set as	:	"CGST %"
+		Local	:	Field	:	GKValeCGST			:	Set as	:	"CGST"
+		Local	:	Field	:	GKValeSGSTRate		:	Set as	:	"SGST %"
+		Local	:	Field	:	GKValeSGST			:	Set as	:	"SGST"
+		Local	:	Field	:	GKValeTotTax		:	Set as	:	"Total Tax"
+		
+[Line	:	GKValeGSTAnls]
+	
+		Field	:	GKValeHSNCode,GKValeTaxble;,GKValeIGSTRate,GKValeIGST
+		Field	:	GKValeCGSTRate,GKValeCGST,GKValeSGSTRate,GKValeSGST;,GKValeTotTax
+		
+		
+[Field	:	GKValeHSNCode]
+	
+				Use		    : Name Field
+				Set as     	: $GSTInvoice_ItemHSNCode
+	            Style      	: Small
+	            Width		: 20			
+	            Align      	: Centre
+;				Border		: Thin Right
+				
+[Field	:	GKValeTaxble]
+	
+				Use			: Amount Field
+				Set as		: If ##vIsDebit Then $$AsDrAmt:$GSTInvoice_GSTAssesableValue Else $$AsCrAmt:$GSTInvoice_GSTAssesableValue
+				Style      	: Small
+	            Width		: 30			
+	            Align      	: Right
+;				Border		: Thin Right
+				
+[Field	:	GKValeIGST]
+	
+				Use			: Amount Field
+				Set as		: If ##vIsDebit Then $$AsDrAmt:$GSTInvoice_IGSTClsTaxAmt Else $$AsCrAmt:$GSTInvoice_IGSTClsTaxAmt
+				Style      	: Small
+	            Width		: 15		
+	            Align      	: Right
+				Invisible	: Yes
+;				Border		: Thin Right
+				
+[Field	:	GKValeIGSTRate]
+	
+			Use		: Name Field
+			Set as  : If $$IsSysNameEqual:OnQuantity:$GSTInvoice_IGSTClsTValType Then $$Sprintf:"%s/%s":$GSTInvoice_IGSTClsfnRate:$GSTInvoice_GSTStockItemUOM +
+						Else $$Sprintf:"%s%%":$GSTInvoice_IGSTClsfnRate     
+			Width	: 5
+			Align   : Right
+			Format	: "NoZero,Percentage"
+			Invisible	: Yes
+			
+[Field	:	GKValeCGSTRate]
+	
+			Use		: Name Field
+			Set as  : If $$IsSysNameEqual:OnQuantity:$GSTInvoice_SGSTClsValType Then $$Sprintf:"%s/%s":$GSTInvoice_SGSTClsfnRate:$GSTInvoice_GSTStockItemUOM +
+						Else $$Sprintf:"%s%%":$GSTInvoice_SGSTClsfnRate   
+			Width	: 12
+			Style      	: Small
+			Align   : Center
+			Format	: "NoZero,Percentage"
+			
+			
+[Field	:	GKValeSGSTRate]
+	
+			Use		: Name Field
+			Set as  : If $$IsSysNameEqual:OnQuantity:$GSTInvoice_SGSTClsValType Then $$Sprintf:"%s/%s":$GSTInvoice_SGSTClsfnRate:$GSTInvoice_GSTStockItemUOM +
+						Else $$Sprintf:"%s%%":$GSTInvoice_SGSTClsfnRate   
+			Width	: 12
+			Style      	: Small
+			Align   : Center
+			Format	: "NoZero,Percentage"
+			
+[Field	:	GKValeCGST]
+	
+				Use		    : Amount Field
+				Set as	 	: If ##vIsDebit Then $$AsDrAmt:$GSTInvoice_SGSTClsTaxAmt Else $$AsCrAmt:$GSTInvoice_SGSTClsTaxAmt
+	            Style      	: Small
+	            Width		: 12			
+	            Align      	: Right
+;				Border		: Thin Right
+				
+[Field	:	GKValeSGST]
+			
+				Use		    : Amount Field
+				Set as	 	: If ##vIsDebit Then $$AsDrAmt:$GSTInvoice_SGSTClsTaxAmt Else $$AsCrAmt:$GSTInvoice_SGSTClsTaxAmt
+	            Style      	: Small
+	            Width		: 12	
+	            Align      	: Right
+;				Border		: Thin Right
+				
+[Field	:	GKValeTotTax]
+	
+				Use		    : Number Field
+				Set as     	: #GKValeCGST+#GKValeSGST+#GKValeIGST
+	            Style      	: Small
+	            Width		: 20			
+	            Align      	: Right
+				Invisible	: Yes
+		
+		
+		
+[Collection: FPGSTAnalysisPrintSummary] 
+ 
+    Source Collection: GSTAnalysisPrintSummarySrc
+    
+    ComputeVar	    : GSTItemLedRate        : String : $$Sprintf:"%s~%s~%s~%s~%s":$CGSTTaxate:$SGSTTaxate:$IGSTTaxate:$CessGSTTaxate:$CessGSTTaxRateQty
+    ComputeVar	    : GSTItemValType        : String : $$Sprintf:"%s~%s~%s~%s":$CGSTValType:$SGSTValType:$IGSTValType:$CessGSTValType
+                                            
+	Compute Var	: CGSTValType				: String	: If $$IsEmpty:$CGSTValType Then $$SysName:OnValue Else $CGSTValType
+	Compute Var	: SGSTValType				: String    : If $$IsEmpty:$SGSTValType Then $$SysName:OnValue Else $SGSTValType
+	Compute Var	: IGSTValType				: String    : If $$IsEmpty:$IGSTValType Then $$SysName:OnValue Else $IGSTValType
+	Compute Var	: CessValType				: String	: If $$IsEmpty:$CessGSTValType Then $$SysName:OnValue Else $CessGSTValType
+
+    Compute Var : vIsAnyValuationTypeOnQty  : Logical : ##CGSTValType CONTAINS "Quantity" OR ##SGSTValType CONTAINS "Quantity" OR  ##IGSTValType CONTAINS "Quantity" OR ##CessValType CONTAINS "Quantity"
+    
+    By           : GSTInvoice_ItemHSNCode        : If $$IsEmpty:$GSTTransNature Then "" Else $GSTItemLedHSNCode 
+    Delete:By           : GSTInvoice_ItemLedRate        : If $$IsEmpty:$GSTTransNature Then "" Else ##GSTItemLedRate
+    
+    Delete:By           : GSTInvoice_ItemCalcType       : If ##vIsAnyValuationTypeOnQty Then ##GSTItemValType Else ""
+                                                 
+    Compute      : GSTInvoice_EntryLedgerName    : $GSTLedgerName
+    Compute      : GSTInvoice_TransLedName       : $GSTLedgerName
+    Compute      : GSTInvoice_TransNature        : $GSTTransNature 
+    Compute      : GSTInvoice_IsGSTTaxableTrn    : $GSTTransNature
+    Compute      : GSTInvoice_StockItemNAme      : $GSTStockItemName
+    Compute      : GSTInvoice_IsGSTLocalTransNat : $IsGSTLocalTransNat 
+    Compute      : GSTInvoice_FirstTransNature   : $GSTFirstTransNatureType 
+                   
+    Compute      : GSTInvoice_CGSTClsfnRate      : $CGSTTaxate   
+    Compute      : GSTInvoice_SGSTClsfnRate      : $SGSTTaxate   
+    Compute      : GSTInvoice_IGSTClsfnRate      : $IGSTTaxate    
+    Compute      : GSTInvoice_CessGSTClsfnRate   : $CessGSTTaxate
+	Compute		 : GSTInvoice_CessGSTClsfnRateQty: $CessGSTTaxRateQty
+	
+    Compute      : GSTInvoice_VchTransType       : $GSTVchTransType
+    Compute      : GSTInvoice_VoucherTypeName    : $IsGSTDelNoteVoucher
+    Compute      : GSTInvoice_GSTStockItemUOM    : $GSTStockItemUOM
+                                                    
+
+
+
+    Aggr Compute : GSTInvoice_GSTAssesableValue  : Sum :  $GSTAssesableAmount
+
+    Aggr Compute : GSTInvoice_CGSTClsTaxAmt      : SUM : $CGSTAmount   
+    Aggr Compute : GSTInvoice_SGSTClsTaxAmt      : SUM : $SGSTAmount   
+    Aggr Compute : GSTInvoice_IGSTClsTaxAmt      : SUM : $IGSTAmount   
+    Aggr Compute : GSTInvoice_CessGSTClsTaxAmt   : SUM : $$NettAmount:$CessOnValGSTAmount:$CessOnQtyGSTAmount
+    Aggr Compute : GSTInvoice_CessOnValAmt       : SUM : $CessOnValGSTAmount
+    Aggr Compute : GSTInvoice_CessOnQtyAmt       : SUM : $CessOnQtyGSTAmount
+    
+    Aggr Compute : GSTInvoice_CGSTClsValType      : SUM : $CGSTValType   
+    Aggr Compute : GSTInvoice_SGSTClsValType      : SUM : $SGSTValType   
+    Aggr Compute : GSTInvoice_IGSTClsTValType     : SUM : $IGSTValType   
+    Aggr Compute : GSTInvoice_CessGSTClsValType   : SUM : $CessGSTValType
+
+    Filter       : GSTInvoice_IsNonEmpryGStNature
+    Client Only  : Yes
+	
+;
+    
+
+[Collection:test]
+	Type: default;.;.default
+	
+[Collection:sumcol]
+	Source Collection:test
+	Walk: ledgerentries
+	
+	Fetch:*.*
+	
+;[*Part: VCH GST Analysis]
+;    
+;    Part        : VCH GST AnalysisAmtDetails, VCH GST AnalysisDetails, VCH GST AmtInWords
+;    Vertical    : Yes
+;    Invisible   : ##vItemAnalysisCount > 5 OR @@IsGSTInvoiceEmptyCollection OR NOT @@GKInvGSTAnalysis
+;    Option      : VCH GST AnalysisAnalysisofItems : @@IsGSTTaxAnalysisWithItems
+;	Option		: VCH GST Analysis EcoPrint		: @@EcoPrinting
+;	
+;
+;[System:Formulae]
+;	GKInvGSTAnalysis	: If @@IsPurchase OR @@IsDebitNote Then ##PUGSTAnalysis Else +
+;                      If (@@IsSalesOrder or @@IsSales OR @@IsCreditNote OR @@IsDelNote OR @@IsReceipt OR @@IsPayment) Then ##SAGSTAnalysis Else No
+;                      
+
+
+			
+	
+			
+						
+						
+								
+	
